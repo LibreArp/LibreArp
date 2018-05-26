@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT name="LibreArp" projectType="audioplug" jucerVersion="5.3.2"
+              version="0.0" buildVST3="1" buildAUv3="0" buildAU="0" buildVST="1"
+              pluginName="LibreArp" pluginDesc="A free (as in free speech) arpeggio sequencer."
+              pluginManufacturer="LibreArp" companyName="LibreArp" pluginWantsMidiIn="1"
+              pluginProducesMidiOut="1" pluginIsMidiEffectPlugin="1" bundleIdentifier="org.librearp.LibreArp"
+              cppLanguageStandard="17" pluginAUExportPrefix="LibreArpAU" aaxIdentifier="org.librearp.LibreArp"
+              pluginManufacturerCode="LArp" pluginCode="LArp" binaryDataNamespace="LArpBin"
+              id="B2JXLb" pluginFormats="buildVST,buildVST3" pluginCharacteristicsValue="pluginEditorRequiresKeys,pluginIsMidiEffectPlugin,pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginVSTCategory="kPlugCategUnknown" pluginAUMainType="'aumi'"
+              pluginVST3Category="Fx,Tools" reportAppUsage="0" displaySplashScreen="0"
+              includeBinaryInAppConfig="0" pluginIsSynth="0" pluginEditorRequiresKeys="1"
+              pluginRTASDisableBypass="0" pluginRTASDisableMultiMono="0" pluginAAXDisableBypass="0"
+              pluginAAXDisableMultiMono="0">
+  <MAINGROUP id="FtyPbS" name="LibreArp">
+    <GROUP id="{4D6501CE-D613-8A3D-7ABE-D57B9896DB0F}" name="Source">
+      <GROUP id="{5F3B42AE-ADC0-53F3-18F5-235FF618509A}" name="util">
+        <FILE id="isEMAp" name="PatternUtil.cpp" compile="1" resource="0" file="Source/util/PatternUtil.cpp"/>
+        <FILE id="VfAT0G" name="PatternUtil.h" compile="0" resource="0" file="Source/util/PatternUtil.h"/>
+      </GROUP>
+      <FILE id="snQ1mq" name="ArpIntegrityException.cpp" compile="1" resource="0"
+            file="Source/ArpIntegrityException.cpp"/>
+      <FILE id="xRbPeX" name="ArpIntegrityException.h" compile="0" resource="0"
+            file="Source/ArpIntegrityException.h"/>
+      <FILE id="Jgfg6O" name="NoteData.h" compile="0" resource="0" file="Source/NoteData.h"/>
+      <FILE id="FcHgI6" name="NoteData.cpp" compile="1" resource="0" file="Source/NoteData.cpp"/>
+      <FILE id="NxMWgn" name="ArpPattern.h" compile="0" resource="0" file="Source/ArpPattern.h"/>
+      <FILE id="LHKzg5" name="ArpEvent.cpp" compile="1" resource="0" file="Source/ArpEvent.cpp"/>
+      <FILE id="jfjnSj" name="ArpEvent.h" compile="0" resource="0" file="Source/ArpEvent.h"/>
+      <FILE id="nSp3QS" name="ArpNote.cpp" compile="1" resource="0" file="Source/ArpNote.cpp"/>
+      <FILE id="XopjKj" name="ArpNote.h" compile="0" resource="0" file="Source/ArpNote.h"/>
+      <FILE id="LFadmC" name="ArpPattern.cpp" compile="1" resource="0" file="Source/ArpPattern.cpp"/>
+      <FILE id="N8HQQl" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="TmmLyg" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="HR6anV" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="goFC8J" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release_64" linuxArchitecture="-m64" targetName="LibreArp.x86_64"/>
+        <CONFIGURATION isDebug="0" name="Release_32" linuxArchitecture="-m32" targetName="LibreArp.x86"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_events" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="Vendor/juce/modules"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
+    <CODEBLOCKS_WINDOWS targetFolder="Builds/CodeBlocksWindows">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release_64" targetName="LibreArp_64" windowsCodeBlocksArchitecture="-m64"/>
+        <CONFIGURATION isDebug="0" name="Release_32" targetName="LibreArp_32" windowsCodeBlocksArchitecture="-m32"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_events" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="Vendor/juce/modules"/>
+      </MODULEPATHS>
+    </CODEBLOCKS_WINDOWS>
+    <CLION targetFolder="Builds/CLion" clionMakefileEnabled="1" clionCodeBlocksEnabled="1">
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_events" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="Vendor/juce/modules"/>
+      </MODULEPATHS>
+    </CLION>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+  </MODULES>
+  <JUCEOPTIONS/>
+  <LIVE_SETTINGS>
+    <LINUX/>
+  </LIVE_SETTINGS>
+</JUCERPROJECT>

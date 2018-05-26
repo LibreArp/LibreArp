@@ -1,0 +1,6 @@
+[submodule "Vendor/vst3sdk"]
+	path = Vendor/vst3sdk
+	url = git@github.com:steinbergmedia/vst3sdk.git
+[submodule "Vendor/juce"]
+	path = Vendor/juce
+	url = git@github.com:WeAreROLI/JUCE.git
