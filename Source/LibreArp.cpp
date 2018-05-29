@@ -22,7 +22,7 @@
 
 const Identifier LibreArp::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NOLINT
 const Identifier LibreArp::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
-const Identifier LibreArp::TREEID_OCTAVES = Identifier("octaves");
+const Identifier LibreArp::TREEID_OCTAVES = Identifier("octaves"); // NOLINT
 
 //==============================================================================
 LibreArp::LibreArp()
