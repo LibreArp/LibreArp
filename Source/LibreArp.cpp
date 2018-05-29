@@ -15,16 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "LibreArp.h"
+#include "editor/MainEditor.h"
 #include "util/PatternUtil.h"
 #include "ArpIntegrityException.h"
 
-const Identifier LibreArpAudioProcessor::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NOLINT
-const Identifier LibreArpAudioProcessor::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
+const Identifier LibreArp::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NOLINT
+const Identifier LibreArp::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
 
 //==============================================================================
-LibreArpAudioProcessor::LibreArpAudioProcessor()
+LibreArp::LibreArp()
 #ifndef JucePlugin_PreferredChannelConfigurations
         : AudioProcessor(BusesProperties()
 #if !JucePlugin_IsMidiEffect
@@ -40,14 +40,14 @@ LibreArpAudioProcessor::LibreArpAudioProcessor()
     setPattern(pattern);
 }
 
-LibreArpAudioProcessor::~LibreArpAudioProcessor() = default;
+LibreArp::~LibreArp() = default;
 
 //==============================================================================
-const String LibreArpAudioProcessor::getName() const {
+const String LibreArp::getName() const {
     return JucePlugin_Name;
 }
 
-bool LibreArpAudioProcessor::acceptsMidi() const {
+bool LibreArp::acceptsMidi() const {
 #if JucePlugin_WantsMidiInput
     return true;
 #else
@@ -55,7 +55,7 @@ bool LibreArpAudioProcessor::acceptsMidi() const {
 #endif
 }
 
-bool LibreArpAudioProcessor::producesMidi() const {
+bool LibreArp::producesMidi() const {
 #if JucePlugin_ProducesMidiOutput
     return true;
 #else
@@ -63,7 +63,7 @@ bool LibreArpAudioProcessor::producesMidi() const {
 #endif
 }
 
-bool LibreArpAudioProcessor::isMidiEffect() const {
+bool LibreArp::isMidiEffect() const {
 #if JucePlugin_IsMidiEffect
     return true;
 #else
@@ -71,46 +71,46 @@ bool LibreArpAudioProcessor::isMidiEffect() const {
 #endif
 }
 
-double LibreArpAudioProcessor::getTailLengthSeconds() const {
+double LibreArp::getTailLengthSeconds() const {
     return 0.0;
 }
 
-int LibreArpAudioProcessor::getNumPrograms() {
+int LibreArp::getNumPrograms() {
     return 1;
 }
 
-int LibreArpAudioProcessor::getCurrentProgram() {
+int LibreArp::getCurrentProgram() {
     return 0;
 }
 
-void LibreArpAudioProcessor::setCurrentProgram(int index) {
+void LibreArp::setCurrentProgram(int index) {
     ignoreUnused(index);
 }
 
-const String LibreArpAudioProcessor::getProgramName(int index) {
+const String LibreArp::getProgramName(int index) {
     ignoreUnused(index);
     return {};
 }
 
-void LibreArpAudioProcessor::changeProgramName(int index, const String &newName) {
+void LibreArp::changeProgramName(int index, const String &newName) {
     ignoreUnused(index);
 }
 
 //==============================================================================
-void LibreArpAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
+void LibreArp::prepareToPlay(double sampleRate, int samplesPerBlock) {
     ignoreUnused(samplesPerBlock);
     this->sampleRate = sampleRate;
     this->lastPosition = 0;
     this->wasPlaying = false;
 }
 
-void LibreArpAudioProcessor::releaseResources() {
+void LibreArp::releaseResources() {
 
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
 
-bool LibreArpAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const {
+bool LibreArp::isBusesLayoutSupported(const BusesLayout &layouts) const {
 #if JucePlugin_IsMidiEffect
     ignoreUnused(layouts);
     return true;
@@ -133,7 +133,7 @@ bool LibreArpAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) 
 
 #endif
 
-void LibreArpAudioProcessor::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
+void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     ScopedNoDenormals noDenormals;
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -209,16 +209,16 @@ void LibreArpAudioProcessor::processBlock(AudioBuffer<float> &audio, MidiBuffer 
 }
 
 //==============================================================================
-bool LibreArpAudioProcessor::hasEditor() const {
+bool LibreArp::hasEditor() const {
     return true;
 }
 
-AudioProcessorEditor *LibreArpAudioProcessor::createEditor() {
-    return new LibreArpAudioProcessorEditor(*this);
+AudioProcessorEditor *LibreArp::createEditor() {
+    return new MainEditor(*this);
 }
 
 //==============================================================================
-void LibreArpAudioProcessor::getStateInformation(MemoryBlock &destData) {
+void LibreArp::getStateInformation(MemoryBlock &destData) {
     ValueTree tree = ValueTree(TREEID_LIBREARP);
     tree.appendChild(this->pattern.toValueTree(), nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
@@ -227,7 +227,7 @@ void LibreArpAudioProcessor::getStateInformation(MemoryBlock &destData) {
     MemoryOutputStream(destData, true).writeString(tree.toXmlString());
 }
 
-void LibreArpAudioProcessor::setStateInformation(const void *data, int sizeInBytes) {
+void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
     if (sizeInBytes > 0) {
         String xml = MemoryInputStream(data, static_cast<size_t>(sizeInBytes), false).readString();
         XmlElement *doc = XmlDocument::parse(xml);
@@ -253,7 +253,7 @@ void LibreArpAudioProcessor::setStateInformation(const void *data, int sizeInByt
     }
 }
 
-void LibreArpAudioProcessor::setPattern(ArpPattern &pattern, bool updateXml) {
+void LibreArp::setPattern(ArpPattern &pattern, bool updateXml) {
     this->pattern = pattern;
     if (updateXml) {
         this->patternXml = pattern.toValueTree().toXmlString();
@@ -261,7 +261,7 @@ void LibreArpAudioProcessor::setPattern(ArpPattern &pattern, bool updateXml) {
     buildPattern();
 }
 
-void LibreArpAudioProcessor::parsePattern(const String &xmlPattern) {
+void LibreArp::parsePattern(const String &xmlPattern) {
     XmlElement *doc = XmlDocument::parse(xmlPattern);
     if (doc == nullptr) {
         throw ArpIntegrityException("Malformed XML!");
@@ -273,29 +273,29 @@ void LibreArpAudioProcessor::parsePattern(const String &xmlPattern) {
     this->patternXml = xmlPattern;
 }
 
-void LibreArpAudioProcessor::buildPattern() {
+void LibreArp::buildPattern() {
     this->events = this->pattern.build();
 }
 
-ArpPattern &LibreArpAudioProcessor::getPattern() {
+ArpPattern &LibreArp::getPattern() {
     return this->pattern;
 }
 
-String &LibreArpAudioProcessor::getPatternXml() {
+String &LibreArp::getPatternXml() {
     return this->patternXml;
 }
 
 
-int64 LibreArpAudioProcessor::getLastPosition() {
+int64 LibreArp::getLastPosition() {
     return this->lastPosition;
 }
 
-int LibreArpAudioProcessor::getNote() {
+int LibreArp::getNote() {
     return this->note;
 }
 
 
-void LibreArpAudioProcessor::processInputMidi(MidiBuffer &midiMessages) {
+void LibreArp::processInputMidi(MidiBuffer &midiMessages) {
     int time;
     MidiMessage m;
     for (MidiBuffer::Iterator i(midiMessages); i.getNextEvent(m, time);) {
@@ -308,7 +308,7 @@ void LibreArpAudioProcessor::processInputMidi(MidiBuffer &midiMessages) {
 }
 
 
-int64 LibreArpAudioProcessor::nextTime(ArpEvent &event, int64 position) {
+int64 LibreArp::nextTime(ArpEvent &event, int64 position) {
     auto result = (((position / pattern.loopLength)) * pattern.loopLength) + event.time;
     if (result < position) {
         result += pattern.loopLength;
@@ -319,5 +319,5 @@ int64 LibreArpAudioProcessor::nextTime(ArpEvent &event, int64 position) {
 //==============================================================================
 // This creates new instances of the plugin..
 AudioProcessor *JUCE_CALLTYPE createPluginFilter() {
-    return new LibreArpAudioProcessor();
+    return new LibreArp();
 }

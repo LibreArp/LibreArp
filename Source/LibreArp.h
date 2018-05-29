@@ -24,15 +24,15 @@
 /**
  * The LibreArp audio processor.
  */
-class LibreArpAudioProcessor : public AudioProcessor {
+class LibreArp : public AudioProcessor {
 public:
     static const Identifier TREEID_LIBREARP;
     static const Identifier TREEID_PATTERN_XML;
 
 
-    LibreArpAudioProcessor();
+    LibreArp();
 
-    ~LibreArpAudioProcessor() override;
+    ~LibreArp() override;
 
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
@@ -96,7 +96,7 @@ public:
     int getNote();
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArpAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
 
     ArpPattern pattern;
     String patternXml;

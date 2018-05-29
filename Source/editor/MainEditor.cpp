@@ -16,13 +16,13 @@
 //
 
 #include <sstream>
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
-#include "ArpIntegrityException.h"
+#include "../LibreArp.h"
+#include "MainEditor.h"
+#include "../ArpIntegrityException.h"
 
 const Colour RED = Colour(255, 0, 0);
 
-LibreArpAudioProcessorEditor::LibreArpAudioProcessorEditor(LibreArpAudioProcessor &p)
+MainEditor::MainEditor(LibreArp &p)
         : AudioProcessorEditor(&p), processor(p) {
     setSize(800, 600);
 
@@ -48,17 +48,17 @@ LibreArpAudioProcessorEditor::LibreArpAudioProcessorEditor(LibreArpAudioProcesso
     };
 }
 
-LibreArpAudioProcessorEditor::~LibreArpAudioProcessorEditor() = default;
+MainEditor::~MainEditor() = default;
 
 //==============================================================================
-void LibreArpAudioProcessorEditor::paint(Graphics &g) {
+void MainEditor::paint(Graphics &g) {
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 
     g.setColour(Colours::white);
     g.setFont(font);
 }
 
-void LibreArpAudioProcessorEditor::resized() {
+void MainEditor::resized() {
     xmlEditor.setBounds(0, 0, getWidth(), getHeight() - 30);
     applyXmlButton.setBounds(0, getHeight() - 30, getWidth(), 30);
 }

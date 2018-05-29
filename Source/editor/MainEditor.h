@@ -17,18 +17,18 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "PluginProcessor.h"
+#include "JuceHeader.h"
+#include "../LibreArp.h"
 
 /**
  * Main LibreArp editor component.
  */
-class LibreArpAudioProcessorEditor : public AudioProcessorEditor {
+class MainEditor : public AudioProcessorEditor {
 public:
 
-    explicit LibreArpAudioProcessorEditor(LibreArpAudioProcessor &);
+    explicit MainEditor(LibreArp &);
 
-    ~LibreArpAudioProcessorEditor() override;
+    ~MainEditor() override;
 
 
     void paint(Graphics &) override;
@@ -39,12 +39,12 @@ private:
     /**
      * The underlying audio processor instance.
      */
-    LibreArpAudioProcessor &processor;
+    LibreArp &processor;
 
     Font font;
 
     TextEditor xmlEditor;
     TextButton applyXmlButton;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArpAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainEditor);
 };

@@ -7,7 +7,7 @@
               pluginProducesMidiOut="1" pluginIsMidiEffectPlugin="1" bundleIdentifier="org.librearp.LibreArp"
               cppLanguageStandard="17" pluginAUExportPrefix="LibreArpAU" aaxIdentifier="org.librearp.LibreArp"
               pluginManufacturerCode="LArp" pluginCode="LArp" binaryDataNamespace="LArpBin"
-              id="B2JXLb" pluginFormats="buildVST,buildVST3" pluginCharacteristicsValue="pluginEditorRequiresKeys,pluginIsMidiEffectPlugin,pluginProducesMidiOut,pluginWantsMidiIn"
+              id="B2JXLb" pluginFormats="buildVST,buildVST3" pluginCharacteristicsValue="pluginWantsMidiIn,pluginProducesMidiOut,pluginIsMidiEffectPlugin,pluginEditorRequiresKeys"
               pluginVSTCategory="kPlugCategUnknown" pluginAUMainType="'aumi'"
               pluginVST3Category="Fx,Tools" reportAppUsage="0" displaySplashScreen="0"
               includeBinaryInAppConfig="0" pluginIsSynth="0" pluginEditorRequiresKeys="1"
@@ -15,29 +15,28 @@
               pluginAAXDisableMultiMono="0">
   <MAINGROUP id="FtyPbS" name="LibreArp">
     <GROUP id="{4D6501CE-D613-8A3D-7ABE-D57B9896DB0F}" name="Source">
-      <GROUP id="{5F3B42AE-ADC0-53F3-18F5-235FF618509A}" name="util">
-        <FILE id="isEMAp" name="PatternUtil.cpp" compile="1" resource="0" file="Source/util/PatternUtil.cpp"/>
-        <FILE id="VfAT0G" name="PatternUtil.h" compile="0" resource="0" file="Source/util/PatternUtil.h"/>
+      <GROUP id="{916A40E5-BC88-61B9-D0D5-8A490632E866}" name="editor">
+        <FILE id="xVzivl" name="MainEditor.cpp" compile="1" resource="0" file="Source/editor/MainEditor.cpp"/>
+        <FILE id="nJdJiZ" name="MainEditor.h" compile="0" resource="0" file="Source/editor/MainEditor.h"/>
       </GROUP>
-      <FILE id="snQ1mq" name="ArpIntegrityException.cpp" compile="1" resource="0"
+      <GROUP id="{AA1AE760-8056-678F-1932-59747CA18764}" name="util">
+        <FILE id="rPEKU9" name="PatternUtil.cpp" compile="1" resource="0" file="Source/util/PatternUtil.cpp"/>
+        <FILE id="cB2pja" name="PatternUtil.h" compile="0" resource="0" file="Source/util/PatternUtil.h"/>
+      </GROUP>
+      <FILE id="GeJVtk" name="ArpEvent.cpp" compile="1" resource="0" file="Source/ArpEvent.cpp"/>
+      <FILE id="IrypCV" name="ArpEvent.h" compile="0" resource="0" file="Source/ArpEvent.h"/>
+      <FILE id="iebd91" name="ArpIntegrityException.cpp" compile="1" resource="0"
             file="Source/ArpIntegrityException.cpp"/>
-      <FILE id="xRbPeX" name="ArpIntegrityException.h" compile="0" resource="0"
+      <FILE id="BAKKSG" name="ArpIntegrityException.h" compile="0" resource="0"
             file="Source/ArpIntegrityException.h"/>
-      <FILE id="Jgfg6O" name="NoteData.h" compile="0" resource="0" file="Source/NoteData.h"/>
-      <FILE id="FcHgI6" name="NoteData.cpp" compile="1" resource="0" file="Source/NoteData.cpp"/>
-      <FILE id="NxMWgn" name="ArpPattern.h" compile="0" resource="0" file="Source/ArpPattern.h"/>
-      <FILE id="LHKzg5" name="ArpEvent.cpp" compile="1" resource="0" file="Source/ArpEvent.cpp"/>
-      <FILE id="jfjnSj" name="ArpEvent.h" compile="0" resource="0" file="Source/ArpEvent.h"/>
-      <FILE id="nSp3QS" name="ArpNote.cpp" compile="1" resource="0" file="Source/ArpNote.cpp"/>
-      <FILE id="XopjKj" name="ArpNote.h" compile="0" resource="0" file="Source/ArpNote.h"/>
-      <FILE id="LFadmC" name="ArpPattern.cpp" compile="1" resource="0" file="Source/ArpPattern.cpp"/>
-      <FILE id="N8HQQl" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
-      <FILE id="TmmLyg" name="PluginProcessor.h" compile="0" resource="0"
-            file="Source/PluginProcessor.h"/>
-      <FILE id="HR6anV" name="PluginEditor.cpp" compile="1" resource="0"
-            file="Source/PluginEditor.cpp"/>
-      <FILE id="goFC8J" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="y4lGFE" name="ArpNote.cpp" compile="1" resource="0" file="Source/ArpNote.cpp"/>
+      <FILE id="TpttHS" name="ArpNote.h" compile="0" resource="0" file="Source/ArpNote.h"/>
+      <FILE id="jfnte9" name="ArpPattern.cpp" compile="1" resource="0" file="Source/ArpPattern.cpp"/>
+      <FILE id="pYhY9N" name="ArpPattern.h" compile="0" resource="0" file="Source/ArpPattern.h"/>
+      <FILE id="dQOFVc" name="LibreArp.cpp" compile="1" resource="0" file="Source/LibreArp.cpp"/>
+      <FILE id="zq56Bs" name="LibreArp.h" compile="0" resource="0" file="Source/LibreArp.h"/>
+      <FILE id="nwBdhE" name="NoteData.cpp" compile="1" resource="0" file="Source/NoteData.cpp"/>
+      <FILE id="Axf1jl" name="NoteData.h" compile="0" resource="0" file="Source/NoteData.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
