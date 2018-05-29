@@ -22,6 +22,7 @@
 
 const Identifier LibreArp::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NOLINT
 const Identifier LibreArp::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
+const Identifier LibreArp::TREEID_OCTAVES = Identifier("octaves");
 
 //==============================================================================
 LibreArp::LibreArp()
@@ -102,6 +103,7 @@ void LibreArp::prepareToPlay(double sampleRate, int samplesPerBlock) {
     this->sampleRate = sampleRate;
     this->lastPosition = 0;
     this->wasPlaying = false;
+    this->octaves = true;
 }
 
 void LibreArp::releaseResources() {
@@ -182,7 +184,12 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
 
                 for (auto data : event.ons) {
                     auto note = activeNotes[data->noteNumber % activeNotes.size()];
+                    if (octaves) {
+                        auto octave = data->noteNumber / activeNotes.size();
+                        note += octave * 12;
+                    }
                     data->lastNote = note;
+
                     midi.addEvent(
                             MidiMessage::noteOn(1, note, static_cast<float>(data->velocity)), offset);
                 }
@@ -222,6 +229,7 @@ void LibreArp::getStateInformation(MemoryBlock &destData) {
     ValueTree tree = ValueTree(TREEID_LIBREARP);
     tree.appendChild(this->pattern.toValueTree(), nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
+    tree.setProperty(TREEID_OCTAVES, this->octaves, nullptr);
 
     destData.reset();
     MemoryOutputStream(destData, true).writeString(tree.toXmlString());
@@ -234,17 +242,19 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
         ValueTree tree = ValueTree::fromXml(*doc);
         delete doc;
 
-        if (tree.isValid()) {
-            if (tree.hasType(TREEID_LIBREARP)) {
-                ValueTree patternTree = tree.getChildWithName(ArpPattern::TREEID_PATTERN);
-                ArpPattern pattern = ArpPattern::fromValueTree(patternTree);
+        if (tree.isValid() && tree.hasType(TREEID_LIBREARP)) {
+            ValueTree patternTree = tree.getChildWithName(ArpPattern::TREEID_PATTERN);
+            ArpPattern pattern = ArpPattern::fromValueTree(patternTree);
 
-                if (tree.hasProperty(TREEID_PATTERN_XML)) {
-                    this->patternXml = tree.getProperty(TREEID_PATTERN_XML);
-                    setPattern(pattern, false);
-                } else {
-                    setPattern(pattern, true);
-                }
+            if (tree.hasProperty(TREEID_OCTAVES)) {
+                this->octaves = tree.getProperty(TREEID_OCTAVES);
+            }
+
+            if (tree.hasProperty(TREEID_PATTERN_XML)) {
+                this->patternXml = tree.getProperty(TREEID_PATTERN_XML);
+                setPattern(pattern, false);
+            } else {
+                setPattern(pattern, true);
             }
         }
     } else {

@@ -28,6 +28,7 @@ class LibreArp : public AudioProcessor {
 public:
     static const Identifier TREEID_LIBREARP;
     static const Identifier TREEID_PATTERN_XML;
+    static const Identifier TREEID_OCTAVES;
 
 
     LibreArp();
@@ -102,6 +103,8 @@ private:
     String patternXml;
     std::vector<ArpEvent> events;
     unsigned long eventsPosition;
+
+    bool octaves;
 
     double sampleRate;
     int64 lastPosition;
