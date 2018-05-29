@@ -154,11 +154,12 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
 
     processInputMidi(midi);
 
-    midi.clear();
     AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
     getPlayHead()->getCurrentPosition(cpi);
 
     if (cpi.isPlaying) {
+        midi.clear();
+
         auto timebase = this->pattern.getTimebase();
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = this->sampleRate * pulseLength;
