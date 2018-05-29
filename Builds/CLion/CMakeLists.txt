@@ -4513,14 +4513,14 @@ target_compile_definitions (SHARED_CODE PRIVATE
 )
 
 target_compile_options (SHARED_CODE PRIVATE
-    "-m64"
+    "-m32"
     "-O0"
     "-mstackrealign"
     "-g"
 )
 
 target_link_libraries (SHARED_CODE PRIVATE
-    -m64
+    -m32
     -lgdi32
     -luser32
     -lkernel32
@@ -4563,7 +4563,7 @@ target_compile_definitions (VST PRIVATE
 )
 
 target_compile_options (VST PRIVATE
-    "-m64"
+    "-m32"
     "-O0"
     "-mstackrealign"
     "-g"
@@ -4573,7 +4573,7 @@ target_link_libraries (VST PRIVATE
     SHARED_CODE
     -L.
     "-L\"${CMAKE_CURRENT_SOURCE_DIR}/bin/Debug\""
-    -m64
+    -m32
     -lgdi32
     -luser32
     -lkernel32
@@ -4596,125 +4596,6 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-strict-aliasing -Wno-strict-
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}")
 
 endif (CMAKE_BUILD_TYPE STREQUAL Debug)
-
-#------------------------------------------------------------------------------
-# Config: Release_64
-#------------------------------------------------------------------------------
-
-if (CMAKE_BUILD_TYPE STREQUAL Release_64)
-
-include_directories (
-    "."
-    "../../JuceLibraryCode"
-    "../../Vendor/juce/modules"
-)
-
-set_target_properties (SHARED_CODE PROPERTIES
-    OUTPUT_NAME "LibreArp_64"
-    CXX_STANDARD 17
-    CXX_EXTENSIONS OFF
-)
-
-target_compile_definitions (SHARED_CODE PRIVATE
-    __MINGW__=1
-    __MINGW_EXTENSION
-    NDEBUG=1
-    JUCER_CODEBLOCKS_WINDOWS_8F9AFD66=1
-    JUCE_APP_VERSION=0.0
-    JUCE_APP_VERSION_HEX=0x0
-    JucePlugin_Build_VST=1
-    JucePlugin_Build_VST3=0
-    JucePlugin_Build_AU=0
-    JucePlugin_Build_AUv3=0
-    JucePlugin_Build_RTAS=0
-    JucePlugin_Build_AAX=0
-    JucePlugin_Build_Standalone=0
-    JUCE_SHARED_CODE=1
-)
-
-target_compile_options (SHARED_CODE PRIVATE
-    "-m64"
-    "-O3"
-    "-mstackrealign"
-)
-
-target_link_libraries (SHARED_CODE PRIVATE
-    -m64
-    -s
-    -lgdi32
-    -luser32
-    -lkernel32
-    -lcomctl32
-    -lcomdlg32
-    -limm32
-    -lole32
-    -loleaut32
-    -lrpcrt4
-    -lshlwapi
-    -luuid
-    -lversion
-    -lwininet
-    -lwinmm
-    -lws2_32
-    -lwsock32
-)
-
-set_target_properties (VST PROPERTIES
-    OUTPUT_NAME "LibreArp_64"
-    CXX_STANDARD 17
-    CXX_EXTENSIONS OFF
-)
-
-target_compile_definitions (VST PRIVATE
-    __MINGW__=1
-    __MINGW_EXTENSION
-    NDEBUG=1
-    JUCER_CODEBLOCKS_WINDOWS_8F9AFD66=1
-    JUCE_APP_VERSION=0.0
-    JUCE_APP_VERSION_HEX=0x0
-    JucePlugin_Build_VST=1
-    JucePlugin_Build_VST3=0
-    JucePlugin_Build_AU=0
-    JucePlugin_Build_AUv3=0
-    JucePlugin_Build_RTAS=0
-    JucePlugin_Build_AAX=0
-    JucePlugin_Build_Standalone=0
-)
-
-target_compile_options (VST PRIVATE
-    "-m64"
-    "-O3"
-    "-mstackrealign"
-)
-
-target_link_libraries (VST PRIVATE
-    SHARED_CODE
-    -L.
-    "-L\"${CMAKE_CURRENT_SOURCE_DIR}/bin/Release_64\""
-    -m64
-    -s
-    -lgdi32
-    -luser32
-    -lkernel32
-    -lcomctl32
-    -lcomdlg32
-    -limm32
-    -lole32
-    -loleaut32
-    -lrpcrt4
-    -lshlwapi
-    -luuid
-    -lversion
-    -lwininet
-    -lwinmm
-    -lws2_32
-    -lwsock32
-)
-
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-strict-aliasing -Wno-strict-overflow")
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}")
-
-endif (CMAKE_BUILD_TYPE STREQUAL Release_64)
 
 #------------------------------------------------------------------------------
 # Config: Release_32
