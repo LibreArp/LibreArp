@@ -49,12 +49,14 @@ std::vector<ArpEvent> ArpPattern::build() {
             throw ArpIntegrityException("A note cannot end before it starts and has to be at least one pulse long!");
         }
 
-        ArpEvent &onEvent = eventMap[note.startPoint];
-        onEvent.time = note.startPoint;
+        int64 onTime = note.startPoint % loopLength;
+        ArpEvent &onEvent = eventMap[onTime];
+        onEvent.time = onTime;
         onEvent.ons.push_back(&(note.data));
 
-        ArpEvent &offEvent = eventMap[note.endPoint];
-        offEvent.time = note.endPoint;
+        int64 offTime = note.endPoint % loopLength;
+        ArpEvent &offEvent = eventMap[offTime];
+        offEvent.time = offTime;
         offEvent.offs.push_back(&(note.data));
     }
 
