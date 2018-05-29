@@ -39,6 +39,12 @@ LibreArp::LibreArp()
 {
     ArpPattern pattern = PatternUtil::createBasicPattern();
     setPattern(pattern);
+
+    addParameter(octaves = new AudioParameterBool(
+            "octaves",
+            "Octaves",
+            true,
+            "Overflow octave transport"));
 }
 
 LibreArp::~LibreArp() = default;
@@ -103,7 +109,7 @@ void LibreArp::prepareToPlay(double sampleRate, int samplesPerBlock) {
     this->sampleRate = sampleRate;
     this->lastPosition = 0;
     this->wasPlaying = false;
-    this->octaves = true;
+//    this->octaves = true;
 }
 
 void LibreArp::releaseResources() {
@@ -184,7 +190,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
 
                 for (auto data : event.ons) {
                     auto note = activeNotes[data->noteNumber % activeNotes.size()];
-                    if (octaves) {
+                    if (octaves->get()) {
                         auto octave = data->noteNumber / activeNotes.size();
                         note += octave * 12;
                     }
@@ -229,7 +235,7 @@ void LibreArp::getStateInformation(MemoryBlock &destData) {
     ValueTree tree = ValueTree(TREEID_LIBREARP);
     tree.appendChild(this->pattern.toValueTree(), nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
-    tree.setProperty(TREEID_OCTAVES, this->octaves, nullptr);
+    tree.setProperty(TREEID_OCTAVES, this->octaves->get(), nullptr);
 
     destData.reset();
     MemoryOutputStream(destData, true).writeString(tree.toXmlString());
@@ -247,7 +253,7 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
             ArpPattern pattern = ArpPattern::fromValueTree(patternTree);
 
             if (tree.hasProperty(TREEID_OCTAVES)) {
-                this->octaves = tree.getProperty(TREEID_OCTAVES);
+                *this->octaves = tree.getProperty(TREEID_OCTAVES);
             }
 
             if (tree.hasProperty(TREEID_PATTERN_XML)) {

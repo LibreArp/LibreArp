@@ -104,7 +104,7 @@ private:
     std::vector<ArpEvent> events;
     unsigned long eventsPosition;
 
-    bool octaves;
+    AudioParameterBool *octaves;
 
     double sampleRate;
     int64 lastPosition;
