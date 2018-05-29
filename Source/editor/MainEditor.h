@@ -41,8 +41,6 @@ private:
      */
     LibreArp &processor;
 
-    Font font;
-
     TextEditor xmlEditor;
     TextButton applyXmlButton;
 

@@ -26,9 +26,6 @@ MainEditor::MainEditor(LibreArp &p)
         : AudioProcessorEditor(&p), processor(p) {
     setSize(800, 600);
 
-    font = Font("Noto Mono", 15.0f, Font::plain);
-
-    xmlEditor.setFont(font);
     xmlEditor.setMultiLine(true, false);
     xmlEditor.setReturnKeyStartsNewLine(true);
     xmlEditor.setText(processor.getPatternXml(), false);
@@ -53,9 +50,6 @@ MainEditor::~MainEditor() = default;
 //==============================================================================
 void MainEditor::paint(Graphics &g) {
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-
-    g.setColour(Colours::white);
-    g.setFont(font);
 }
 
 void MainEditor::resized() {
