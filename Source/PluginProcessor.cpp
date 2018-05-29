@@ -101,7 +101,6 @@ void LibreArpAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBloc
     ignoreUnused(samplesPerBlock);
     this->sampleRate = sampleRate;
     this->lastPosition = 0;
-    this->startingPosition = 0;
     this->wasPlaying = false;
 }
 
@@ -153,15 +152,11 @@ void LibreArpAudioProcessor::processBlock(AudioBuffer<float> &audio, MidiBuffer 
 
     if (cpi.isPlaying) {
         auto timebase = this->pattern.getTimebase();
-        auto pulseLength = 60.0 / (cpi.bpm  * timebase);
+        auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = this->sampleRate * pulseLength;
 
         auto position = static_cast<int64>(std::ceil(cpi.ppqPosition * timebase));
         auto lastPosition = this->lastPosition;
-        if (!wasPlaying) {
-//            lastPosition = position - 1;
-            this->startingPosition = position;
-        }
 
         ArpEvent event;
         int64 time;
@@ -175,9 +170,8 @@ void LibreArpAudioProcessor::processBlock(AudioBuffer<float> &audio, MidiBuffer 
             }
         } else {
             while ((time = nextTime(event = events[eventsPosition], lastPosition)) < position) {
-                int64 loopPos = position % pattern.loopLength;
-                int offset = jmax(0, static_cast<int>(std::fmod((time - this->startingPosition) * pulseSamples,
-                                                                numSamples)));
+                auto offsetBase = static_cast<int>(std::ceil((time - this->lastPosition) * pulseSamples));
+                int offset = jmax(0, offsetBase % numSamples);
 
                 for (auto data : event.offs) {
                     if (data->lastNote >= 0) {
@@ -210,7 +204,6 @@ void LibreArpAudioProcessor::processBlock(AudioBuffer<float> &audio, MidiBuffer 
         }
         this->eventsPosition = 0;
         this->lastPosition = 0;
-        this->startingPosition = 0;
         this->wasPlaying = false;
     }
 }
@@ -284,11 +277,11 @@ void LibreArpAudioProcessor::buildPattern() {
     this->events = this->pattern.build();
 }
 
-ArpPattern& LibreArpAudioProcessor::getPattern() {
+ArpPattern &LibreArpAudioProcessor::getPattern() {
     return this->pattern;
 }
 
-String& LibreArpAudioProcessor::getPatternXml() {
+String &LibreArpAudioProcessor::getPatternXml() {
     return this->patternXml;
 }
 

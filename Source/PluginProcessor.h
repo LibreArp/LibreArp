@@ -105,7 +105,6 @@ private:
 
     double sampleRate;
     int64 lastPosition;
-    int64 startingPosition;
     bool wasPlaying;
 
     SortedSet<int> activeNotes;
