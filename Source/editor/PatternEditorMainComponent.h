@@ -19,38 +19,21 @@
 
 #include "JuceHeader.h"
 #include "../LibreArp.h"
-#include "PatternEditorMainComponent.h"
-#include "PatternEditorTopComponent.h"
 
+class PatternEditorComponent;
 
-class PatternEditorComponent : public Component {
+class PatternEditorMainComponent : public Component {
 public:
 
-    explicit PatternEditorComponent(LibreArp &p);
+    explicit PatternEditorMainComponent(LibreArp &p, PatternEditorComponent *ec);
 
     void paint(Graphics &g) override;
 
-    void resized() override;
-
-    int getPixelsPerBeat();
-    int getPixelsPerNote();
-    void zoomPattern(float deltaX, float deltaY);
-
-    int getRenderWidth();
-    int getRenderHeight();
+    void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) override;
 
 private:
-
     LibreArp &processor;
-
-    Viewport mainComponentViewport;
-    PatternEditorMainComponent mainComponent;
-
-    Viewport topBarViewport;
-    PatternEditorTopComponent topBar;
-
-    int pixelsPerBeat;
-    int pixelsPerNote;
+    PatternEditorComponent *editorComponent;
 };
 
 

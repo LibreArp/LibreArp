@@ -18,10 +18,18 @@
       <GROUP id="{916A40E5-BC88-61B9-D0D5-8A490632E866}" name="editor">
         <FILE id="xVzivl" name="MainEditor.cpp" compile="1" resource="0" file="Source/editor/MainEditor.cpp"/>
         <FILE id="nJdJiZ" name="MainEditor.h" compile="0" resource="0" file="Source/editor/MainEditor.h"/>
-        <FILE id="l5kUX0" name="PatternEditorComponent.cpp" compile="1" resource="0"
+        <FILE id="mINNeb" name="PatternEditorComponent.cpp" compile="1" resource="0"
               file="Source/editor/PatternEditorComponent.cpp"/>
-        <FILE id="HXUwgj" name="PatternEditorComponent.h" compile="0" resource="0"
+        <FILE id="KRjxmk" name="PatternEditorComponent.h" compile="0" resource="0"
               file="Source/editor/PatternEditorComponent.h"/>
+        <FILE id="l5kUX0" name="PatternEditorMainComponent.cpp" compile="1"
+              resource="0" file="Source/editor/PatternEditorMainComponent.cpp"/>
+        <FILE id="HXUwgj" name="PatternEditorMainComponent.h" compile="0" resource="0"
+              file="Source/editor/PatternEditorMainComponent.h"/>
+        <FILE id="zO2AR7" name="PatternEditorTopComponent.cpp" compile="1"
+              resource="0" file="Source/editor/PatternEditorTopComponent.cpp"/>
+        <FILE id="OlQ30m" name="PatternEditorTopComponent.h" compile="0" resource="0"
+              file="Source/editor/PatternEditorTopComponent.h"/>
         <FILE id="neTwrY" name="XmlEditorComponent.cpp" compile="1" resource="0"
               file="Source/editor/XmlEditorComponent.cpp"/>
         <FILE id="SszSFe" name="XmlEditorComponent.h" compile="0" resource="0"

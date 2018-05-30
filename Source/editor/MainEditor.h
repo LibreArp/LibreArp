@@ -20,6 +20,7 @@
 #include "JuceHeader.h"
 #include "../LibreArp.h"
 #include "XmlEditorComponent.h"
+#include "PatternEditorMainComponent.h"
 #include "PatternEditorComponent.h"
 
 /**
@@ -44,7 +45,6 @@ private:
     ComponentBoundsConstrainer boundsConstrainer;
     TabbedComponent tabs;
 
-    Viewport patternEditorViewport;
     PatternEditorComponent patternEditor;
     XmlEditorComponent xmlEditor;
 

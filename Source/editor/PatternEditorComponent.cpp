@@ -17,28 +17,61 @@
 
 #include "PatternEditorComponent.h"
 
-const Colour BLACK = Colour(0, 0, 0);
-const Colour WHITE = Colour(255, 255, 255);
-const Colour TRANSPARENT_BLACK = Colour((uint8) 0, 0, 0, 0.10f);
-const Colour RED = Colour(255, 0, 0);
-const Colour LIGHT_RED = Colour(255, 127, 127);
-
 const int X_ZOOM_RATE = 80;
 const int Y_ZOOM_RATE = 30;
 
 PatternEditorComponent::PatternEditorComponent(LibreArp &p)
-        : processor(p)
-{
-    setSize(100, 100);
+        : processor(p),
+          topBar(p, this),
+          mainComponent(p, this) {
 
     this->pixelsPerBeat = 100;
     this->pixelsPerNote = 12;
+
+    mainComponentViewport.setViewedComponent(&mainComponent);
+    addAndMakeVisible(mainComponentViewport);
+
+    topBarViewport.setViewedComponent(&topBar);
+    topBarViewport.setScrollBarsShown(false, false, false, false);
+    addAndMakeVisible(topBarViewport);
 }
 
 void PatternEditorComponent::paint(Graphics &g) {
-    ArpPattern &pattern = processor.getPattern();
+    topBarViewport.setViewPosition(mainComponentViewport.getViewPositionX(), topBarViewport.getViewPositionY());
+}
 
-    // Determine size
+void PatternEditorComponent::resized() {
+    auto area = getLocalBounds();
+    topBarViewport.setBounds(area.removeFromTop(16));
+    mainComponentViewport.setBounds(area);
+}
+
+
+int PatternEditorComponent::getPixelsPerBeat() {
+    return this->pixelsPerBeat;
+}
+
+int PatternEditorComponent::getPixelsPerNote() {
+    return this->pixelsPerNote;
+}
+
+void PatternEditorComponent::zoomPattern(float deltaX, float deltaY) {
+    pixelsPerBeat = jmax(32, pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
+    pixelsPerNote = jmax(8, pixelsPerNote + static_cast<int>(deltaY * Y_ZOOM_RATE));
+
+    mainComponent.repaint();
+    topBar.repaint();
+}
+
+
+int PatternEditorComponent::getRenderWidth() {
+    auto pattern = processor.getPattern();
+    return static_cast<int>((3 + pattern.loopLength / static_cast<double>(pattern.getTimebase())) * pixelsPerBeat);
+}
+
+int PatternEditorComponent::getRenderHeight() {
+    auto pattern = processor.getPattern();
+
     int dist = INT32_MIN;
     for (auto &note : pattern.getNotes()) {
         if (std::abs(note.data.noteNumber) > dist) {
@@ -48,70 +81,5 @@ void PatternEditorComponent::paint(Graphics &g) {
     dist += 3;
     dist *= 2;
 
-    auto width = static_cast<int>((3 + pattern.loopLength / static_cast<double>(pattern.getTimebase())) * pixelsPerBeat);
-    auto height = dist * pixelsPerNote;
-    setSize(jmax(width, getParentWidth()), jmax(height, getParentHeight()));
-
-    // Draw note 0
-    int top = getHeight() / 2;
-    g.setColour(TRANSPARENT_BLACK);
-    g.fillRect(0, top, getWidth(), pixelsPerNote);
-
-    // Draw gridlines
-    g.setColour(BLACK);
-    for (int i = (getHeight() / 2) % pixelsPerNote; i < getHeight(); i += pixelsPerNote) {
-        g.drawLine(0, i, getWidth(), i, 0.5);
-    }
-
-    float beatDiv = (pixelsPerBeat / 4.0f);
-    int n = 1;
-    for (float i = beatDiv; i < getWidth(); i += beatDiv, n++) {
-        if (n % 4 == 0) {
-            g.drawLine(i, 0, i, getHeight(), 1.5);
-        } else {
-            g.drawLine(i, 0, i, getHeight(), 0.5);
-        }
-
-    }
-
-    g.setColour(WHITE);
-    int loopLine = static_cast<int>((pattern.loopLength / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat);
-    g.drawLine(loopLine, 0, loopLine, getHeight(), 1);
-
-
-    // Draw notes
-    for (auto &note : pattern.getNotes()) {
-        Rectangle noteRect = Rectangle<float>(
-                (note.startPoint / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat,
-                (getHeight() / 2) + (1 - note.data.noteNumber) * pixelsPerNote,
-                ((note.endPoint - note.startPoint) / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat,
-                pixelsPerNote);
-
-        g.setColour((note.data.lastNote == -1) ? RED : LIGHT_RED);
-        g.fillRect(noteRect);
-        g.setColour(BLACK);
-        g.drawRect(noteRect);
-    }
-
-
-    // Draw position indicator
-    g.setColour(WHITE);
-    auto pos = static_cast<int>(((processor.getLastPosition() % pattern.loopLength) / static_cast<double>(pattern.getTimebase())) * (pixelsPerBeat));
-    g.drawLine(pos, 0, pos, getHeight());
-
-    if (isVisible()) {
-        repaint();
-    }
-}
-
-void PatternEditorComponent::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) {
-    if (event.mods.isCtrlDown()) {
-        if (event.mods.isShiftDown()) {
-            pixelsPerNote = jmax(8, pixelsPerNote + static_cast<int>(wheel.deltaY * Y_ZOOM_RATE));
-        } else {
-            pixelsPerBeat = jmax(32, pixelsPerBeat + static_cast<int>(wheel.deltaY * X_ZOOM_RATE));
-        }
-    } else {
-        Component::mouseWheelMove(event, wheel);
-    }
+    return dist * pixelsPerNote;
 }
