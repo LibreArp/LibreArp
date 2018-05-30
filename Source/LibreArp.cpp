@@ -165,7 +165,8 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         auto pulseSamples = this->sampleRate * pulseLength;
 
         auto position = static_cast<int64>(std::ceil(cpi.ppqPosition * timebase));
-        auto lastPosition = this->lastPosition;
+        auto lastPosition =
+                (wasPlaying) ? this->lastPosition : static_cast<int64>(std::floor(cpi.ppqPosition * timebase));
 
         ArpEvent event;
         int64 time;
