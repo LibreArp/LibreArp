@@ -190,9 +190,17 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                 }
 
                 for (auto data : event.ons) {
-                    auto note = activeNotes[data->noteNumber % activeNotes.size()];
+                    auto index = data->noteNumber % activeNotes.size();
+                    if (index < 0) {
+                        index += activeNotes.size();
+                    }
+
+                    auto note = activeNotes[index];
                     if (octaves->get()) {
                         auto octave = data->noteNumber / activeNotes.size();
+                        if (data->noteNumber < 0) {
+                            octave--;
+                        }
                         note += octave * 12;
                     }
                     data->lastNote = note;
