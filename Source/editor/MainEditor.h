@@ -20,6 +20,7 @@
 #include "JuceHeader.h"
 #include "../LibreArp.h"
 #include "XmlEditorComponent.h"
+#include "PatternEditorComponent.h"
 
 /**
  * Main LibreArp editor component.
@@ -40,8 +41,12 @@ private:
     LibreArp &processor;
 
     ResizableCornerComponent resizer;
-    XmlEditorComponent xmlEditor;
+    ComponentBoundsConstrainer boundsConstrainer;
     TabbedComponent tabs;
+
+    Viewport patternEditorViewport;
+    PatternEditorComponent patternEditor;
+    XmlEditorComponent xmlEditor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainEditor);
 };

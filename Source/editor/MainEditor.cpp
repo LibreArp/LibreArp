@@ -24,9 +24,18 @@ const int RESIZER_SIZE = 18;
 
 MainEditor::MainEditor(LibreArp &p)
         : AudioProcessorEditor(&p),
-          processor(p), resizer(this, nullptr), xmlEditor(p), tabs(TabbedButtonBar::Orientation::TabsAtTop) {
-    setSize(800, 600);
+          processor(p),
+          resizer(this, &boundsConstrainer),
+          tabs(TabbedButtonBar::Orientation::TabsAtTop),
+          patternEditor(p),
+          xmlEditor(p) {
 
+    setSize(640, 480);
+
+    boundsConstrainer.setMinimumSize(200, 200);
+
+    patternEditorViewport.setViewedComponent(&patternEditor);
+    tabs.addTab("Pattern", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditorViewport, false);
     tabs.addTab("XML Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
 
     addAndMakeVisible(tabs);

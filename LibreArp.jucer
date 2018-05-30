@@ -18,6 +18,10 @@
       <GROUP id="{916A40E5-BC88-61B9-D0D5-8A490632E866}" name="editor">
         <FILE id="xVzivl" name="MainEditor.cpp" compile="1" resource="0" file="Source/editor/MainEditor.cpp"/>
         <FILE id="nJdJiZ" name="MainEditor.h" compile="0" resource="0" file="Source/editor/MainEditor.h"/>
+        <FILE id="l5kUX0" name="PatternEditorComponent.cpp" compile="1" resource="0"
+              file="Source/editor/PatternEditorComponent.cpp"/>
+        <FILE id="HXUwgj" name="PatternEditorComponent.h" compile="0" resource="0"
+              file="Source/editor/PatternEditorComponent.h"/>
         <FILE id="neTwrY" name="XmlEditorComponent.cpp" compile="1" resource="0"
               file="Source/editor/XmlEditorComponent.cpp"/>
         <FILE id="SszSFe" name="XmlEditorComponent.h" compile="0" resource="0"
