@@ -56,8 +56,14 @@ int PatternEditorComponent::getPixelsPerNote() {
 }
 
 void PatternEditorComponent::zoomPattern(float deltaX, float deltaY) {
+    double xPercent = mainComponentViewport.getViewPositionX() / static_cast<double>(mainComponent.getWidth());
+    double yPercent = mainComponentViewport.getViewPositionY() / static_cast<double>(mainComponent.getHeight());
     pixelsPerBeat = jmax(32, pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
     pixelsPerNote = jmax(8, pixelsPerNote + static_cast<int>(deltaY * Y_ZOOM_RATE));
+
+    mainComponentViewport.setViewPosition(
+            static_cast<int>(xPercent * getRenderWidth()),
+            static_cast<int>(yPercent * getRenderHeight()));
 
     mainComponent.repaint();
     topBar.repaint();
