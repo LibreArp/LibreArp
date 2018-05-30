@@ -59,6 +59,10 @@ void PatternEditorComponent::paint(Graphics &g) {
 
     // Draw gridlines
     g.setColour(BLACK);
+    for (int i = (getHeight() / 2) % pixelsPerNote; i < getHeight(); i += pixelsPerNote) {
+        g.drawLine(0, i, getWidth(), i, 0.5);
+    }
+
     float beatDiv = (pixelsPerBeat / 4.0f);
     int n = 1;
     for (float i = beatDiv; i < getWidth(); i += beatDiv, n++) {
@@ -70,10 +74,9 @@ void PatternEditorComponent::paint(Graphics &g) {
 
     }
 
-    g.setColour(BLACK);
-    for (int i = (getHeight() / 2) % pixelsPerNote; i < getHeight(); i += pixelsPerNote) {
-        g.drawLine(0, i, getWidth(), i, 0.5);
-    }
+    g.setColour(WHITE);
+    int loopLine = static_cast<int>((pattern.loopLength / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat);
+    g.drawLine(loopLine, 0, loopLine, getHeight(), 1);
 
 
     // Draw notes
