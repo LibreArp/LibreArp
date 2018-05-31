@@ -22,10 +22,10 @@ const Colour GRIDLINES_COLOUR = Colour(0, 0, 0);
 const Colour POSITION_INDICATOR_COLOUR = Colour(255, 255, 255);
 const Colour LOOP_LINE_COLOUR = Colour(255, 0, 0);
 const Colour ZERO_LINE_COLOUR = Colour((uint8) 0, 0, 0, 0.10f);
-const Colour NOTE_FILL_COLOUR = Colour(104, 134, 183);
 
-const Colour NOTE_ACTIVE_FILL_COLOUR = Colour(171, 187, 214);
-const Colour NOTE_BORDER_COLOUR = Colour(0, 0, 0);
+const Colour NOTE_FILL_COLOUR = Colour((uint8) 117, 169, 255, 0.7f);
+const Colour NOTE_ACTIVE_FILL_COLOUR = Colour(191, 215, 255);
+const Colour NOTE_BORDER_COLOUR = Colour((uint8) 0, 0, 0, 0.5f);
 
 const Colour CURSOR_TIME_COLOUR = Colour((uint8) 255, 255, 255, 0.7f);
 const Colour CURSOR_NOTE_COLOUR = Colour((uint8) 255, 255, 255, 0.05f);
