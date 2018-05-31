@@ -43,6 +43,7 @@ PatternEditor::PatternEditor(LibreArp &p, PatternEditorView *ec)
     cursorPulse = 0;
     dragAction = nullptr;
     lastNoteLength = processor.getPattern().getTimebase() / divisor;
+    snapEnabled = true;
 }
 
 void PatternEditor::paint(Graphics &g) {
@@ -193,6 +194,8 @@ void PatternEditor::mouseDrag(const MouseEvent &event) {
 void PatternEditor::mouseAnyMove(const MouseEvent &event) {
     cursorPulse = xToPulse(event.x);
     cursorNote = yToNote(event.y);
+
+    snapEnabled = !(event.mods.isAltDown() || (event.mods.isCtrlDown() && event.mods.isShiftDown()));
 
     setMouseCursor(MouseCursor::NormalCursor);
     repaint();
@@ -357,6 +360,10 @@ Rectangle<int> PatternEditor::getRectangleForLoop() {
 
 
 int64 PatternEditor::snapPulse(int64 pulse, bool floor) {
+    if (!snapEnabled) {
+        return pulse;
+    }
+
     auto &pattern = processor.getPattern();
     auto timebase = pattern.getTimebase();
     double doubleDivisor = this->divisor;

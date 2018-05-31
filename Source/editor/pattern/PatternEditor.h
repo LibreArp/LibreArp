@@ -73,6 +73,8 @@ private:
 
     int64 lastNoteLength;
 
+    bool snapEnabled;
+
     DragAction *dragAction;
 
     void setDragAction(DragAction *newDragAction);
