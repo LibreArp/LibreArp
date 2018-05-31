@@ -49,8 +49,8 @@ void BeatBar::paint(Graphics &g) {
 
     // Draw beat lines
     g.setFont(12);
-    int n = 0;
-    for (float i = pixelsPerBeat; i < getWidth(); i += pixelsPerBeat, n++) {
+    int n = 1;
+    for (float i = 0; i < getWidth(); i += pixelsPerBeat, n++) {
         g.setColour(BEAT_LINE_COLOUR);
         g.drawLine(i, 0, i, getHeight(), 0.5);
 
