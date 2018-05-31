@@ -23,7 +23,7 @@ const Colour BOTTOM_LINE_COLOUR = Colour(0, 0, 0);
 const Colour BEAT_LINE_COLOUR = Colour(255, 255, 255);
 const Colour BEAT_NUMBER_COLOUR = Colour(255, 255, 255);
 const Colour LOOP_LINE_COLOUR = Colour(255, 0, 0);
-const Colour LOOP_TEXT_COLOUR = Colour((uint8) 255, 0, 0, 0.3f);
+const Colour LOOP_TEXT_COLOUR = Colour((uint8) 255, 0, 0, 0.5f);
 
 const String LOOP_TEXT = "loop"; // NOLINT
 
