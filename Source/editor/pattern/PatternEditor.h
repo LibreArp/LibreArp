@@ -23,6 +23,19 @@
 class PatternEditorView;
 
 class PatternEditor : public Component {
+
+    class DragAction {
+    public:
+        static const uint8 TYPE_NONE = 0x00;
+        static const uint8 TYPE_LOOP_RESIZE = 0x10;
+        static const uint8 TYPE_NOTE_MOVE = 0x20;
+        static const uint8 TYPE_NOTE_RESIZE = 0x21;
+
+        uint8 type;
+
+        explicit DragAction(uint8 type = TYPE_NONE);
+    };
+
 public:
 
     explicit PatternEditor(LibreArp &p, PatternEditorView *ec);
@@ -31,7 +44,8 @@ public:
 
     void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) override;
 
-
+    void mouseMove(const MouseEvent &event) override;
+    void mouseDrag(const MouseEvent &event) override;
 
     PatternEditorView *getView();
 
@@ -43,6 +57,24 @@ private:
     PatternEditorView *view;
 
     int divisor;
+
+    int64 cursorPulse;
+    int cursorNote;
+
+    DragAction dragAction;
+
+    void mouseAnyMove(const MouseEvent &event);
+    void loopResize(const MouseEvent &event);
+
+    Rectangle<int> getRectangleForNote(ArpNote &note);
+    Rectangle<int> getRectangleForLoop();
+
+    int64 snapPulse(int64 pulse);
+    int64 xToPulse(int x, bool snap = true);
+    int yToNote(int y);
+
+    int pulseToX(int64 pulse);
+    int noteToY(int note);
 };
 
 
