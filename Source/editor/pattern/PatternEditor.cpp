@@ -150,6 +150,8 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
         this->dragAction = DragAction(DragAction::TYPE_LOOP_RESIZE);
         return;
     }
+
+    this->dragAction = DragAction();
 }
 
 void PatternEditor::mouseDrag(const MouseEvent &event) {
@@ -159,6 +161,8 @@ void PatternEditor::mouseDrag(const MouseEvent &event) {
         switch (this->dragAction.type) {
             case DragAction::TYPE_LOOP_RESIZE:
                 loopResize(event);
+                break;
+            default:
                 break;
         }
     }
