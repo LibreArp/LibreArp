@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <set>
 #include "JuceHeader.h"
 #include "../../LibreArp.h"
 
@@ -31,6 +32,7 @@ class PatternEditor : public Component {
         static const uint8 TYPE_NOTE_MOVE = 0x20;
         static const uint8 TYPE_NOTE_START_RESIZE = 0x21;
         static const uint8 TYPE_NOTE_END_RESIZE = 0x22;
+        static const uint8 TYPE_SELECTION = 0x30;
 
         uint8 type;
 
@@ -39,15 +41,51 @@ class PatternEditor : public Component {
 
     class NoteDragAction : public DragAction {
     public:
-        explicit NoteDragAction(uint8 type, ArpNote &note, int64 offset = 0);
 
-        ArpNote &note;
-        int64 offset;
+        class NoteOffset {
+        public:
+            ArpNote &note;
+            int64 endOffset;
+            int64 startOffset;
+            int noteOffset;
+
+            explicit NoteOffset(ArpNote &note);
+        };
+
+        explicit NoteDragAction(
+                PatternEditor *editor,
+                uint8 type,
+                ArpNote &note,
+                const MouseEvent &event,
+                bool offset = true);
+
+        explicit NoteDragAction(
+                PatternEditor *editor,
+                uint8 type,
+                std::set<int> &indices,
+                std::vector<ArpNote> &allNotes,
+                const MouseEvent &event,
+                bool offset = true);
+
+        std::vector<NoteOffset> noteOffsets;
+
+    private:
+        static NoteOffset createOffset(PatternEditor *editor, ArpNote &note, const MouseEvent &event);
+    };
+
+    class SelectionDragAction : public DragAction {
+    public:
+        explicit SelectionDragAction(int startX, int startY);
+
+        int startX;
+        int startY;
     };
 
 public:
 
     explicit PatternEditor(LibreArp &p, PatternEditorView *ec);
+
+    ~PatternEditor() override;
 
     void paint(Graphics &g) override;
 
@@ -56,6 +94,7 @@ public:
     void mouseMove(const MouseEvent &event) override;
     void mouseDrag(const MouseEvent &event) override;
     void mouseDown(const MouseEvent &event) override;
+    void mouseUp(const MouseEvent &event) override;
 
     PatternEditorView *getView();
 
@@ -75,6 +114,9 @@ private:
 
     bool snapEnabled;
 
+    Rectangle<int> selection;
+    std::set<int> selectedNotes;
+
     DragAction *dragAction;
 
     void setDragAction(DragAction *newDragAction);
@@ -88,6 +130,8 @@ private:
     void noteMove(const MouseEvent &event, NoteDragAction *dragAction);
     void noteCreate(const MouseEvent &event);
     void noteDelete(const MouseEvent &event);
+
+    void select(const MouseEvent &event, SelectionDragAction *dragAction);
 
     Rectangle<int> getRectangleForNote(ArpNote &note);
     Rectangle<int> getRectangleForLoop();
