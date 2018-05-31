@@ -137,11 +137,11 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
         auto noteRect = getRectangleForNote(note);
         if (noteRect.contains(event.x, event.y)) {
             if (event.x <= (noteRect.getX() + NOTE_RESIZE_TOLERANCE)) {
-                setMouseCursor(MouseCursor::LeftRightResizeCursor);
+                setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
                 setDragAction(new NoteDragAction(DragAction::TYPE_NOTE_START_RESIZE, note));
                 return;
             } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - NOTE_RESIZE_TOLERANCE)) {
-                setMouseCursor(MouseCursor::LeftRightResizeCursor);
+                setMouseCursor(MouseCursor::RightEdgeResizeCursor);
                 setDragAction(new NoteDragAction(DragAction::TYPE_NOTE_END_RESIZE, note));
                 return;
             } else {
@@ -239,14 +239,14 @@ void PatternEditor::loopResize(const MouseEvent &event) {
 void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dragAction) {
     dragAction->note.startPoint = jmin(xToPulse(event.x), dragAction->note.endPoint - 1);
     processor.buildPattern();
-    setMouseCursor(MouseCursor::LeftRightResizeCursor);
+    setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
 }
 
 void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragAction) {
     dragAction->note.endPoint =
             jmin(jmax(xToPulse(event.x), dragAction->note.startPoint + 1), processor.getPattern().loopLength);
     processor.buildPattern();
-    setMouseCursor(MouseCursor::LeftRightResizeCursor);
+    setMouseCursor(MouseCursor::RightEdgeResizeCursor);
 }
 
 void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAction *dragAction) {
