@@ -42,6 +42,7 @@ PatternEditor::PatternEditor(LibreArp &p, PatternEditorView *ec)
     divisor = 4;
     cursorPulse = 0;
     dragAction = nullptr;
+    lastNoteLength = processor.getPattern().getTimebase() / divisor;
 }
 
 void PatternEditor::paint(Graphics &g) {
@@ -235,7 +236,11 @@ void PatternEditor::loopResize(const MouseEvent &event) {
 
 void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dragAction) {
     auto timebase = processor.getPattern().getTimebase();
-    dragAction->note.startPoint = jmin(xToPulse(event.x), dragAction->note.endPoint - (timebase / divisor));
+    auto &note = dragAction->note;
+    note.startPoint = jmin(xToPulse(event.x), note.endPoint - (timebase / divisor));
+
+    lastNoteLength = note.endPoint - note.startPoint;
+
     processor.buildPattern();
     repaint();
     setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
@@ -243,9 +248,12 @@ void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dra
 
 void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragAction) {
     auto timebase = processor.getPattern().getTimebase();
-    dragAction->note.endPoint =
-            jmin(jmax(xToPulse(event.x), dragAction->note.startPoint + (timebase / divisor)),
+    auto &note = dragAction->note;
+    note.endPoint =
+            jmin(jmax(xToPulse(event.x), note.startPoint + (timebase / divisor)),
                  processor.getPattern().loopLength);
+
+    lastNoteLength = note.endPoint - note.startPoint;
 
     processor.buildPattern();
     repaint();
@@ -274,7 +282,7 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
     auto &pattern = processor.getPattern();
     auto &notes = pattern.getNotes();
     auto pulse = xToPulse(event.x, true, true);
-    auto length = pattern.getTimebase() / divisor;
+    auto length = lastNoteLength;
 
     ArpNote note = ArpNote();
     note.startPoint = pulse;

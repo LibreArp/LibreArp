@@ -71,6 +71,8 @@ private:
     int64 cursorPulse;
     int cursorNote;
 
+    int64 lastNoteLength;
+
     DragAction *dragAction;
 
     void setDragAction(DragAction *newDragAction);
