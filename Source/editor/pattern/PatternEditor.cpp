@@ -287,7 +287,11 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
     processor.buildPattern();
     repaint();
 
-    setDragAction(new NoteDragAction(DragAction::TYPE_NOTE_MOVE, notes[index], length));
+    if (event.mods.isShiftDown()) {
+        setDragAction(new NoteDragAction(DragAction::TYPE_NOTE_END_RESIZE, notes[index]));
+    } else {
+        setDragAction(new NoteDragAction(DragAction::TYPE_NOTE_MOVE, notes[index], length));
+    }
 }
 
 void PatternEditor::noteDelete(const MouseEvent &event) {
