@@ -234,15 +234,19 @@ void PatternEditor::loopResize(const MouseEvent &event) {
 
 
 void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dragAction) {
-    dragAction->note.startPoint = jmin(xToPulse(event.x), dragAction->note.endPoint - 1);
+    auto timebase = processor.getPattern().getTimebase();
+    dragAction->note.startPoint = jmin(xToPulse(event.x), dragAction->note.endPoint - (timebase / divisor));
     processor.buildPattern();
     repaint();
     setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
 }
 
 void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragAction) {
+    auto timebase = processor.getPattern().getTimebase();
     dragAction->note.endPoint =
-            jmin(jmax(xToPulse(event.x), dragAction->note.startPoint + 1), processor.getPattern().loopLength);
+            jmin(jmax(xToPulse(event.x), dragAction->note.startPoint + (timebase / divisor)),
+                 processor.getPattern().loopLength);
+
     processor.buildPattern();
     repaint();
     setMouseCursor(MouseCursor::RightEdgeResizeCursor);
