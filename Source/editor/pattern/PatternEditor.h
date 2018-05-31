@@ -55,6 +55,7 @@ public:
 
     void mouseMove(const MouseEvent &event) override;
     void mouseDrag(const MouseEvent &event) override;
+    void mouseDown(const MouseEvent &event) override;
 
     PatternEditorView *getView();
 
@@ -75,16 +76,20 @@ private:
     void setDragAction(DragAction *newDragAction);
 
     void mouseAnyMove(const MouseEvent &event);
+
     void loopResize(const MouseEvent &event);
+
     void noteStartResize(const MouseEvent &event, NoteDragAction *dragAction);
     void noteEndResize(const MouseEvent &event, NoteDragAction *dragAction);
     void noteMove(const MouseEvent &event, NoteDragAction *dragAction);
+    void noteCreate(const MouseEvent &event);
+    void noteDelete(const MouseEvent &event);
 
     Rectangle<int> getRectangleForNote(ArpNote &note);
     Rectangle<int> getRectangleForLoop();
 
-    int64 snapPulse(int64 pulse);
-    int64 xToPulse(int x, bool snap = true);
+    int64 snapPulse(int64 pulse, bool floor = false);
+    int64 xToPulse(int x, bool snap = true, bool floor = false);
     int yToNote(int y);
 
     int pulseToX(int64 pulse);
