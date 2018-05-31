@@ -157,7 +157,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
     getPlayHead()->getCurrentPosition(cpi);
 
-    if (cpi.isPlaying) {
+    if (cpi.isPlaying && !this->pattern.getNotes().empty()) {
         midi.clear();
 
         auto timebase = this->pattern.getTimebase();
