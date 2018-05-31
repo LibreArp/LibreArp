@@ -285,8 +285,8 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
     auto length = lastNoteLength;
 
     ArpNote note = ArpNote();
-    note.startPoint = pulse;
-    note.endPoint = pulse + length;
+    note.startPoint = jmin(pulse, pattern.loopLength - length);
+    note.endPoint = note.startPoint + length;
     note.data.noteNumber = yToNote(event.y);
 
     auto index = notes.size();
