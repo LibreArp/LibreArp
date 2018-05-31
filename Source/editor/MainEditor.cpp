@@ -18,31 +18,27 @@
 #include <sstream>
 #include "../LibreArp.h"
 #include "MainEditor.h"
-#include "../ArpIntegrityException.h"
+#include "../exception/ArpIntegrityException.h"
 
-const Colour RED = Colour(255, 0, 0);
+const int RESIZER_SIZE = 18;
 
 MainEditor::MainEditor(LibreArp &p)
-        : AudioProcessorEditor(&p), processor(p) {
-    setSize(800, 600);
+        : AudioProcessorEditor(&p),
+          processor(p),
+          resizer(this, &boundsConstrainer),
+          tabs(TabbedButtonBar::Orientation::TabsAtTop),
+          patternEditor(p),
+          xmlEditor(p) {
 
-    xmlEditor.setMultiLine(true, false);
-    xmlEditor.setReturnKeyStartsNewLine(true);
-    xmlEditor.setText(processor.getPatternXml(), false);
+    setSize(640, 480);
 
-    applyXmlButton.setButtonText("Apply");
+    boundsConstrainer.setMinimumSize(200, 200);
 
-    addAndMakeVisible(xmlEditor, -1);
-    addAndMakeVisible(applyXmlButton, -1);
+    tabs.addTab("Pattern", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
+    tabs.addTab("XML Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
 
-    applyXmlButton.onClick = [this] {
-        try {
-            processor.parsePattern(xmlEditor.getText());
-            xmlEditor.removeColour(TextEditor::outlineColourId);
-        } catch (ArpIntegrityException &e) {
-            xmlEditor.setColour(TextEditor::outlineColourId, RED);
-        }
-    };
+    addAndMakeVisible(tabs);
+    addAndMakeVisible(resizer, 9999);
 }
 
 MainEditor::~MainEditor() = default;
@@ -53,6 +49,6 @@ void MainEditor::paint(Graphics &g) {
 }
 
 void MainEditor::resized() {
-    xmlEditor.setBounds(0, 0, getWidth(), getHeight() - 30);
-    applyXmlButton.setBounds(0, getHeight() - 30, getWidth(), 30);
+    tabs.setBounds(0, 0, getWidth(), getHeight());
+    resizer.setBounds(getWidth() - RESIZER_SIZE, getHeight() - RESIZER_SIZE, RESIZER_SIZE, RESIZER_SIZE);
 }

@@ -19,6 +19,9 @@
 
 #include "JuceHeader.h"
 #include "../LibreArp.h"
+#include "xml/XmlEditor.h"
+#include "pattern/PatternEditor.h"
+#include "pattern/PatternEditorView.h"
 
 /**
  * Main LibreArp editor component.
@@ -36,13 +39,14 @@ public:
     void resized() override;
 
 private:
-    /**
-     * The underlying audio processor instance.
-     */
     LibreArp &processor;
 
-    TextEditor xmlEditor;
-    TextButton applyXmlButton;
+    ResizableCornerComponent resizer;
+    ComponentBoundsConstrainer boundsConstrainer;
+    TabbedComponent tabs;
+
+    PatternEditorView patternEditor;
+    XmlEditor xmlEditor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainEditor);
 };

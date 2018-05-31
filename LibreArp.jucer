@@ -15,7 +15,28 @@
               pluginAAXDisableMultiMono="0">
   <MAINGROUP id="FtyPbS" name="LibreArp">
     <GROUP id="{4D6501CE-D613-8A3D-7ABE-D57B9896DB0F}" name="Source">
+      <GROUP id="{50F657DF-8B13-1330-0F07-913BC78A94FD}" name="exception">
+        <FILE id="AaDTLm" name="ArpIntegrityException.cpp" compile="1" resource="0"
+              file="Source/exception/ArpIntegrityException.cpp"/>
+        <FILE id="XynWej" name="ArpIntegrityException.h" compile="0" resource="0"
+              file="Source/exception/ArpIntegrityException.h"/>
+      </GROUP>
       <GROUP id="{916A40E5-BC88-61B9-D0D5-8A490632E866}" name="editor">
+        <GROUP id="{08EE391D-EA98-DD24-CD7B-9B776718130D}" name="xml">
+          <FILE id="jztN0C" name="XmlEditor.cpp" compile="1" resource="0" file="Source/editor/xml/XmlEditor.cpp"/>
+          <FILE id="gBwqaQ" name="XmlEditor.h" compile="0" resource="0" file="Source/editor/xml/XmlEditor.h"/>
+        </GROUP>
+        <GROUP id="{E1567BF7-D972-D3FD-9442-4184BBF160FF}" name="pattern">
+          <FILE id="zGkUCF" name="BeatBar.cpp" compile="1" resource="0" file="Source/editor/pattern/BeatBar.cpp"/>
+          <FILE id="QvM5TL" name="BeatBar.h" compile="0" resource="0" file="Source/editor/pattern/BeatBar.h"/>
+          <FILE id="VrOhtm" name="PatternEditor.cpp" compile="1" resource="0"
+                file="Source/editor/pattern/PatternEditor.cpp"/>
+          <FILE id="bUaNL9" name="PatternEditor.h" compile="0" resource="0" file="Source/editor/pattern/PatternEditor.h"/>
+          <FILE id="PkX915" name="PatternEditorView.cpp" compile="1" resource="0"
+                file="Source/editor/pattern/PatternEditorView.cpp"/>
+          <FILE id="ok2XbK" name="PatternEditorView.h" compile="0" resource="0"
+                file="Source/editor/pattern/PatternEditorView.h"/>
+        </GROUP>
         <FILE id="xVzivl" name="MainEditor.cpp" compile="1" resource="0" file="Source/editor/MainEditor.cpp"/>
         <FILE id="nJdJiZ" name="MainEditor.h" compile="0" resource="0" file="Source/editor/MainEditor.h"/>
       </GROUP>
@@ -25,10 +46,6 @@
       </GROUP>
       <FILE id="GeJVtk" name="ArpEvent.cpp" compile="1" resource="0" file="Source/ArpEvent.cpp"/>
       <FILE id="IrypCV" name="ArpEvent.h" compile="0" resource="0" file="Source/ArpEvent.h"/>
-      <FILE id="iebd91" name="ArpIntegrityException.cpp" compile="1" resource="0"
-            file="Source/ArpIntegrityException.cpp"/>
-      <FILE id="BAKKSG" name="ArpIntegrityException.h" compile="0" resource="0"
-            file="Source/ArpIntegrityException.h"/>
       <FILE id="y4lGFE" name="ArpNote.cpp" compile="1" resource="0" file="Source/ArpNote.cpp"/>
       <FILE id="TpttHS" name="ArpNote.h" compile="0" resource="0" file="Source/ArpNote.h"/>
       <FILE id="jfnte9" name="ArpPattern.cpp" compile="1" resource="0" file="Source/ArpPattern.cpp"/>
