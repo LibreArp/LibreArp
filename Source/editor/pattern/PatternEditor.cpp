@@ -103,10 +103,6 @@ void PatternEditor::paint(Graphics &g) {
     g.setColour(CURSOR_NOTE_COLOUR);
     auto cursorNoteY = noteToY(cursorNote);
     g.fillRect(0, cursorNoteY, getWidth(), pixelsPerNote);
-
-    if (isVisible()) {
-        repaint();
-    }
 }
 
 
@@ -198,6 +194,7 @@ void PatternEditor::mouseAnyMove(const MouseEvent &event) {
     cursorNote = yToNote(event.y);
 
     setMouseCursor(MouseCursor::NormalCursor);
+    repaint();
 }
 
 void PatternEditor::mouseDown(const MouseEvent &event) {
@@ -239,6 +236,7 @@ void PatternEditor::loopResize(const MouseEvent &event) {
 void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dragAction) {
     dragAction->note.startPoint = jmin(xToPulse(event.x), dragAction->note.endPoint - 1);
     processor.buildPattern();
+    repaint();
     setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
 }
 
@@ -246,6 +244,7 @@ void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragA
     dragAction->note.endPoint =
             jmin(jmax(xToPulse(event.x), dragAction->note.startPoint + 1), processor.getPattern().loopLength);
     processor.buildPattern();
+    repaint();
     setMouseCursor(MouseCursor::RightEdgeResizeCursor);
 }
 
@@ -262,6 +261,7 @@ void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAct
     note.data.noteNumber = yToNote(event.y);
 
     processor.buildPattern();
+    repaint();
 
     setMouseCursor(MouseCursor::DraggingHandCursor);
 }
@@ -281,6 +281,7 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
     notes.push_back(note);
 
     processor.buildPattern();
+    repaint();
 
     setDragAction(new NoteDragAction(DragAction::TYPE_NOTE_MOVE, notes[index], length));
 }
@@ -304,6 +305,7 @@ void PatternEditor::noteDelete(const MouseEvent &event) {
 
     if (erased) {
         processor.buildPattern();
+        repaint();
     }
 }
 

@@ -215,9 +215,19 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
             }
         }
 
+        if (getActiveEditor() != nullptr && getActiveEditor()->isVisible()) {
+            getActiveEditor()->repaint();
+        }
+
         this->lastPosition = position;
         this->wasPlaying = true;
     } else {
+        if (this->wasPlaying) {
+            if (getActiveEditor() != nullptr && getActiveEditor()->isVisible()) {
+                getActiveEditor()->repaint();
+            }
+        }
+
         for (auto &note : pattern.getNotes()) {
             auto &data = note.data;
             if (data.lastNote > 0) {
