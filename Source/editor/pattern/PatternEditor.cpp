@@ -30,7 +30,7 @@ const Colour NOTE_BORDER_COLOUR = Colour(0, 0, 0);
 const Colour CURSOR_TIME_COLOUR = Colour((uint8) 255, 255, 255, 0.7f);
 const Colour CURSOR_NOTE_COLOUR = Colour((uint8) 255, 255, 255, 0.05f);
 
-const int NOTE_RESIZE_TOLERANCE = 5;
+const int NOTE_RESIZE_TOLERANCE = 6;
 const int LOOP_RESIZE_TOLERANCE = 3;
 
 
@@ -41,6 +41,7 @@ PatternEditor::PatternEditor(LibreArp &p, PatternEditorView *ec)
 
     divisor = 4;
     cursorPulse = 0;
+    dragAction = nullptr;
 }
 
 void PatternEditor::paint(Graphics &g) {
@@ -108,6 +109,13 @@ void PatternEditor::paint(Graphics &g) {
     }
 }
 
+
+void PatternEditor::setDragAction(DragAction *newDragAction) {
+    delete this->dragAction;
+    this->dragAction = newDragAction;
+}
+
+
 void PatternEditor::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) {
     if (event.mods.isCtrlDown()) {
         if (event.mods.isShiftDown()) {
@@ -121,24 +129,25 @@ void PatternEditor::mouseWheelMove(const MouseEvent &event, const MouseWheelDeta
 }
 
 void PatternEditor::mouseMove(const MouseEvent &event) {
-    auto pattern = processor.getPattern();
+    auto &pattern = processor.getPattern();
 
     mouseAnyMove(event);
 
-    for (auto note : pattern.getNotes()) {
+    for (auto &note : pattern.getNotes()) {
         auto noteRect = getRectangleForNote(note);
         if (noteRect.contains(event.x, event.y)) {
             if (event.x <= (noteRect.getX() + NOTE_RESIZE_TOLERANCE)) {
                 setMouseCursor(MouseCursor::LeftRightResizeCursor);
-                // TODO Starting point resize action
+                setDragAction(new NoteDragAction(DragAction::TYPE_NOTE_START_RESIZE, note));
                 return;
             } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - NOTE_RESIZE_TOLERANCE)) {
                 setMouseCursor(MouseCursor::LeftRightResizeCursor);
-                // TODO End point resize action
+                setDragAction(new NoteDragAction(DragAction::TYPE_NOTE_END_RESIZE, note));
                 return;
             } else {
-                setMouseCursor(MouseCursor::UpDownLeftRightResizeCursor);
-                // TODO Move action
+                setMouseCursor(MouseCursor::DraggingHandCursor);
+                int64 endOffset = note.endPoint - xToPulse(event.x);
+                setDragAction(new NoteDragAction(DragAction::TYPE_NOTE_MOVE, note, endOffset));
                 return;
             }
         }
@@ -147,23 +156,34 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
     auto loopRect = getRectangleForLoop();
     if (loopRect.contains(event.x, event.y)) {
         setMouseCursor(MouseCursor::LeftRightResizeCursor);
-        this->dragAction = DragAction(DragAction::TYPE_LOOP_RESIZE);
+        setDragAction(new DragAction(DragAction::TYPE_LOOP_RESIZE));
         return;
     }
 
-    this->dragAction = DragAction();
+    setDragAction(nullptr);
 }
 
 void PatternEditor::mouseDrag(const MouseEvent &event) {
     mouseAnyMove(event);
 
     if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
-        switch (this->dragAction.type) {
-            case DragAction::TYPE_LOOP_RESIZE:
-                loopResize(event);
-                break;
-            default:
-                break;
+        if (this->dragAction != nullptr) {
+            switch (this->dragAction->type) {
+                case DragAction::TYPE_LOOP_RESIZE:
+                    loopResize(event);
+                    break;
+                case DragAction::TYPE_NOTE_START_RESIZE:
+                    noteStartResize(event, (NoteDragAction *) (this->dragAction));
+                    break;
+                case DragAction::TYPE_NOTE_END_RESIZE:
+                    noteEndResize(event, (NoteDragAction *) (this->dragAction));
+                    break;
+                case DragAction::TYPE_NOTE_MOVE:
+                    noteMove(event, (NoteDragAction *) (this->dragAction));
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
@@ -190,6 +210,37 @@ void PatternEditor::loopResize(const MouseEvent &event) {
     setMouseCursor(MouseCursor::LeftRightResizeCursor);
 }
 
+void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dragAction) {
+    dragAction->note.startPoint = jmin(xToPulse(event.x), dragAction->note.endPoint - 1);
+    processor.buildPattern();
+    setMouseCursor(MouseCursor::LeftRightResizeCursor);
+}
+
+void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragAction) {
+    dragAction->note.endPoint =
+            jmin(jmax(xToPulse(event.x), dragAction->note.startPoint + 1), processor.getPattern().loopLength);
+    processor.buildPattern();
+    setMouseCursor(MouseCursor::LeftRightResizeCursor);
+}
+
+void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAction *dragAction) {
+    auto &note = dragAction->note;
+    auto noteLength = note.endPoint - note.startPoint;
+    auto wantedEnd = xToPulse(event.x) + dragAction->offset;
+
+    note.endPoint = jmin(
+            jmax(wantedEnd, noteLength),
+            processor.getPattern().loopLength);
+    note.startPoint = note.endPoint - noteLength;
+
+    note.data.noteNumber = yToNote(event.y);
+
+    processor.buildPattern();
+
+    setMouseCursor(MouseCursor::DraggingHandCursor);
+}
+
+
 PatternEditorView* PatternEditor::getView() {
     return view;
 }
@@ -205,7 +256,6 @@ void PatternEditor::setDivisor(int divisor) {
 
 Rectangle<int> PatternEditor::getRectangleForNote(ArpNote &note) {
     ArpPattern &pattern = processor.getPattern();
-    auto pixelsPerBeat = view->getPixelsPerBeat();
     auto pixelsPerNote = view->getPixelsPerNote();
 
     return Rectangle<int>(
@@ -222,7 +272,7 @@ Rectangle<int> PatternEditor::getRectangleForLoop() {
 
 
 int64 PatternEditor::snapPulse(int64 pulse) {
-    auto pattern = processor.getPattern();
+    auto &pattern = processor.getPattern();
     auto timebase = pattern.getTimebase();
     double doubleDivisor = this->divisor;
 
@@ -231,7 +281,7 @@ int64 PatternEditor::snapPulse(int64 pulse) {
 
 
 int64 PatternEditor::xToPulse(int x, bool snap) {
-    auto pattern = processor.getPattern();
+    auto &pattern = processor.getPattern();
     auto timebase = pattern.getTimebase();
     double pixelsPerBeat = view->getPixelsPerBeat();
 
@@ -247,7 +297,7 @@ int PatternEditor::yToNote(int y) {
 }
 
 int PatternEditor::pulseToX(int64 pulse) {
-    auto pattern = processor.getPattern();
+    auto &pattern = processor.getPattern();
     auto pixelsPerBeat = view->getPixelsPerBeat();
 
     return static_cast<int>((pulse / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat);
@@ -260,6 +310,10 @@ int PatternEditor::noteToY(int note) {
 
 
 
-PatternEditor::DragAction::DragAction(uint8 type) {
-    this->type = type;
+PatternEditor::DragAction::DragAction(uint8 type)
+        : type(type) {
+}
+
+PatternEditor::NoteDragAction::NoteDragAction(uint8 type, ArpNote &note, int64 offset)
+        : DragAction(type), note(note), offset(offset) {
 }

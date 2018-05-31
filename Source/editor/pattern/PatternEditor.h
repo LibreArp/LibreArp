@@ -29,11 +29,20 @@ class PatternEditor : public Component {
         static const uint8 TYPE_NONE = 0x00;
         static const uint8 TYPE_LOOP_RESIZE = 0x10;
         static const uint8 TYPE_NOTE_MOVE = 0x20;
-        static const uint8 TYPE_NOTE_RESIZE = 0x21;
+        static const uint8 TYPE_NOTE_START_RESIZE = 0x21;
+        static const uint8 TYPE_NOTE_END_RESIZE = 0x22;
 
         uint8 type;
 
         explicit DragAction(uint8 type = TYPE_NONE);
+    };
+
+    class NoteDragAction : public DragAction {
+    public:
+        explicit NoteDragAction(uint8 type, ArpNote &note, int64 offset = 0);
+
+        ArpNote &note;
+        int64 offset;
     };
 
 public:
@@ -61,10 +70,15 @@ private:
     int64 cursorPulse;
     int cursorNote;
 
-    DragAction dragAction;
+    DragAction *dragAction;
+
+    void setDragAction(DragAction *newDragAction);
 
     void mouseAnyMove(const MouseEvent &event);
     void loopResize(const MouseEvent &event);
+    void noteStartResize(const MouseEvent &event, NoteDragAction *dragAction);
+    void noteEndResize(const MouseEvent &event, NoteDragAction *dragAction);
+    void noteMove(const MouseEvent &event, NoteDragAction *dragAction);
 
     Rectangle<int> getRectangleForNote(ArpNote &note);
     Rectangle<int> getRectangleForLoop();
