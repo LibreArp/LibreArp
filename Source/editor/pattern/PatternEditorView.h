@@ -17,23 +17,40 @@
 
 #pragma once
 
-#include "../LibreArp.h"
 #include "JuceHeader.h"
+#include "../../LibreArp.h"
+#include "PatternEditor.h"
+#include "BeatBar.h"
 
-class XmlEditorComponent : public Component {
+
+class PatternEditorView : public Component {
 public:
 
-    explicit XmlEditorComponent(LibreArp &p);
+    explicit PatternEditorView(LibreArp &p);
+
+    void paint(Graphics &g) override;
 
     void resized() override;
 
+    int getPixelsPerBeat();
+    int getPixelsPerNote();
+    void zoomPattern(float deltaX, float deltaY);
+
+    int getRenderWidth();
+    int getRenderHeight();
+
 private:
+
     LibreArp &processor;
 
-    TextEditor xmlEditor;
-    TextButton applyXmlButton;
+    Viewport mainComponentViewport;
+    PatternEditor mainComponent;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditorComponent);
+    Viewport topBarViewport;
+    BeatBar topBar;
+
+    int pixelsPerBeat;
+    int pixelsPerNote;
 };
 
 

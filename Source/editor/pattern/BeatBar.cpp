@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "PatternEditorTopComponent.h"
-#include "PatternEditorComponent.h"
+#include "BeatBar.h"
+#include "PatternEditorView.h"
 
 const Colour BACKGROUND_COLOUR = Colour((uint8) 0, 0, 0, 0.3f);
 const Colour BOTTOM_LINE_COLOUR = Colour(0, 0, 0);
@@ -29,13 +29,13 @@ const String LOOP_TEXT = "loop"; // NOLINT
 
 const int TEXT_OFFSET = 4;
 
-PatternEditorTopComponent::PatternEditorTopComponent(LibreArp &p, PatternEditorComponent *ec)
+BeatBar::BeatBar(LibreArp &p, PatternEditorView *ec)
         : processor(p), editorComponent(ec) {
 
     setSize(1, 1);
 }
 
-void PatternEditorTopComponent::paint(Graphics &g) {
+void BeatBar::paint(Graphics &g) {
     auto pattern = processor.getPattern();
     auto pixelsPerBeat = editorComponent->getPixelsPerBeat();
 
@@ -69,7 +69,7 @@ void PatternEditorTopComponent::paint(Graphics &g) {
     g.drawText(LOOP_TEXT, loopLineWithOffset, 0, loopTextWidth, getHeight(), Justification::centredRight);
 }
 
-void PatternEditorTopComponent::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) {
+void BeatBar::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) {
     if (event.mods.isShiftDown()) {
         editorComponent->zoomPattern(0, wheel.deltaY);
     } else {

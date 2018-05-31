@@ -18,7 +18,7 @@
 #include <sstream>
 #include "../LibreArp.h"
 #include "MainEditor.h"
-#include "../ArpIntegrityException.h"
+#include "../exception/ArpIntegrityException.h"
 
 const int RESIZER_SIZE = 18;
 

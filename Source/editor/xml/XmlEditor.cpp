@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "XmlEditorComponent.h"
-#include "../ArpIntegrityException.h"
+#include "XmlEditor.h"
+#include "../../exception/ArpIntegrityException.h"
 
 const Colour RED = Colour(255, 0, 0);
 
-XmlEditorComponent::XmlEditorComponent(LibreArp &p) : processor(p) {
+XmlEditor::XmlEditor(LibreArp &p) : processor(p) {
     xmlEditor.setMultiLine(true, false);
     xmlEditor.setReturnKeyStartsNewLine(true);
     xmlEditor.setText(processor.getPatternXml(), false);
@@ -40,7 +40,7 @@ XmlEditorComponent::XmlEditorComponent(LibreArp &p) : processor(p) {
     addAndMakeVisible(applyXmlButton);
 }
 
-void XmlEditorComponent::resized() {
+void XmlEditor::resized() {
     xmlEditor.setBounds(0, 0, getWidth(), getHeight() - 30);
     applyXmlButton.setBounds(0, getHeight() - 30, getWidth(), 30);
 }

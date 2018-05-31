@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "PatternEditorMainComponent.h"
-#include "PatternEditorComponent.h"
+#include "PatternEditor.h"
+#include "PatternEditorView.h"
 
 const Colour GRIDLINES_COLOUR = Colour(0, 0, 0);
 const Colour POSITION_INDICATOR_COLOUR = Colour(255, 255, 255);
@@ -28,21 +28,22 @@ const Colour NOTE_ACTIVE_FILL_COLOUR = Colour(171, 187, 214);
 const Colour NOTE_BORDER_COLOUR = Colour(0, 0, 0);
 
 
-PatternEditorMainComponent::PatternEditorMainComponent(LibreArp &p, PatternEditorComponent *ec)
-        : processor(p), editorComponent(ec)
+PatternEditor::PatternEditor(LibreArp &p, PatternEditorView *ec)
+        : processor(p), view(ec)
 {
     setSize(1, 1); // We have to set this, otherwise it won't render at all
+    divisor = 4;
 }
 
-void PatternEditorMainComponent::paint(Graphics &g) {
+void PatternEditor::paint(Graphics &g) {
     ArpPattern &pattern = processor.getPattern();
-    auto pixelsPerBeat = editorComponent->getPixelsPerBeat();
-    auto pixelsPerNote = editorComponent->getPixelsPerNote();
+    auto pixelsPerBeat = view->getPixelsPerBeat();
+    auto pixelsPerNote = view->getPixelsPerNote();
 
     // Set size
     setSize(
-            jmax(editorComponent->getRenderWidth(), getParentWidth()),
-            jmax(editorComponent->getRenderHeight(), getParentHeight()));
+            jmax(view->getRenderWidth(), getParentWidth()),
+            jmax(view->getRenderHeight(), getParentHeight()));
 
     // Draw note 0
     int top = getHeight() / 2;
@@ -55,10 +56,10 @@ void PatternEditorMainComponent::paint(Graphics &g) {
         g.drawLine(0, i, getWidth(), i, 0.5);
     }
 
-    float beatDiv = (pixelsPerBeat / 4.0f);
+    float beatDiv = (pixelsPerBeat / static_cast<float>(divisor));
     int n = 1;
     for (float i = beatDiv; i < getWidth(); i += beatDiv, n++) {
-        if (n % 4 == 0) {
+        if (n % divisor == 0) {
             g.drawLine(i, 0, i, getHeight(), 1.5);
         } else {
             g.drawLine(i, 0, i, getHeight(), 0.5);
@@ -94,14 +95,26 @@ void PatternEditorMainComponent::paint(Graphics &g) {
     }
 }
 
-void PatternEditorMainComponent::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) {
+void PatternEditor::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) {
     if (event.mods.isCtrlDown()) {
         if (event.mods.isShiftDown()) {
-            editorComponent->zoomPattern(0, wheel.deltaY);
+            view->zoomPattern(0, wheel.deltaY);
         } else {
-            editorComponent->zoomPattern(wheel.deltaY, 0);
+            view->zoomPattern(wheel.deltaY, 0);
         }
     } else {
         Component::mouseWheelMove(event, wheel);
     }
+}
+
+PatternEditorView* PatternEditor::getView() {
+    return view;
+}
+
+int PatternEditor::getDivisor() {
+    return divisor;
+}
+
+void PatternEditor::setDivisor(int divisor) {
+    this->divisor = divisor;
 }

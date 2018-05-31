@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "PatternEditorComponent.h"
+#include "PatternEditorView.h"
 
 const int X_ZOOM_RATE = 80;
 const int Y_ZOOM_RATE = 30;
 
-PatternEditorComponent::PatternEditorComponent(LibreArp &p)
+PatternEditorView::PatternEditorView(LibreArp &p)
         : processor(p),
           topBar(p, this),
           mainComponent(p, this) {
@@ -36,26 +36,26 @@ PatternEditorComponent::PatternEditorComponent(LibreArp &p)
     addAndMakeVisible(topBarViewport);
 }
 
-void PatternEditorComponent::paint(Graphics &g) {
+void PatternEditorView::paint(Graphics &g) {
     topBarViewport.setViewPosition(mainComponentViewport.getViewPositionX(), topBarViewport.getViewPositionY());
 }
 
-void PatternEditorComponent::resized() {
+void PatternEditorView::resized() {
     auto area = getLocalBounds();
     topBarViewport.setBounds(area.removeFromTop(16));
     mainComponentViewport.setBounds(area);
 }
 
 
-int PatternEditorComponent::getPixelsPerBeat() {
+int PatternEditorView::getPixelsPerBeat() {
     return this->pixelsPerBeat;
 }
 
-int PatternEditorComponent::getPixelsPerNote() {
+int PatternEditorView::getPixelsPerNote() {
     return this->pixelsPerNote;
 }
 
-void PatternEditorComponent::zoomPattern(float deltaX, float deltaY) {
+void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
     double xPercent = mainComponentViewport.getViewPositionX() / static_cast<double>(mainComponent.getWidth());
     double yPercent = mainComponentViewport.getViewPositionY() / static_cast<double>(mainComponent.getHeight());
     pixelsPerBeat = jmax(32, pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
@@ -70,12 +70,12 @@ void PatternEditorComponent::zoomPattern(float deltaX, float deltaY) {
 }
 
 
-int PatternEditorComponent::getRenderWidth() {
+int PatternEditorView::getRenderWidth() {
     auto pattern = processor.getPattern();
     return static_cast<int>((3 + pattern.loopLength / static_cast<double>(pattern.getTimebase())) * pixelsPerBeat);
 }
 
-int PatternEditorComponent::getRenderHeight() {
+int PatternEditorView::getRenderHeight() {
     auto pattern = processor.getPattern();
 
     int dist = INT32_MIN;

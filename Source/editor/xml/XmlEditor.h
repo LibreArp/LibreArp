@@ -17,24 +17,23 @@
 
 #pragma once
 
+#include "../../LibreArp.h"
 #include "JuceHeader.h"
-#include "../LibreArp.h"
 
-class PatternEditorComponent;
-
-class PatternEditorTopComponent : public Component {
+class XmlEditor : public Component {
 public:
 
-    explicit PatternEditorTopComponent(LibreArp &p, PatternEditorComponent *ec);
+    explicit XmlEditor(LibreArp &p);
 
-    void paint(Graphics &g) override;
-
-    void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) override;
+    void resized() override;
 
 private:
-
     LibreArp &processor;
-    PatternEditorComponent *editorComponent;
+
+    TextEditor xmlEditor;
+    TextButton applyXmlButton;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor);
 };
 
 

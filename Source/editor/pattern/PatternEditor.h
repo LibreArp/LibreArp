@@ -18,39 +18,31 @@
 #pragma once
 
 #include "JuceHeader.h"
-#include "../LibreArp.h"
-#include "PatternEditorMainComponent.h"
-#include "PatternEditorTopComponent.h"
+#include "../../LibreArp.h"
 
+class PatternEditorView;
 
-class PatternEditorComponent : public Component {
+class PatternEditor : public Component {
 public:
 
-    explicit PatternEditorComponent(LibreArp &p);
+    explicit PatternEditor(LibreArp &p, PatternEditorView *ec);
 
     void paint(Graphics &g) override;
 
-    void resized() override;
+    void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) override;
 
-    int getPixelsPerBeat();
-    int getPixelsPerNote();
-    void zoomPattern(float deltaX, float deltaY);
 
-    int getRenderWidth();
-    int getRenderHeight();
+
+    PatternEditorView *getView();
+
+    int getDivisor();
+    void setDivisor(int divisor);
 
 private:
-
     LibreArp &processor;
+    PatternEditorView *view;
 
-    Viewport mainComponentViewport;
-    PatternEditorMainComponent mainComponent;
-
-    Viewport topBarViewport;
-    PatternEditorTopComponent topBar;
-
-    int pixelsPerBeat;
-    int pixelsPerNote;
+    int divisor;
 };
 
 

@@ -18,22 +18,23 @@
 #pragma once
 
 #include "JuceHeader.h"
-#include "../LibreArp.h"
+#include "../../LibreArp.h"
 
-class PatternEditorComponent;
+class PatternEditorView;
 
-class PatternEditorMainComponent : public Component {
+class BeatBar : public Component {
 public:
 
-    explicit PatternEditorMainComponent(LibreArp &p, PatternEditorComponent *ec);
+    explicit BeatBar(LibreArp &p, PatternEditorView *ec);
 
     void paint(Graphics &g) override;
 
     void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) override;
 
 private:
+
     LibreArp &processor;
-    PatternEditorComponent *editorComponent;
+    PatternEditorView *editorComponent;
 };
 
 

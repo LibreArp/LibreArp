@@ -18,7 +18,7 @@
 #include "LibreArp.h"
 #include "editor/MainEditor.h"
 #include "util/PatternUtil.h"
-#include "ArpIntegrityException.h"
+#include "exception/ArpIntegrityException.h"
 
 const Identifier LibreArp::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NOLINT
 const Identifier LibreArp::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
