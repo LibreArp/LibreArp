@@ -110,10 +110,12 @@ private:
     int64 lastPosition;
     bool wasPlaying;
 
-    SortedSet<int> activeNotes;
+    SortedSet<int> inputNotes;
+    SortedSet<int> playingNotes;
     int note;
 
     void processInputMidi(MidiBuffer &midiMessages);
+    void stopAll(MidiBuffer &midi);
 
     int64 nextTime(ArpEvent &event, int64 position);
 };
