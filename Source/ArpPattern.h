@@ -20,6 +20,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ArpEvent.h"
 #include "ArpNote.h"
+#include "ArpBuiltEvents.h"
 
 class ArpPattern {
 public:
@@ -63,8 +64,17 @@ public:
      * Builds a vector of ArpEvents, sorted by time, from this pattern.
      *
      * @return a vector of ArpEvents
+     * @deprecated use buildEvents() instead
      */
+     [[deprecated("Replaced by buildEvents()")]]
     std::vector<ArpEvent> build();
+
+    /**
+     * Builds events from this pattern.
+     *
+     * @return ArpBuiltEvents built from this pattern
+     */
+    ArpBuiltEvents buildEvents();
 
     /**
      * Gets the pattern as a ValueTree.

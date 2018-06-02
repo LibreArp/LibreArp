@@ -109,7 +109,8 @@ void LibreArp::prepareToPlay(double sampleRate, int samplesPerBlock) {
     this->sampleRate = sampleRate;
     this->lastPosition = 0;
     this->wasPlaying = false;
-//    this->octaves = true;
+    this->buildScheduled = false;
+    this->stopScheduled = false;
 }
 
 void LibreArp::releaseResources() {
@@ -152,6 +153,13 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         audio.clear(i, 0, numSamples);
 
+    // Build events if scheduled
+    if (buildScheduled) {
+        this->stopAll();
+        events = pattern.buildEvents();
+        buildScheduled = false;
+    }
+
     processInputMidi(midi);
 
     AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
@@ -159,6 +167,11 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
 
     if (cpi.isPlaying && !this->pattern.getNotes().empty()) {
         midi.clear();
+
+        if (stopScheduled) {
+            this->stopAll(midi);
+            stopScheduled = false;
+        }
 
         auto timebase = this->pattern.getTimebase();
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
@@ -168,7 +181,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         auto lastPosition = position - static_cast<int64>(std::ceil(numSamples / pulseSamples));
 
         if (!wasPlaying || lastPosition > position) {
-            this->stopAll(midi);
+            this->stopAll();
         }
 
         if (inputNotes.isEmpty()) {
@@ -180,81 +193,47 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                 }
             }
         } else {
-            for(auto event : events) {
+            for(auto event : events.events) {
                 auto time = nextTime(event, lastPosition);
-                if (time <= position) {
+                if (time < position) {
                     auto offsetBase = static_cast<int>(std::ceil((time - this->lastPosition) * pulseSamples));
-                    auto mod = jmin(offsetBase, numSamples - 1);
+                    auto mod = offsetBase % numSamples;
                     int offset = jmax(0, mod);
 
-                    for (auto data : event.offs) {
-                        if (data->lastNote >= 0) {
-                            midi.addEvent(MidiMessage::noteOff(1, data->lastNote), offset);
-                            playingNotes.removeValue(data->lastNote);
-                            data->lastNote = -1;
+                    for (auto i : event.offs) {
+                        auto &data = events.data[i];
+                        if (data.lastNote >= 0) {
+                            midi.addEvent(MidiMessage::noteOff(1, data.lastNote), offset);
+                            playingNotes.removeValue(data.lastNote);
+                            data.lastNote = -1;
                         }
                     }
 
-                    for (auto data : event.ons) {
-                        auto index = data->noteNumber % inputNotes.size();
+                    for (auto i : event.ons) {
+                        auto &data = events.data[i];
+                        auto index = data.noteNumber % inputNotes.size();
                         if (index < 0) {
                             index += inputNotes.size();
                         }
 
                         auto note = inputNotes[index];
                         if (octaves->get()) {
-                            auto octave = data->noteNumber / inputNotes.size();
-                            if (data->noteNumber < 0) {
+                            auto octave = data.noteNumber / inputNotes.size();
+                            if (data.noteNumber < 0) {
                                 octave--;
                             }
                             note += octave * 12;
                         }
-                        data->lastNote = note;
 
-                        midi.addEvent(
-                                MidiMessage::noteOn(1, note, static_cast<float>(data->velocity)), offset);
+                        if (data.lastNote != note) {
+                            data.lastNote = note;
+                            midi.addEvent(
+                                    MidiMessage::noteOn(1, note, static_cast<float>(data.velocity)), offset);
+                        }
                         playingNotes.add(note);
                     }
                 }
             }
-
-
-//            while ((time = nextTime(event = events[eventsPosition], time)) < position) {
-//                auto offsetBase = static_cast<int>(std::ceil((time - this->lastPosition) * pulseSamples));
-//                auto mod = jmin(offsetBase, numSamples - 1);
-//                int offset = jmax(0, mod);
-//
-//                for (auto data : event.offs) {
-//                    if (data->lastNote >= 0) {
-//                        midi.addEvent(MidiMessage::noteOff(1, data->lastNote), offset);
-//                        playingNotes.removeValue(data->lastNote);
-//                        data->lastNote = -1;
-//                    }
-//                }
-//
-//                for (auto data : event.ons) {
-//                    auto index = data->noteNumber % inputNotes.size();
-//                    if (index < 0) {
-//                        index += inputNotes.size();
-//                    }
-//
-//                    auto note = inputNotes[index];
-//                    if (octaves->get()) {
-//                        auto octave = data->noteNumber / inputNotes.size();
-//                        if (data->noteNumber < 0) {
-//                            octave--;
-//                        }
-//                        note += octave * 12;
-//                    }
-//                    data->lastNote = note;
-//
-//                    midi.addEvent(
-//                            MidiMessage::noteOn(1, note, static_cast<float>(data->velocity)), offset);
-//                    playingNotes.add(note);
-//                }
-//
-//                eventsPosition = (eventsPosition + 1) % events.size();
-//            }
         }
 
         if (getActiveEditor() != nullptr && getActiveEditor()->isVisible()) {
@@ -264,7 +243,6 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         this->lastPosition = position;
         this->wasPlaying = true;
     } else {
-        this->eventsPosition = 0;
         this->lastPosition = 0;
         this->wasPlaying = false;
 
@@ -347,7 +325,7 @@ void LibreArp::parsePattern(const String &xmlPattern) {
 }
 
 void LibreArp::buildPattern() {
-    this->events = this->pattern.build();
+    this->buildScheduled = true;
 }
 
 ArpPattern &LibreArp::getPattern() {
@@ -380,13 +358,15 @@ void LibreArp::processInputMidi(MidiBuffer &midiMessages) {
     }
 }
 
+void LibreArp::stopAll() {
+    this->stopScheduled = true;
+}
+
 void LibreArp::stopAll(MidiBuffer &midi) {
     midi.clear();
 
-    eventsPosition = 0;
-
     for (auto noteNumber : playingNotes) {
-        midi.addEvent(MidiMessage::noteOff(1, noteNumber), 0);
+        midi.addEvent(MidiMessage::noteOff(1, noteNumber), 1);
     }
     playingNotes.clear();
 
@@ -397,6 +377,14 @@ void LibreArp::stopAll(MidiBuffer &midi) {
 
 
 int64 LibreArp::nextTime(ArpEvent &event, int64 position) {
+    auto result = (((position / pattern.loopLength)) * pattern.loopLength) + event.time;
+    if (result < position) {
+        result += pattern.loopLength;
+    }
+    return result;
+}
+
+int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 position) {
     auto result = (((position / pattern.loopLength)) * pattern.loopLength) + event.time;
     if (result < position) {
         result += pattern.loopLength;

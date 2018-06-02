@@ -68,6 +68,32 @@ std::vector<ArpEvent> ArpPattern::build() {
     return result;
 }
 
+ArpBuiltEvents ArpPattern::buildEvents() {
+    std::map<int64, ArpBuiltEvents::Event> eventMap;
+    ArpBuiltEvents result;
+
+    for (auto &note : this->notes) {
+        auto dataIndex = result.data.size();
+        result.data.push_back(note.data);
+
+        int64 onTime = note.startPoint % loopLength;
+        ArpBuiltEvents::Event &onEvent = eventMap[onTime];
+        onEvent.time = onTime;
+        onEvent.ons.push_back(dataIndex);
+
+        int64 offTime = note.endPoint % loopLength;
+        ArpBuiltEvents::Event &offEvent = eventMap[offTime];
+        offEvent.time = offTime;
+        offEvent.offs.push_back(dataIndex);
+    }
+
+    for (std::pair<int64, ArpBuiltEvents::Event> pair : eventMap) {
+        result.events.push_back(pair.second);
+    }
+
+    return result;
+}
+
 ValueTree ArpPattern::toValueTree() {
     ValueTree result = ValueTree(TREEID_PATTERN);
 

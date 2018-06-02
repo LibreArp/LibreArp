@@ -101,8 +101,7 @@ private:
 
     ArpPattern pattern;
     String patternXml;
-    std::vector<ArpEvent> events;
-    unsigned long eventsPosition;
+    ArpBuiltEvents events;
 
     AudioParameterBool *octaves;
 
@@ -110,12 +109,18 @@ private:
     int64 lastPosition;
     bool wasPlaying;
 
+    bool stopScheduled;
+    bool buildScheduled;
+
     SortedSet<int> inputNotes;
     SortedSet<int> playingNotes;
     int note;
 
     void processInputMidi(MidiBuffer &midiMessages);
+    void stopAll();
     void stopAll(MidiBuffer &midi);
 
+    [[deprecated]]
     int64 nextTime(ArpEvent &event, int64 position);
+    int64 nextTime(ArpBuiltEvents::Event &event, int64 position);
 };

@@ -47,6 +47,10 @@
       <FILE id="GeJVtk" name="ArpEvent.cpp" compile="1" resource="0" file="Source/ArpEvent.cpp"/>
       <FILE id="IrypCV" name="ArpEvent.h" compile="0" resource="0" file="Source/ArpEvent.h"/>
       <FILE id="y4lGFE" name="ArpNote.cpp" compile="1" resource="0" file="Source/ArpNote.cpp"/>
+      <FILE id="bHOd9I" name="ArpBuiltEvents.cpp" compile="1" resource="0"
+            file="Source/ArpBuiltEvents.cpp"/>
+      <FILE id="EG63G7" name="ArpBuiltEvents.h" compile="0" resource="0"
+            file="Source/ArpBuiltEvents.h"/>
       <FILE id="TpttHS" name="ArpNote.h" compile="0" resource="0" file="Source/ArpNote.h"/>
       <FILE id="jfnte9" name="ArpPattern.cpp" compile="1" resource="0" file="Source/ArpPattern.cpp"/>
       <FILE id="pYhY9N" name="ArpPattern.h" compile="0" resource="0" file="Source/ArpPattern.h"/>
