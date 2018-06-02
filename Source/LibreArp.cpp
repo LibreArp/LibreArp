@@ -373,14 +373,6 @@ void LibreArp::stopAll(MidiBuffer &midi) {
 }
 
 
-int64 LibreArp::nextTime(ArpEvent &event, int64 position) {
-    auto result = (((position / pattern.loopLength)) * pattern.loopLength) + event.time;
-    if (result < position) {
-        result += pattern.loopLength;
-    }
-    return result;
-}
-
 int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 position) {
     auto result = (((position / events.loopLength)) * events.loopLength) + event.time;
     if (result < position) {

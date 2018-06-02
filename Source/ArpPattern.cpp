@@ -41,32 +41,6 @@ std::vector<ArpNote> &ArpPattern::getNotes() {
     return this->notes;
 }
 
-std::vector<ArpEvent> ArpPattern::build() {
-    std::map<int64, ArpEvent> eventMap;
-
-    for (ArpNote &note : this->notes) {
-        if (note.endPoint <= note.startPoint) {
-            throw ArpIntegrityException("A note cannot end before it starts and has to be at least one pulse long!");
-        }
-
-        int64 onTime = note.startPoint % loopLength;
-        ArpEvent &onEvent = eventMap[onTime];
-        onEvent.time = onTime;
-        onEvent.ons.push_back(&(note.data));
-
-        int64 offTime = note.endPoint % loopLength;
-        ArpEvent &offEvent = eventMap[offTime];
-        offEvent.time = offTime;
-        offEvent.offs.push_back(&(note.data));
-    }
-
-    std::vector<ArpEvent> result;
-    for (std::pair<int, ArpEvent> pair : eventMap) {
-        result.push_back(pair.second);
-    }
-
-    return result;
-}
 
 ArpBuiltEvents ArpPattern::buildEvents() {
     std::map<int64, ArpBuiltEvents::Event> eventMap;

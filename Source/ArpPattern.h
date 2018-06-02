@@ -18,7 +18,6 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "ArpEvent.h"
 #include "ArpNote.h"
 #include "ArpBuiltEvents.h"
 
@@ -59,15 +58,6 @@ public:
      */
     std::vector<ArpNote> &getNotes();
 
-
-    /**
-     * Builds a vector of ArpEvents, sorted by time, from this pattern.
-     *
-     * @return a vector of ArpEvents
-     * @deprecated use buildEvents() instead
-     */
-     [[deprecated("Replaced by buildEvents()")]]
-    std::vector<ArpEvent> build();
 
     /**
      * Builds events from this pattern.

@@ -44,8 +44,6 @@
         <FILE id="rPEKU9" name="PatternUtil.cpp" compile="1" resource="0" file="Source/util/PatternUtil.cpp"/>
         <FILE id="cB2pja" name="PatternUtil.h" compile="0" resource="0" file="Source/util/PatternUtil.h"/>
       </GROUP>
-      <FILE id="GeJVtk" name="ArpEvent.cpp" compile="1" resource="0" file="Source/ArpEvent.cpp"/>
-      <FILE id="IrypCV" name="ArpEvent.h" compile="0" resource="0" file="Source/ArpEvent.h"/>
       <FILE id="y4lGFE" name="ArpNote.cpp" compile="1" resource="0" file="Source/ArpNote.cpp"/>
       <FILE id="bHOd9I" name="ArpBuiltEvents.cpp" compile="1" resource="0"
             file="Source/ArpBuiltEvents.cpp"/>
