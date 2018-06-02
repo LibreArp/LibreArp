@@ -32,6 +32,9 @@ public:
 
     std::vector<Event> events;
     std::vector<NoteData> data;
+
+    int timebase;
+    int64 loopLength;
 };
 
 

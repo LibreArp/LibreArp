@@ -168,7 +168,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     if (cpi.isPlaying && !this->events.events.empty()) {
         midi.clear();
 
-        auto timebase = this->pattern.getTimebase();
+        auto timebase = this->events.timebase;
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = this->sampleRate * pulseLength;
 
@@ -382,9 +382,9 @@ int64 LibreArp::nextTime(ArpEvent &event, int64 position) {
 }
 
 int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 position) {
-    auto result = (((position / pattern.loopLength)) * pattern.loopLength) + event.time;
+    auto result = (((position / events.loopLength)) * events.loopLength) + event.time;
     if (result < position) {
-        result += pattern.loopLength;
+        result += events.loopLength;
     }
     return result;
 }

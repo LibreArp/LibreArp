@@ -72,6 +72,9 @@ ArpBuiltEvents ArpPattern::buildEvents() {
     std::map<int64, ArpBuiltEvents::Event> eventMap;
     ArpBuiltEvents result;
 
+    result.timebase = this->timebase;
+    result.loopLength = this->loopLength;
+
     for (auto &note : this->notes) {
         auto dataIndex = result.data.size();
         result.data.push_back(note.data);
