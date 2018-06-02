@@ -327,7 +327,7 @@ void PatternEditor::loopResize(const MouseEvent &event) {
         }
     }
 
-    processor.getPattern().loopLength = jmax(lastNoteEnd, xToPulse(event.x));
+    processor.getPattern().loopLength = jmax((int64) 1, lastNoteEnd, xToPulse(event.x));
     processor.buildPattern();
     view->repaint();
     setMouseCursor(MouseCursor::LeftRightResizeCursor);
