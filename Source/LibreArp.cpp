@@ -168,11 +168,6 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     if (cpi.isPlaying && !this->pattern.getNotes().empty()) {
         midi.clear();
 
-        if (stopScheduled) {
-            this->stopAll(midi);
-            stopScheduled = false;
-        }
-
         auto timebase = this->pattern.getTimebase();
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = this->sampleRate * pulseLength;
@@ -182,6 +177,11 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
 
         if (!wasPlaying || lastPosition > position) {
             this->stopAll();
+        }
+
+        if (stopScheduled) {
+            this->stopAll(midi);
+            stopScheduled = false;
         }
 
         if (inputNotes.isEmpty()) {
@@ -197,38 +197,41 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                 auto time = nextTime(event, lastPosition);
                 if (time < position) {
                     auto offsetBase = static_cast<int>(std::ceil((time - this->lastPosition) * pulseSamples));
-                    int offset = jmax(0, jmin(offsetBase, numSamples - 1));
+//                    int offset = jmax(0, jmin(offsetBase, numSamples - 1));
+                    int offset = jmin(offsetBase, numSamples - 1);
 
-                    for (auto i : event.offs) {
-                        auto &data = events.data[i];
-                        if (data.lastNote >= 0) {
-                            midi.addEvent(MidiMessage::noteOff(1, data.lastNote), offset);
-                            playingNotes.removeValue(data.lastNote);
-                            data.lastNote = -1;
-                        }
-                    }
-
-                    for (auto i : event.ons) {
-                        auto &data = events.data[i];
-                        auto index = data.noteNumber % inputNotes.size();
-                        if (index < 0) {
-                            index += inputNotes.size();
-                        }
-
-                        auto note = inputNotes[index];
-                        if (octaves->get()) {
-                            auto octave = data.noteNumber / inputNotes.size();
-                            if (data.noteNumber < 0) {
-                                octave--;
+                    if (offset >= 0) {
+                        for (auto i : event.offs) {
+                            auto &data = events.data[i];
+                            if (data.lastNote >= 0) {
+                                midi.addEvent(MidiMessage::noteOff(1, data.lastNote), offset);
+                                playingNotes.removeValue(data.lastNote);
+                                data.lastNote = -1;
                             }
-                            note += octave * 12;
                         }
 
-                        if (data.lastNote != note) {
-                            data.lastNote = note;
-                            midi.addEvent(
-                                    MidiMessage::noteOn(1, note, static_cast<float>(data.velocity)), offset);
-                            playingNotes.add(note);
+                        for (auto i : event.ons) {
+                            auto &data = events.data[i];
+                            auto index = data.noteNumber % inputNotes.size();
+                            if (index < 0) {
+                                index += inputNotes.size();
+                            }
+
+                            auto note = inputNotes[index];
+                            if (octaves->get()) {
+                                auto octave = data.noteNumber / inputNotes.size();
+                                if (data.noteNumber < 0) {
+                                    octave--;
+                                }
+                                note += octave * 12;
+                            }
+
+                            if (data.lastNote != note) {
+                                data.lastNote = note;
+                                midi.addEvent(
+                                        MidiMessage::noteOn(1, note, static_cast<float>(data.velocity)), offset);
+                                playingNotes.add(note);
+                            }
                         }
                     }
                 }
