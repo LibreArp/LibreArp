@@ -43,11 +43,14 @@ private:
 
     LibreArp &processor;
 
-    Viewport mainComponentViewport;
-    PatternEditor mainComponent;
+    Slider snapSlider;
+    Label snapSliderLabel;
 
-    Viewport topBarViewport;
-    BeatBar topBar;
+    Viewport editorViewport;
+    PatternEditor editor;
+
+    Viewport beatBarViewport;
+    BeatBar beatBar;
 
     int pixelsPerBeat;
     int pixelsPerNote;

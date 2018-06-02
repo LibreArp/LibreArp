@@ -22,28 +22,49 @@ const int Y_ZOOM_RATE = 30;
 
 PatternEditorView::PatternEditorView(LibreArp &p)
         : processor(p),
-          topBar(p, this),
-          mainComponent(p, this) {
+          beatBar(p, this),
+          editor(p, this) {
 
     this->pixelsPerBeat = 100;
     this->pixelsPerNote = 12;
 
-    mainComponentViewport.setViewedComponent(&mainComponent);
-    addAndMakeVisible(mainComponentViewport);
+    editorViewport.setViewedComponent(&editor);
+    addAndMakeVisible(editorViewport);
 
-    topBarViewport.setViewedComponent(&topBar);
-    topBarViewport.setScrollBarsShown(false, false, false, false);
-    addAndMakeVisible(topBarViewport);
+    beatBarViewport.setViewedComponent(&beatBar);
+    beatBarViewport.setScrollBarsShown(false, false, false, false);
+    addAndMakeVisible(beatBarViewport);
+
+    snapSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
+    snapSlider.setRange(1, 16, 1);
+    snapSlider.setValue(editor.getDivisor(), NotificationType::dontSendNotification);
+    snapSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    snapSlider.onValueChange = [this] {
+        editor.setDivisor(static_cast<int>(snapSlider.getValue()));
+        editor.repaint();
+    };
+    addAndMakeVisible(snapSlider);
+
+    snapSliderLabel.setText("Snap:", NotificationType::dontSendNotification);
+    snapSliderLabel.setJustificationType(Justification::centredRight);
+    addAndMakeVisible(snapSliderLabel);
 }
 
 void PatternEditorView::paint(Graphics &g) {
-    topBarViewport.setViewPosition(mainComponentViewport.getViewPositionX(), topBarViewport.getViewPositionY());
+    beatBarViewport.setViewPosition(editorViewport.getViewPositionX(), beatBarViewport.getViewPositionY());
 }
 
 void PatternEditorView::resized() {
     auto area = getLocalBounds();
-    topBarViewport.setBounds(area.removeFromTop(16));
-    mainComponentViewport.setBounds(area);
+
+    auto toolBarArea = area.removeFromTop(32);
+    toolBarArea.removeFromBottom(4);
+    toolBarArea.removeFromTop(4);
+    snapSlider.setBounds(toolBarArea.removeFromRight(96));
+    snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
+
+    beatBarViewport.setBounds(area.removeFromTop(16));
+    editorViewport.setBounds(area);
 }
 
 
@@ -56,17 +77,17 @@ int PatternEditorView::getPixelsPerNote() {
 }
 
 void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
-    double xPercent = mainComponentViewport.getViewPositionX() / static_cast<double>(mainComponent.getWidth());
-    double yPercent = mainComponentViewport.getViewPositionY() / static_cast<double>(mainComponent.getHeight());
+    double xPercent = editorViewport.getViewPositionX() / static_cast<double>(editor.getWidth());
+    double yPercent = editorViewport.getViewPositionY() / static_cast<double>(editor.getHeight());
     pixelsPerBeat = jmax(32, pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
     pixelsPerNote = jmax(8, pixelsPerNote + static_cast<int>(deltaY * Y_ZOOM_RATE));
 
-    mainComponentViewport.setViewPosition(
+    editorViewport.setViewPosition(
             static_cast<int>(xPercent * getRenderWidth()),
             static_cast<int>(yPercent * getRenderHeight()));
 
-    mainComponent.repaint();
-    topBar.repaint();
+    editor.repaint();
+    beatBar.repaint();
 }
 
 
