@@ -49,6 +49,8 @@ PatternEditor::PatternEditor(LibreArp &p, PatternEditorView *ec)
     lastNoteLength = processor.getPattern().getTimebase() / divisor;
     snapEnabled = true;
     selection = Rectangle(0, 0, 0, 0);
+
+    setWantsKeyboardFocus(true);
 }
 
 PatternEditor::~PatternEditor() {
@@ -152,12 +154,14 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
 
     mouseAnyMove(event);
 
-    for (auto &note : pattern.getNotes()) {
+    auto &notes = pattern.getNotes();
+    for (int i = 0; i < notes.size(); i++) {
+        auto &note = notes[i];
         auto noteRect = getRectangleForNote(note);
         if (noteRect.contains(event.x, event.y)) {
             if (event.x <= (noteRect.getX() + NOTE_RESIZE_TOLERANCE)) {
                 setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
-                if (selectedNotes.empty()) {
+                if (selectedNotes.find(i) == selectedNotes.end()) {
                     setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, note, event));
                 } else {
                     setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, selectedNotes, pattern.getNotes(), event));
@@ -165,7 +169,7 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
                 return;
             } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - NOTE_RESIZE_TOLERANCE)) {
                 setMouseCursor(MouseCursor::RightEdgeResizeCursor);
-                if (selectedNotes.empty()) {
+                if (selectedNotes.find(i) == selectedNotes.end()) {
                     setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, note, event));
                 } else {
                     setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, selectedNotes, pattern.getNotes(), event));
@@ -173,8 +177,7 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
                 return;
             } else {
                 setMouseCursor(MouseCursor::DraggingHandCursor);
-                int64 endOffset = note.endPoint - xToPulse(event.x);
-                if (selectedNotes.empty()) {
+                if (selectedNotes.find(i) == selectedNotes.end()) {
                     setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, note, event));
                 } else {
                     setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, selectedNotes, pattern.getNotes(), event));
@@ -249,9 +252,18 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
                 noteCreate(event);
                 repaint();
             }
-            Component::mouseDown(event);
-            return;
+        } else {
+            switch(this->dragAction->type) {
+                case DragAction::TYPE_NOTE_MOVE:
+                    if (event.mods.isShiftDown() && !event.mods.isCtrlDown() && !event.mods.isAltDown()) {
+                        noteDuplicate((NoteDragAction *) (this->dragAction));
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
+
         Component::mouseDown(event);
         return;
     }
@@ -277,9 +289,39 @@ void PatternEditor::mouseUp(const MouseEvent &event) {
 }
 
 
+bool PatternEditor::keyPressed(const KeyPress &key) {
+    if (key == KeyPress::deleteKey || key == KeyPress::numberPadDelete) {
+        deleteSelected();
+        return false;
+    }
+
+    if (key.isKeyCode(KeyPress::upKey)) {
+        moveSelectedUp();
+        return false;
+    }
+
+    if (key.isKeyCode(KeyPress::downKey)) {
+        moveSelectedDown();
+        return false;
+    }
+
+    if (key == KeyPress::createFromDescription("CTRL+A")) {
+        selectAll();
+        return false;
+    }
+
+    if (key == KeyPress::createFromDescription("CTRL+D")) {
+        deselectAll();
+        return false;
+    }
+
+    return true;
+}
+
+
 void PatternEditor::loopResize(const MouseEvent &event) {
     int64 lastNoteEnd = 0;
-    for (auto note : processor.getPattern().getNotes()) {
+    for (auto &note : processor.getPattern().getNotes()) {
         if (note.endPoint > lastNoteEnd) {
             lastNoteEnd = note.endPoint;
         }
@@ -294,8 +336,7 @@ void PatternEditor::loopResize(const MouseEvent &event) {
 
 void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dragAction) {
     auto timebase = processor.getPattern().getTimebase();
-//    auto &note = dragAction->note;
-    for (auto noteOffset : dragAction->noteOffsets) {
+    for (auto &noteOffset : dragAction->noteOffsets) {
         auto &note = noteOffset.note;
         note.startPoint = jmin(xToPulse(event.x) + noteOffset.startOffset, note.endPoint - (timebase / divisor));
 
@@ -309,9 +350,8 @@ void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dra
 
 void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragAction) {
     auto timebase = processor.getPattern().getTimebase();
-//    auto &note = dragAction->note;
 
-    for (auto noteOffset : dragAction->noteOffsets) {
+    for (auto &noteOffset : dragAction->noteOffsets) {
         ArpNote &note = noteOffset.note;
         note.endPoint =
                 jmin(jmax(xToPulse(event.x) + noteOffset.endOffset, note.startPoint + (timebase / divisor)),
@@ -326,25 +366,34 @@ void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragA
 }
 
 void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAction *dragAction) {
-//    auto &note = dragAction->note;
-
-    for (auto noteOffset : dragAction->noteOffsets) {
+    for (auto &noteOffset : dragAction->noteOffsets) {
         ArpNote &note = noteOffset.note;
         auto noteLength = note.endPoint - note.startPoint;
         auto wantedEnd = xToPulse(event.x) + noteOffset.endOffset;
 
-        note.endPoint = jmin(
-                jmax(wantedEnd, noteLength),
-                processor.getPattern().loopLength);
-        note.startPoint = note.endPoint - noteLength;
+        if (!event.mods.isCtrlDown()) {
+            note.endPoint = jmin(
+                    jmax(wantedEnd, noteLength),
+                    processor.getPattern().loopLength);
+            note.startPoint = note.endPoint - noteLength;
+        }
 
-        note.data.noteNumber = yToNote(event.y) + noteOffset.noteOffset;
+        if (!event.mods.isShiftDown()) {
+            note.data.noteNumber = yToNote(event.y) + noteOffset.noteOffset;
+        }
     }
 
     processor.buildPattern();
     repaint();
 
     setMouseCursor(MouseCursor::DraggingHandCursor);
+}
+
+void PatternEditor::noteDuplicate(PatternEditor::NoteDragAction *dragAction) {
+    for (auto &noteOffset : dragAction->noteOffsets) {
+        processor.getPattern().getNotes().push_back(noteOffset.note);
+    }
+    processor.buildPattern();
 }
 
 void PatternEditor::noteCreate(const MouseEvent &event) {
@@ -392,6 +441,51 @@ void PatternEditor::noteDelete(const MouseEvent &event) {
         processor.buildPattern();
         repaint();
     }
+}
+
+
+void PatternEditor::selectAll() {
+    auto &notes = processor.getPattern().getNotes();
+    for (int i = 0; i < notes.size(); i++) {
+        selectedNotes.insert(i);
+    }
+    repaint();
+}
+
+void PatternEditor::deselectAll() {
+    selectedNotes.clear();
+    repaint();
+}
+
+void PatternEditor::deleteSelected() {
+    auto &notes = processor.getPattern().getNotes();
+    for (auto it = selectedNotes.rbegin(); it != selectedNotes.rend(); it++) {
+        auto index = *it;
+        notes[index] = notes.back();
+        notes.pop_back();
+    }
+    selectedNotes.clear();
+    setDragAction(nullptr);
+    processor.buildPattern();
+    repaint();
+}
+
+void PatternEditor::moveSelectedUp() {
+    auto &notes = processor.getPattern().getNotes();
+    for (auto index : selectedNotes) {
+        notes[index].data.noteNumber++;
+    }
+    processor.buildPattern();
+    repaint();
+}
+
+void PatternEditor::moveSelectedDown() {
+    auto &notes = processor.getPattern().getNotes();
+    for (auto index : selectedNotes) {
+        notes[index].data.noteNumber--;
+    }
+    processor.buildPattern();
+    repaint();
 }
 
 

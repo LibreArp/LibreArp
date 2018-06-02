@@ -96,6 +96,8 @@ public:
     void mouseDown(const MouseEvent &event) override;
     void mouseUp(const MouseEvent &event) override;
 
+    bool keyPressed(const KeyPress &key) override;
+
     PatternEditorView *getView();
 
     int getDivisor();
@@ -128,8 +130,15 @@ private:
     void noteStartResize(const MouseEvent &event, NoteDragAction *dragAction);
     void noteEndResize(const MouseEvent &event, NoteDragAction *dragAction);
     void noteMove(const MouseEvent &event, NoteDragAction *dragAction);
+    void noteDuplicate(NoteDragAction *dragAction);
     void noteCreate(const MouseEvent &event);
     void noteDelete(const MouseEvent &event);
+
+    void selectAll();
+    void deselectAll();
+    void deleteSelected();
+    void moveSelectedUp();
+    void moveSelectedDown();
 
     void select(const MouseEvent &event, SelectionDragAction *dragAction);
 
