@@ -338,7 +338,8 @@ void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dra
     auto timebase = processor.getPattern().getTimebase();
     for (auto &noteOffset : dragAction->noteOffsets) {
         auto &note = noteOffset.note;
-        note.startPoint = jmin(xToPulse(event.x) + noteOffset.startOffset, note.endPoint - (timebase / divisor));
+        int64 minSize = (snapEnabled) ? (timebase / divisor) : 1;
+        note.startPoint = jmin(xToPulse(event.x) + noteOffset.startOffset, note.endPoint - minSize);
 
         lastNoteLength = note.endPoint - note.startPoint;
     }
@@ -353,8 +354,9 @@ void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragA
 
     for (auto &noteOffset : dragAction->noteOffsets) {
         ArpNote &note = noteOffset.note;
+        int64 minSize = (snapEnabled) ? (timebase / divisor) : 1;
         note.endPoint =
-                jmin(jmax(xToPulse(event.x) + noteOffset.endOffset, note.startPoint + (timebase / divisor)),
+                jmin(jmax(xToPulse(event.x) + noteOffset.endOffset, note.startPoint + minSize),
                      processor.getPattern().loopLength);
 
         lastNoteLength = note.endPoint - note.startPoint;
