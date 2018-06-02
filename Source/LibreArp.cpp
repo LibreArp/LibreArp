@@ -165,7 +165,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
     getPlayHead()->getCurrentPosition(cpi);
 
-    if (cpi.isPlaying && !this->pattern.getNotes().empty()) {
+    if (cpi.isPlaying && !this->events.events.empty()) {
         midi.clear();
 
         auto timebase = this->pattern.getTimebase();
@@ -184,36 +184,27 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
             stopScheduled = false;
         }
 
-        if (inputNotes.isEmpty()) {
-            for (auto &note : pattern.getNotes()) {
-                auto &data = note.data;
-                if (data.lastNote > 0) {
-                    midi.addEvent(MidiMessage::noteOff(1, data.lastNote), 0);
-                    data.lastNote = -1;
-                }
-            }
-        } else {
-            for(auto event : events.events) {
-                auto time = nextTime(event, lastPosition);
-                if (time < position) {
-                    auto offsetBase = static_cast<int>(std::ceil((time - this->lastPosition) * pulseSamples));
-//                    int offset = jmax(0, jmin(offsetBase, numSamples - 1));
-                    int offset = jmin(offsetBase, numSamples - 1);
+        for(auto event : events.events) {
+            auto time = nextTime(event, lastPosition);
+            if (time < position) {
+                auto offsetBase = static_cast<int>(std::ceil((time - this->lastPosition) * pulseSamples));
+                int offset = jmin(offsetBase, numSamples - 1);
 
-                    if (this->lastPosition > position && offset < 0) {
-                        offset = 0;
+                if (this->lastPosition > position && offset < 0) {
+                    offset = 0;
+                }
+
+                if (offset >= 0) {
+                    for (auto i : event.offs) {
+                        auto &data = events.data[i];
+                        if (data.lastNote >= 0) {
+                            midi.addEvent(MidiMessage::noteOff(1, data.lastNote), offset);
+                            playingNotes.removeValue(data.lastNote);
+                            data.lastNote = -1;
+                        }
                     }
 
-                    if (offset >= 0) {
-                        for (auto i : event.offs) {
-                            auto &data = events.data[i];
-                            if (data.lastNote >= 0) {
-                                midi.addEvent(MidiMessage::noteOff(1, data.lastNote), offset);
-                                playingNotes.removeValue(data.lastNote);
-                                data.lastNote = -1;
-                            }
-                        }
-
+                    if (!inputNotes.isEmpty()) {
                         for (auto i : event.ons) {
                             auto &data = events.data[i];
                             auto index = data.noteNumber % inputNotes.size();
