@@ -197,8 +197,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                 auto time = nextTime(event, lastPosition);
                 if (time < position) {
                     auto offsetBase = static_cast<int>(std::ceil((time - this->lastPosition) * pulseSamples));
-                    auto mod = offsetBase % numSamples;
-                    int offset = jmax(0, mod);
+                    int offset = jmax(0, jmin(offsetBase, numSamples - 1));
 
                     for (auto i : event.offs) {
                         auto &data = events.data[i];
@@ -229,8 +228,8 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                             data.lastNote = note;
                             midi.addEvent(
                                     MidiMessage::noteOn(1, note, static_cast<float>(data.velocity)), offset);
+                            playingNotes.add(note);
                         }
-                        playingNotes.add(note);
                     }
                 }
             }
@@ -243,9 +242,6 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         this->lastPosition = position;
         this->wasPlaying = true;
     } else {
-        this->lastPosition = 0;
-        this->wasPlaying = false;
-
         if (this->wasPlaying) {
             if (getActiveEditor() != nullptr && getActiveEditor()->isVisible()) {
                 getActiveEditor()->repaint();
@@ -253,6 +249,9 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
 
             this->stopAll(midi);
         }
+
+        this->lastPosition = 0;
+        this->wasPlaying = false;
     }
 }
 
@@ -366,12 +365,12 @@ void LibreArp::stopAll(MidiBuffer &midi) {
     midi.clear();
 
     for (auto noteNumber : playingNotes) {
-        midi.addEvent(MidiMessage::noteOff(1, noteNumber), 1);
+        midi.addEvent(MidiMessage::noteOff(1, noteNumber), 0);
     }
     playingNotes.clear();
 
-    for (auto &note : pattern.getNotes()) {
-        note.data.lastNote = -1;
+    for (auto &data : events.data) {
+        data.lastNote = -1;
     }
 }
 
