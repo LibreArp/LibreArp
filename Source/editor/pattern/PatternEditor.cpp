@@ -111,8 +111,13 @@ void PatternEditor::paint(Graphics &g) {
 
     // Draw position indicator
     g.setColour(POSITION_INDICATOR_COLOUR);
-    auto pos = pulseToX((processor.getLastPosition() % pattern.loopLength));
-    g.drawLine(pos, 0, pos, getHeight());
+    auto position = processor.getLastPosition();
+    if (processor.getLoopReset() > 0.0) {
+        position %= static_cast<int64>(processor.getLoopReset() * pattern.getTimebase());
+    }
+    position %= pattern.loopLength;
+    auto positionX = pulseToX(position);
+    g.drawLine(positionX, 0, positionX, getHeight());
 
     // Draw cursor indicator
     g.setColour(CURSOR_TIME_COLOUR);

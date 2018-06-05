@@ -46,6 +46,9 @@ private:
     Slider snapSlider;
     Label snapSliderLabel;
 
+    Slider loopResetSlider;
+    Label loopResetSliderLabel;
+
     Viewport editorViewport;
     PatternEditor editor;
 

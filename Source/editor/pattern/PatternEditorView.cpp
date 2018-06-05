@@ -35,6 +35,20 @@ PatternEditorView::PatternEditorView(LibreArp &p)
     beatBarViewport.setScrollBarsShown(false, false, false, false);
     addAndMakeVisible(beatBarViewport);
 
+    loopResetSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
+    loopResetSlider.setRange(0, 65535, 1);
+    loopResetSlider.setNumDecimalPlacesToDisplay(0);
+    loopResetSlider.setValue(processor.getLoopReset());
+    loopResetSlider.onValueChange = [this] {
+        processor.setLoopReset(loopResetSlider.getValue());
+        processor.stopAll();
+    };
+    addAndMakeVisible(loopResetSlider);
+
+    loopResetSliderLabel.setText("Reset every (beats):", NotificationType::dontSendNotification);
+    loopResetSliderLabel.setJustificationType(Justification::centredRight);
+    addAndMakeVisible(loopResetSliderLabel);
+
     snapSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
     snapSlider.setRange(1, 16, 1);
     snapSlider.setValue(editor.getDivisor(), NotificationType::dontSendNotification);
@@ -60,6 +74,9 @@ void PatternEditorView::resized() {
     auto toolBarArea = area.removeFromTop(32);
     toolBarArea.removeFromBottom(4);
     toolBarArea.removeFromTop(4);
+    loopResetSliderLabel.setBounds(
+            toolBarArea.removeFromLeft(loopResetSliderLabel.getFont().getStringWidth(loopResetSliderLabel.getText())));
+    loopResetSlider.setBounds(toolBarArea.removeFromLeft(128));
     snapSlider.setBounds(toolBarArea.removeFromRight(96));
     snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
 
