@@ -56,12 +56,16 @@ ArpBuiltEvents ArpPattern::buildEvents() {
         int64 onTime = note.startPoint % loopLength;
         ArpBuiltEvents::Event &onEvent = eventMap[onTime];
         onEvent.time = onTime;
-        onEvent.ons.push_back(dataIndex);
+        onEvent.ons.insert(dataIndex);
 
         int64 offTime = note.endPoint % loopLength;
         ArpBuiltEvents::Event &offEvent = eventMap[offTime];
         offEvent.time = offTime;
-        offEvent.offs.push_back(dataIndex);
+        offEvent.offs.insert(dataIndex);
+
+        ArpBuiltEvents::Event &totalOffEvent = eventMap[0];
+        totalOffEvent.time = 0;
+        totalOffEvent.offs.insert(dataIndex);
     }
 
     for (std::pair<int64, ArpBuiltEvents::Event> pair : eventMap) {
