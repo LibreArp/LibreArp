@@ -26,7 +26,7 @@ const Identifier ArpPattern::TREEID_NOTES = Identifier("notes"); // NOLINT
 
 ArpPattern::ArpPattern(int timebase) {
     this->timebase = timebase;
-    this->loopLength = 0;
+    this->loopLength = timebase;
     this->notes = std::vector<ArpNote>();
 }
 
