@@ -37,6 +37,11 @@ LibreArp::LibreArp()
 )
 #endif
 {
+    this->lastPosition = 0;
+    this->wasPlaying = false;
+    this->buildScheduled = false;
+    this->stopScheduled = false;
+    this->loopReset = 0.0;
     addParameter(octaves = new AudioParameterBool(
             "octaves",
             "Octaves",
@@ -104,11 +109,6 @@ void LibreArp::changeProgramName(int index, const String &newName) {
 void LibreArp::prepareToPlay(double sampleRate, int samplesPerBlock) {
     ignoreUnused(samplesPerBlock);
     this->sampleRate = sampleRate;
-    this->lastPosition = 0;
-    this->wasPlaying = false;
-    this->buildScheduled = false;
-    this->stopScheduled = false;
-    this->loopReset = 0.0;
 }
 
 void LibreArp::releaseResources() {
