@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <set>
 #include "JuceHeader.h"
 #include "NoteData.h"
 
@@ -26,8 +27,8 @@ public:
     class Event {
     public:
         int64 time;
-        std::vector<unsigned long> ons;
-        std::vector<unsigned long> offs;
+        std::set<unsigned long> ons;
+        std::set<unsigned long> offs;
     };
 
     std::vector<Event> events;

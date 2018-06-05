@@ -27,6 +27,7 @@
 class LibreArp : public AudioProcessor {
 public:
     static const Identifier TREEID_LIBREARP;
+    static const Identifier TREEID_LOOP_RESET;
     static const Identifier TREEID_PATTERN_XML;
     static const Identifier TREEID_OCTAVES;
 
@@ -81,6 +82,9 @@ public:
     void setStateInformation(const void *data, int sizeInBytes) override;
 
 
+    void stopAll();
+
+
     void setPattern(ArpPattern &pattern, bool updateXml = true);
 
     void parsePattern(const String &xmlPattern);
@@ -96,6 +100,10 @@ public:
 
     int getNote();
 
+    void setLoopReset(double loopReset);
+
+    double getLoopReset();
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
 
@@ -107,6 +115,7 @@ private:
 
     double sampleRate;
     int64 lastPosition;
+    double loopReset;
     bool wasPlaying;
 
     bool stopScheduled;
@@ -117,8 +126,7 @@ private:
     int note;
 
     void processInputMidi(MidiBuffer &midiMessages);
-    void stopAll();
     void stopAll(MidiBuffer &midi);
 
-    int64 nextTime(ArpBuiltEvents::Event &event, int64 position);
+    int64 nextTime(ArpBuiltEvents::Event &event, int64 position, int64 lastPosition);
 };

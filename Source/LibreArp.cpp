@@ -21,6 +21,7 @@
 #include "exception/ArpIntegrityException.h"
 
 const Identifier LibreArp::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NOLINT
+const Identifier LibreArp::TREEID_LOOP_RESET = Identifier("loopReset"); // NOLINT
 const Identifier LibreArp::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
 const Identifier LibreArp::TREEID_OCTAVES = Identifier("octaves"); // NOLINT
 
@@ -111,6 +112,7 @@ void LibreArp::prepareToPlay(double sampleRate, int samplesPerBlock) {
     this->wasPlaying = false;
     this->buildScheduled = false;
     this->stopScheduled = false;
+    this->loopReset = 0.0;
 }
 
 void LibreArp::releaseResources() {
@@ -172,7 +174,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = this->sampleRate * pulseLength;
 
-        auto position = static_cast<int64>(std::ceil(cpi.ppqPosition * timebase));
+        auto position = static_cast<int64>(std::floor(cpi.ppqPosition * timebase));
         auto lastPosition = position - static_cast<int64>(std::ceil(numSamples / pulseSamples));
 
         if (!wasPlaying || this->lastPosition > position) {
@@ -185,7 +187,8 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         }
 
         for(auto event : events.events) {
-            auto time = nextTime(event, lastPosition);
+            auto time = nextTime(event, position, lastPosition);
+
             if (time < position) {
                 auto offsetBase = static_cast<int>(std::ceil((time - this->lastPosition) * pulseSamples));
                 int offset = jmin(offsetBase, numSamples - 1);
@@ -266,6 +269,7 @@ AudioProcessorEditor *LibreArp::createEditor() {
 void LibreArp::getStateInformation(MemoryBlock &destData) {
     ValueTree tree = ValueTree(TREEID_LIBREARP);
     tree.appendChild(this->pattern.toValueTree(), nullptr);
+    tree.setProperty(TREEID_LOOP_RESET, this->loopReset, nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
     tree.setProperty(TREEID_OCTAVES, this->octaves->get(), nullptr);
 
@@ -283,6 +287,10 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
         if (tree.isValid() && tree.hasType(TREEID_LIBREARP)) {
             ValueTree patternTree = tree.getChildWithName(ArpPattern::TREEID_PATTERN);
             ArpPattern pattern = ArpPattern::fromValueTree(patternTree);
+
+            if (tree.hasProperty(TREEID_LOOP_RESET)) {
+                this->loopReset = tree.getProperty(TREEID_LOOP_RESET);
+            }
 
             if (tree.hasProperty(TREEID_OCTAVES)) {
                 *this->octaves = tree.getProperty(TREEID_OCTAVES);
@@ -343,6 +351,15 @@ int LibreArp::getNote() {
 }
 
 
+void LibreArp::setLoopReset(double loopReset) {
+    this->loopReset = jmax(0.0, loopReset);
+}
+
+double LibreArp::getLoopReset() {
+    return this->loopReset;
+}
+
+
 void LibreArp::processInputMidi(MidiBuffer &midiMessages) {
     int time;
     MidiMessage m;
@@ -373,11 +390,24 @@ void LibreArp::stopAll(MidiBuffer &midi) {
 }
 
 
-int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 position) {
-    auto result = (((position / events.loopLength)) * events.loopLength) + event.time;
-    if (result < position) {
+int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 position, int64 lastPosition) {
+    int64 result;
+
+    if (loopReset > 0.0) {
+        auto loopResetLength = static_cast<int64>(std::ceil(events.timebase * loopReset));
+        auto resetPosition = position % loopResetLength;
+        auto intermediateResult = resetPosition - (resetPosition % events.loopLength) + event.time;
+        intermediateResult %= loopResetLength;
+
+        result = position - (position % loopResetLength) + intermediateResult;
+    } else {
+        result = position - (position % events.loopLength) + event.time;
+    }
+
+    if (result < lastPosition) {
         result += events.loopLength;
     }
+
     return result;
 }
 
