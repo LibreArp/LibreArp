@@ -644,7 +644,7 @@ the exclusion of warranty; and each file should have at least the
         GNU General Public License for more details.
 
         You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <https://www.gnu.org/licenses/>.
+        along with this program.  If not, see https://librearp.gitlab.io/license/.
 
 Also add information on how to contact you by electronic and paper
 mail.
@@ -665,7 +665,7 @@ use an "about box".
 You should also get your employer (if you work as a programmer) or
 school, if any, to sign a "copyright disclaimer" for the program, if
 necessary. For more information on this, and how to apply and follow
-the GNU GPL, see <https://www.gnu.org/licenses/>.
+the GNU GPL, see https://librearp.gitlab.io/license/.
 
 The GNU General Public License does not permit incorporating your
 program into proprietary programs. If your program is a subroutine
