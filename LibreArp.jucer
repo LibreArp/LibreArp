@@ -41,8 +41,6 @@
         <FILE id="nJdJiZ" name="MainEditor.h" compile="0" resource="0" file="Source/editor/MainEditor.h"/>
       </GROUP>
       <FILE id="y4lGFE" name="ArpNote.cpp" compile="1" resource="0" file="Source/ArpNote.cpp"/>
-      <FILE id="bHOd9I" name="ArpBuiltEvents.cpp" compile="1" resource="0"
-            file="Source/ArpBuiltEvents.cpp"/>
       <FILE id="EG63G7" name="ArpBuiltEvents.h" compile="0" resource="0"
             file="Source/ArpBuiltEvents.h"/>
       <FILE id="TpttHS" name="ArpNote.h" compile="0" resource="0" file="Source/ArpNote.h"/>
