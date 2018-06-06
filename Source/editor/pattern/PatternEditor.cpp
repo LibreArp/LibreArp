@@ -38,15 +38,16 @@ const int NOTE_RESIZE_TOLERANCE = 6;
 const int LOOP_RESIZE_TOLERANCE = 3;
 
 
-PatternEditor::PatternEditor(LibreArp &p, PatternEditorView *ec)
-        : processor(p), view(ec)
+PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
+        : processor(p), state(e), view(ec)
 {
     setSize(1, 1); // We have to set this, otherwise it won't render at all
 
-    divisor = 4;
     cursorPulse = 0;
     dragAction = nullptr;
-    lastNoteLength = processor.getPattern().getTimebase() / divisor;
+    if (state.lastNoteLength < 1) {
+        state.lastNoteLength = processor.getPattern().getTimebase() / state.divisor;
+    }
     snapEnabled = true;
     selection = Rectangle(0, 0, 0, 0);
 
@@ -59,8 +60,8 @@ PatternEditor::~PatternEditor() {
 
 void PatternEditor::paint(Graphics &g) {
     ArpPattern &pattern = processor.getPattern();
-    auto pixelsPerBeat = view->getPixelsPerBeat();
-    auto pixelsPerNote = view->getPixelsPerNote();
+    auto pixelsPerBeat = state.pixelsPerBeat;
+    auto pixelsPerNote = state.pixelsPerNote;
 
     // Set size
     setSize(
@@ -78,10 +79,10 @@ void PatternEditor::paint(Graphics &g) {
         g.drawLine(0, i, getWidth(), i, 0.5);
     }
 
-    float beatDiv = (pixelsPerBeat / static_cast<float>(divisor));
+    float beatDiv = (pixelsPerBeat / static_cast<float>(state.divisor));
     int n = 1;
     for (float i = beatDiv; i < getWidth(); i += beatDiv, n++) {
-        if (n % divisor == 0) {
+        if (n % state.divisor == 0) {
             g.drawLine(i, 0, i, getHeight(), 1.5);
         } else {
             g.drawLine(i, 0, i, getHeight(), 0.5);
@@ -343,10 +344,10 @@ void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dra
     auto timebase = processor.getPattern().getTimebase();
     for (auto &noteOffset : dragAction->noteOffsets) {
         auto &note = noteOffset.note;
-        int64 minSize = (snapEnabled) ? (timebase / divisor) : 1;
+        int64 minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
         note.startPoint = jmin(xToPulse(event.x) + noteOffset.startOffset, note.endPoint - minSize);
 
-        lastNoteLength = note.endPoint - note.startPoint;
+        state.lastNoteLength = note.endPoint - note.startPoint;
     }
 
     processor.buildPattern();
@@ -359,12 +360,12 @@ void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragA
 
     for (auto &noteOffset : dragAction->noteOffsets) {
         ArpNote &note = noteOffset.note;
-        int64 minSize = (snapEnabled) ? (timebase / divisor) : 1;
+        int64 minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
         note.endPoint =
                 jmin(jmax(xToPulse(event.x) + noteOffset.endOffset, note.startPoint + minSize),
                      processor.getPattern().loopLength);
 
-        lastNoteLength = note.endPoint - note.startPoint;
+        state.lastNoteLength = note.endPoint - note.startPoint;
     }
 
     processor.buildPattern();
@@ -407,7 +408,7 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
     auto &pattern = processor.getPattern();
     auto &notes = pattern.getNotes();
     auto pulse = xToPulse(event.x, true, true);
-    auto length = (event.mods.isShiftDown()) ? (pattern.getTimebase() / divisor) : lastNoteLength;
+    auto length = (event.mods.isShiftDown()) ? (pattern.getTimebase() / state.divisor) : state.lastNoteLength;
 
     ArpNote note = ArpNote();
     note.startPoint = jmin(pulse, pattern.loopLength - length);
@@ -515,18 +516,10 @@ PatternEditorView* PatternEditor::getView() {
     return view;
 }
 
-int PatternEditor::getDivisor() {
-    return divisor;
-}
-
-void PatternEditor::setDivisor(int divisor) {
-    this->divisor = divisor;
-}
-
 
 Rectangle<int> PatternEditor::getRectangleForNote(ArpNote &note) {
     ArpPattern &pattern = processor.getPattern();
-    auto pixelsPerNote = view->getPixelsPerNote();
+    auto pixelsPerNote = state.pixelsPerNote;
 
     return Rectangle<int>(
             pulseToX(note.startPoint),
@@ -548,19 +541,19 @@ int64 PatternEditor::snapPulse(int64 pulse, bool floor) {
 
     auto &pattern = processor.getPattern();
     auto timebase = pattern.getTimebase();
-    double doubleDivisor = this->divisor;
+    double doubleDivisor = state.divisor;
 
     double base = (pulse * doubleDivisor) / timebase;
     int64 roundedBase = static_cast<int64>((floor) ? std::floor(base) : std::round(base));
 
-    return roundedBase * (timebase / divisor);
+    return roundedBase * (timebase / state.divisor);
 }
 
 
 int64 PatternEditor::xToPulse(int x, bool snap, bool floor) {
     auto &pattern = processor.getPattern();
     auto timebase = pattern.getTimebase();
-    double pixelsPerBeat = view->getPixelsPerBeat();
+    double pixelsPerBeat = state.pixelsPerBeat;
 
     auto pulse = static_cast<int64>(
             std::round((x / pixelsPerBeat) * timebase));
@@ -569,19 +562,19 @@ int64 PatternEditor::xToPulse(int x, bool snap, bool floor) {
 }
 
 int PatternEditor::yToNote(int y) {
-    double pixelsPerNote = view->getPixelsPerNote();
+    double pixelsPerNote = state.pixelsPerNote;
     return static_cast<int>(std::ceil(1 - (y - (getHeight() / 2)) / pixelsPerNote));
 }
 
 int PatternEditor::pulseToX(int64 pulse) {
     auto &pattern = processor.getPattern();
-    auto pixelsPerBeat = view->getPixelsPerBeat();
+    auto pixelsPerBeat = state.pixelsPerBeat;
 
     return static_cast<int>((pulse / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat);
 }
 
 int PatternEditor::noteToY(int note) {
-    auto pixelsPerNote = view->getPixelsPerNote();
+    auto pixelsPerNote = state.pixelsPerNote;
     return (getHeight() / 2) + (1 - note) * pixelsPerNote;
 }
 

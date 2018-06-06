@@ -29,7 +29,7 @@
 class MainEditor : public AudioProcessorEditor {
 public:
 
-    explicit MainEditor(LibreArp &);
+    explicit MainEditor(LibreArp &, EditorState &);
 
     ~MainEditor() override;
 
@@ -40,6 +40,7 @@ public:
 
 private:
     LibreArp &processor;
+    EditorState &state;
 
     ResizableCornerComponent resizer;
     ComponentBoundsConstrainer boundsConstrainer;

@@ -22,15 +22,16 @@
 
 const int RESIZER_SIZE = 18;
 
-MainEditor::MainEditor(LibreArp &p)
+MainEditor::MainEditor(LibreArp &p, EditorState &e)
         : AudioProcessorEditor(&p),
           processor(p),
+          state(e),
           resizer(this, &boundsConstrainer),
           tabs(TabbedButtonBar::Orientation::TabsAtTop),
-          patternEditor(p),
+          patternEditor(p, e),
           xmlEditor(p) {
 
-    setSize(640, 480);
+    setSize(state.width, state.height);
 
     boundsConstrainer.setMinimumSize(200, 200);
 
@@ -49,6 +50,9 @@ void MainEditor::paint(Graphics &g) {
 }
 
 void MainEditor::resized() {
-    tabs.setBounds(0, 0, getWidth(), getHeight());
+    state.width = getWidth();
+    state.height = getHeight();
+
+    tabs.setBounds(getLocalBounds());
     resizer.setBounds(getWidth() - RESIZER_SIZE, getHeight() - RESIZER_SIZE, RESIZER_SIZE, RESIZER_SIZE);
 }

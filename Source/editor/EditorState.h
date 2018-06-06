@@ -18,41 +18,34 @@
 #pragma once
 
 #include "JuceHeader.h"
-#include "../../LibreArp.h"
-#include "PatternEditor.h"
-#include "BeatBar.h"
 
 
-class PatternEditorView : public Component {
+class EditorState {
 public:
 
-    explicit PatternEditorView(LibreArp &p, EditorState &editorState);
+    static const Identifier TREEID_EDITOR_STATE;
+    static const Identifier TREEID_WIDTH;
+    static const Identifier TREEID_HEIGHT;
+    static const Identifier TREEID_DIVISOR;
+    static const Identifier TREEID_LAST_NOTE_LENGTH;
+    static const Identifier TREEID_PIXELS_PER_BEAT;
+    static const Identifier TREEID_PIXELS_PER_NOTE;
 
-    void paint(Graphics &g) override;
+    EditorState();
 
-    void resized() override;
+    // Main
+    int width;
+    int height;
 
-    void zoomPattern(float deltaX, float deltaY);
+    // Pattern editor
+    int divisor;
+    int64 lastNoteLength;
+    int pixelsPerBeat;
+    int pixelsPerNote;
 
-    int getRenderWidth();
-    int getRenderHeight();
+    ValueTree toValueTree();
+    static EditorState fromValueTree(ValueTree &tree);
 
-private:
-
-    LibreArp &processor;
-    EditorState &state;
-
-    Slider snapSlider;
-    Label snapSliderLabel;
-
-    Slider loopResetSlider;
-    Label loopResetSliderLabel;
-
-    Viewport editorViewport;
-    PatternEditor editor;
-
-    Viewport beatBarViewport;
-    BeatBar beatBar;
 };
 
 

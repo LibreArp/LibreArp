@@ -258,13 +258,14 @@ bool LibreArp::hasEditor() const {
 }
 
 AudioProcessorEditor *LibreArp::createEditor() {
-    return new MainEditor(*this);
+    return new MainEditor(*this, editorState);
 }
 
 //==============================================================================
 void LibreArp::getStateInformation(MemoryBlock &destData) {
     ValueTree tree = ValueTree(TREEID_LIBREARP);
     tree.appendChild(this->pattern.toValueTree(), nullptr);
+    tree.appendChild(this->editorState.toValueTree(), nullptr);
     tree.setProperty(TREEID_LOOP_RESET, this->loopReset, nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
     tree.setProperty(TREEID_OCTAVES, this->octaves->get(), nullptr);
@@ -283,6 +284,11 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
         if (tree.isValid() && tree.hasType(TREEID_LIBREARP)) {
             ValueTree patternTree = tree.getChildWithName(ArpPattern::TREEID_PATTERN);
             ArpPattern pattern = ArpPattern::fromValueTree(patternTree);
+
+            ValueTree editorTree = tree.getChildWithName(EditorState::TREEID_EDITOR_STATE);
+            if (editorTree.isValid()) {
+                this->editorState = EditorState::fromValueTree(editorTree);
+            }
 
             if (tree.hasProperty(TREEID_LOOP_RESET)) {
                 this->loopReset = tree.getProperty(TREEID_LOOP_RESET);

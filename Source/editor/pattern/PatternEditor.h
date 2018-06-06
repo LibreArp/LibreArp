@@ -83,7 +83,7 @@ class PatternEditor : public Component {
 
 public:
 
-    explicit PatternEditor(LibreArp &p, PatternEditorView *ec);
+    explicit PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec);
 
     ~PatternEditor() override;
 
@@ -100,19 +100,13 @@ public:
 
     PatternEditorView *getView();
 
-    int getDivisor();
-    void setDivisor(int divisor);
-
 private:
     LibreArp &processor;
+    EditorState &state;
     PatternEditorView *view;
-
-    int divisor;
 
     int64 cursorPulse;
     int cursorNote;
-
-    int64 lastNoteLength;
 
     bool snapEnabled;
 

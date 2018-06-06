@@ -20,13 +20,11 @@
 const int X_ZOOM_RATE = 80;
 const int Y_ZOOM_RATE = 30;
 
-PatternEditorView::PatternEditorView(LibreArp &p)
+PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
         : processor(p),
-          beatBar(p, this),
-          editor(p, this) {
-
-    this->pixelsPerBeat = 100;
-    this->pixelsPerNote = 12;
+          state(e),
+          beatBar(p, state, this),
+          editor(p, state, this) {
 
     editorViewport.setViewedComponent(&editor);
     addAndMakeVisible(editorViewport);
@@ -51,10 +49,10 @@ PatternEditorView::PatternEditorView(LibreArp &p)
 
     snapSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
     snapSlider.setRange(1, 16, 1);
-    snapSlider.setValue(editor.getDivisor(), NotificationType::dontSendNotification);
+    snapSlider.setValue(state.divisor, NotificationType::dontSendNotification);
     snapSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
     snapSlider.onValueChange = [this] {
-        editor.setDivisor(static_cast<int>(snapSlider.getValue()));
+        state.divisor = static_cast<int>(snapSlider.getValue());
         editor.repaint();
     };
     addAndMakeVisible(snapSlider);
@@ -84,20 +82,11 @@ void PatternEditorView::resized() {
     editorViewport.setBounds(area);
 }
 
-
-int PatternEditorView::getPixelsPerBeat() {
-    return this->pixelsPerBeat;
-}
-
-int PatternEditorView::getPixelsPerNote() {
-    return this->pixelsPerNote;
-}
-
 void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
     double xPercent = editorViewport.getViewPositionX() / static_cast<double>(editor.getWidth());
     double yPercent = editorViewport.getViewPositionY() / static_cast<double>(editor.getHeight());
-    pixelsPerBeat = jmax(32, pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
-    pixelsPerNote = jmax(8, pixelsPerNote + static_cast<int>(deltaY * Y_ZOOM_RATE));
+    state.pixelsPerBeat = jmax(32, state.pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
+    state.pixelsPerNote = jmax(8, state.pixelsPerNote + static_cast<int>(deltaY * Y_ZOOM_RATE));
 
     editorViewport.setViewPosition(
             static_cast<int>(xPercent * getRenderWidth()),
@@ -110,7 +99,8 @@ void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
 
 int PatternEditorView::getRenderWidth() {
     auto pattern = processor.getPattern();
-    return static_cast<int>((3 + pattern.loopLength / static_cast<double>(pattern.getTimebase())) * pixelsPerBeat);
+    return static_cast<int>(
+            (3 + pattern.loopLength / static_cast<double>(pattern.getTimebase())) * state.pixelsPerBeat);
 }
 
 int PatternEditorView::getRenderHeight() {
@@ -125,5 +115,5 @@ int PatternEditorView::getRenderHeight() {
     dist += 3;
     dist *= 2;
 
-    return dist * pixelsPerNote;
+    return dist * state.pixelsPerNote;
 }

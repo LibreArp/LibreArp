@@ -22,6 +22,8 @@
               file="Source/exception/ArpIntegrityException.h"/>
       </GROUP>
       <GROUP id="{916A40E5-BC88-61B9-D0D5-8A490632E866}" name="editor">
+        <FILE id="xu0lJy" name="EditorState.cpp" compile="1" resource="0" file="Source/editor/EditorState.cpp"/>
+        <FILE id="IME8s2" name="EditorState.h" compile="0" resource="0" file="Source/editor/EditorState.h"/>
         <GROUP id="{08EE391D-EA98-DD24-CD7B-9B776718130D}" name="xml">
           <FILE id="jztN0C" name="XmlEditor.cpp" compile="1" resource="0" file="Source/editor/xml/XmlEditor.cpp"/>
           <FILE id="gBwqaQ" name="XmlEditor.h" compile="0" resource="0" file="Source/editor/xml/XmlEditor.h"/>

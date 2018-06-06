@@ -25,7 +25,7 @@ class PatternEditorView;
 class BeatBar : public Component {
 public:
 
-    explicit BeatBar(LibreArp &p, PatternEditorView *ec);
+    explicit BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec);
 
     void paint(Graphics &g) override;
 
@@ -34,6 +34,7 @@ public:
 private:
 
     LibreArp &processor;
+    EditorState &state;
     PatternEditorView *editorComponent;
 };
 

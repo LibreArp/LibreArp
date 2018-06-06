@@ -29,15 +29,15 @@ const String LOOP_TEXT = "loop"; // NOLINT
 
 const int TEXT_OFFSET = 4;
 
-BeatBar::BeatBar(LibreArp &p, PatternEditorView *ec)
-        : processor(p), editorComponent(ec) {
+BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec)
+        : processor(p), state(e), editorComponent(ec) {
 
     setSize(1, 1);
 }
 
 void BeatBar::paint(Graphics &g) {
     auto pattern = processor.getPattern();
-    auto pixelsPerBeat = editorComponent->getPixelsPerBeat();
+    auto pixelsPerBeat = state.pixelsPerBeat;
 
     setSize(jmax(editorComponent->getRenderWidth(), getParentWidth()), getParentHeight());
 

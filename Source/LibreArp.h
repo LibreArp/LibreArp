@@ -20,6 +20,7 @@
 #include <sstream>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ArpPattern.h"
+#include "editor/EditorState.h"
 
 /**
  * The LibreArp audio processor.
@@ -106,6 +107,8 @@ public:
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
+
+    EditorState editorState;
 
     ArpPattern pattern;
     String patternXml;
