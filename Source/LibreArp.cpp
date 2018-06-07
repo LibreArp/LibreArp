@@ -170,10 +170,10 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = this->sampleRate * pulseLength;
 
-        auto position = static_cast<int64>(std::floor(cpi.ppqPosition * timebase));
-        auto lastPosition = position - static_cast<int64>(std::ceil(numSamples / pulseSamples));
+        auto lastPosition = static_cast<int64>(std::floor(cpi.ppqPosition * timebase));
+        auto position = lastPosition + static_cast<int64>(std::ceil(numSamples / pulseSamples));
 
-        if (!wasPlaying || this->lastPosition > position) {
+        if (!wasPlaying) {
             this->stopAll();
         }
 
@@ -186,7 +186,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
             auto time = nextTime(event, position, lastPosition);
 
             if (time < position) {
-                auto offsetBase = static_cast<int>(std::ceil((time - this->lastPosition) * pulseSamples));
+                auto offsetBase = static_cast<int>(std::floor((time - this->lastPosition) * pulseSamples));
                 int offset = jmin(offsetBase, numSamples - 1);
 
                 if (this->lastPosition > position && offset < 0) {
