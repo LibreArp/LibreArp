@@ -173,10 +173,6 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         auto lastPosition = static_cast<int64>(std::floor(cpi.ppqPosition * timebase));
         auto position = lastPosition + static_cast<int64>(std::ceil(numSamples / pulseSamples));
 
-        if (!wasPlaying) {
-            this->stopAll();
-        }
-
         if (stopScheduled) {
             this->stopAll(midi);
             stopScheduled = false;
