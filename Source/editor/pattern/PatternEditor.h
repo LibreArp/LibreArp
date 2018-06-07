@@ -52,25 +52,26 @@ class PatternEditor : public Component {
 
         class NoteOffset {
         public:
-            ArpNote &note;
+            uint64 noteIndex;
             int64 endOffset;
             int64 startOffset;
             int noteOffset;
 
-            explicit NoteOffset(ArpNote &note);
+            explicit NoteOffset(uint64 i);
         };
 
         explicit NoteDragAction(
                 PatternEditor *editor,
                 uint8 type,
-                ArpNote &note,
+                uint64 index,
+                std::vector<ArpNote> &allNotes,
                 const MouseEvent &event,
                 bool offset = true);
 
         explicit NoteDragAction(
                 PatternEditor *editor,
                 uint8 type,
-                std::set<int> &indices,
+                std::set<uint64> &indices,
                 std::vector<ArpNote> &allNotes,
                 const MouseEvent &event,
                 bool offset = true);
@@ -78,7 +79,7 @@ class PatternEditor : public Component {
         std::vector<NoteOffset> noteOffsets;
 
     private:
-        static NoteOffset createOffset(PatternEditor *editor, ArpNote &note, const MouseEvent &event);
+        static NoteOffset createOffset(PatternEditor *editor, std::vector<ArpNote> &allNotes, uint64 noteIndex, const MouseEvent &event);
     };
 
     class SelectionDragAction : public DragAction {
@@ -119,7 +120,7 @@ private:
     bool snapEnabled;
 
     Rectangle<int> selection;
-    std::set<int> selectedNotes;
+    std::set<uint64> selectedNotes;
 
     DragAction *dragAction;
 
