@@ -75,7 +75,7 @@ void PatternEditor::paint(Graphics &g) {
 
     // Draw gridlines
     g.setColour(GRIDLINES_COLOUR);
-    for (int i = (getHeight() / 2) % pixelsPerNote; i < getHeight(); i += pixelsPerNote) {
+    for (int i = (getHeight() / 2) % pixelsPerNote - pixelsPerNote / 2; i < getHeight(); i += pixelsPerNote) {
         g.drawLine(0, i, getWidth(), i, 0.5);
     }
 
@@ -571,7 +571,7 @@ int64 PatternEditor::xToPulse(int x, bool snap, bool floor) {
 
 int PatternEditor::yToNote(int y) {
     double pixelsPerNote = state.pixelsPerNote;
-    return static_cast<int>(std::ceil(1 - (y - (getHeight() / 2)) / pixelsPerNote));
+    return static_cast<int>(std::ceil(((getHeight() / 2.0) - y) / pixelsPerNote - 0.5));
 }
 
 int PatternEditor::pulseToX(int64 pulse) {
@@ -582,8 +582,8 @@ int PatternEditor::pulseToX(int64 pulse) {
 }
 
 int PatternEditor::noteToY(int note) {
-    auto pixelsPerNote = state.pixelsPerNote;
-    return (getHeight() / 2) + (1 - note) * pixelsPerNote;
+    double pixelsPerNote = state.pixelsPerNote;
+    return static_cast<int>(std::round((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote));
 }
 
 
