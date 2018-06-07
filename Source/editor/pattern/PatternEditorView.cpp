@@ -36,6 +36,7 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     loopResetSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
     loopResetSlider.setRange(0, 65535, 1);
     loopResetSlider.setNumDecimalPlacesToDisplay(0);
+    loopResetSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
     loopResetSlider.setValue(processor.getLoopReset());
     loopResetSlider.onValueChange = [this] {
         processor.setLoopReset(loopResetSlider.getValue());
