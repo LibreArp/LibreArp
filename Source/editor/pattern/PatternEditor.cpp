@@ -355,7 +355,7 @@ void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dra
     for (auto &noteOffset : dragAction->noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
         int64 minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
-        note.startPoint = jmin(xToPulse(event.x) + noteOffset.startOffset, note.endPoint - minSize);
+        note.startPoint = jmax((int64) 0, jmin(xToPulse(event.x) + noteOffset.startOffset, note.endPoint - minSize));
 
         state.lastNoteLength = note.endPoint - note.startPoint;
     }
