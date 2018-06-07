@@ -221,7 +221,7 @@ void PatternEditor::mouseDrag(const MouseEvent &event) {
                 case DragAction::TYPE_NOTE_MOVE:
                     noteMove(event, (NoteDragAction *) (this->dragAction));
                     return;
-                case DragAction::TYPE_SELECTION:
+                case DragAction::TYPE_SELECTION_DRAG:
                     select(event, (SelectionDragAction *) (this->dragAction));
                     return;
                 default:
@@ -260,9 +260,15 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
             }
         } else {
             switch(this->dragAction->type) {
-                case DragAction::TYPE_NOTE_MOVE:
-                    if (event.mods.isShiftDown() && !event.mods.isCtrlDown() && !event.mods.isAltDown()) {
-                        noteDuplicate((NoteDragAction *) (this->dragAction));
+                case DragAction::TYPE_NOTE_MOVE: {
+                        auto &offsets = ((NoteDragAction *) this->dragAction)->noteOffsets;
+                        if (offsets.size() == 1) {
+                            auto &note = offsets[0].note;
+                            state.lastNoteLength = note.endPoint - note.startPoint;
+                        }
+                        if (event.mods.isShiftDown() && !event.mods.isCtrlDown() && !event.mods.isAltDown()) {
+                            noteDuplicate((NoteDragAction *) (this->dragAction));
+                        }
                     }
                     break;
                 default:
@@ -408,11 +414,13 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
     auto &pattern = processor.getPattern();
     auto &notes = pattern.getNotes();
     auto pulse = xToPulse(event.x, true, true);
-    auto length = (event.mods.isShiftDown()) ? (pattern.getTimebase() / state.divisor) : state.lastNoteLength;
+    if (event.mods.isShiftDown()) {
+        state.lastNoteLength = pattern.getTimebase() / state.divisor;
+    }
 
     ArpNote note = ArpNote();
-    note.startPoint = jmin(pulse, pattern.loopLength - length);
-    note.endPoint = note.startPoint + length;
+    note.startPoint = jmin(pulse, pattern.loopLength - state.lastNoteLength);
+    note.endPoint = note.startPoint + state.lastNoteLength;
     note.data.noteNumber = yToNote(event.y);
 
     auto index = notes.size();
@@ -635,5 +643,5 @@ PatternEditor::NoteDragAction::NoteOffset PatternEditor::NoteDragAction::createO
 
 
 PatternEditor::SelectionDragAction::SelectionDragAction(int startX, int startY)
-        : DragAction(TYPE_SELECTION), startX(startX), startY(startY) {
+        : DragAction(TYPE_SELECTION_DRAG), startX(startX), startY(startY) {
 }

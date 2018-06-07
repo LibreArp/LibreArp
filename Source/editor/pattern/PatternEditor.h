@@ -27,12 +27,20 @@ class PatternEditor : public Component {
 
     class DragAction {
     public:
+        static const uint8 TYPE_MASK = 0xF0;
+
         static const uint8 TYPE_NONE = 0x00;
+
+        static const uint8 TYPE_LOOP = 0x10;
         static const uint8 TYPE_LOOP_RESIZE = 0x10;
+
+        static const uint8 TYPE_NOTE = 0x20;
         static const uint8 TYPE_NOTE_MOVE = 0x20;
         static const uint8 TYPE_NOTE_START_RESIZE = 0x21;
         static const uint8 TYPE_NOTE_END_RESIZE = 0x22;
+
         static const uint8 TYPE_SELECTION = 0x30;
+        static const uint8 TYPE_SELECTION_DRAG = 0x30;
 
         uint8 type;
 
