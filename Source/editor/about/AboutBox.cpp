@@ -19,14 +19,16 @@
 #include "AboutBoxConfig.h"
 
 AboutBox::AboutBox() {
-    pluginNameLabel.setText(JucePlugin_Name, NotificationType::dontSendNotification);
-    pluginNameLabel.setFont(Font(32));
-    pluginNameLabel.setJustificationType(Justification::centred);
-    addAndMakeVisible(pluginNameLabel);
 
-    pluginVersionLabel.setText(JucePlugin_VersionString, NotificationType::dontSendNotification);
-    pluginVersionLabel.setJustificationType(Justification::centred);
-    addAndMakeVisible(pluginVersionLabel);
+#if JUCE_DEBUG == 1
+    nameAndVersionLabel.setText(JucePlugin_Name " (debug version)", NotificationType::dontSendNotification);
+#else
+    nameAndVersionLabel.setText(JucePlugin_Name " " JucePlugin_VersionString, NotificationType::dontSendNotification);
+#endif
+
+    nameAndVersionLabel.setFont(Font(32));
+    nameAndVersionLabel.setJustificationType(Justification::centred);
+    addAndMakeVisible(nameAndVersionLabel);
 
     auto gplFont = gplLabel.getFont();
     gplLabel.setText(LICENSE_NOTICE, NotificationType::dontSendNotification);
@@ -53,8 +55,7 @@ AboutBox::AboutBox() {
 void AboutBox::resized() {
     auto area = getLocalBounds();
 
-    pluginNameLabel.setBounds(area.removeFromTop(48));
-    pluginVersionLabel.setBounds(area.removeFromTop(16));
+    nameAndVersionLabel.setBounds(area.removeFromTop(64));
 
     juceButton.setBounds(area.removeFromBottom(18));
     sourceButton.setBounds(area.removeFromBottom(18));

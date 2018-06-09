@@ -29,8 +29,7 @@ public:
 
 private:
 
-    Label pluginNameLabel;
-    Label pluginVersionLabel;
+    Label nameAndVersionLabel;
     Label gplLabel;
 
     HyperlinkButton websiteButton;
