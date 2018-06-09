@@ -17,26 +17,23 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include "../../LibreArp.h"
+#include "JuceHeader.h"
 
-class NoteData {
+class XmlEditor : public Component {
 public:
-    static const Identifier TREEID_NOTE_DATA;
-    static const Identifier TREEID_NOTE_NUMBER;
-    static const Identifier TREEID_VELOCITY;
-    static const Identifier TREEID_PAN;
 
-    int noteNumber;
-    double velocity;
-    double pan;
+    explicit XmlEditor(LibreArp &p);
 
-    int lastNote = -1;
+    void resized() override;
 
-    NoteData();
+private:
+    LibreArp &processor;
 
-    ValueTree toValueTree();
+    TextEditor xmlEditor;
+    TextButton applyXmlButton;
 
-    static NoteData fromValueTree(ValueTree &tree);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor);
 };
 
 

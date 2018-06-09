@@ -12,12 +12,12 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
 #include <map>
 #include "ArpPattern.h"
-#include "ArpIntegrityException.h"
+#include "exception/ArpIntegrityException.h"
 
 const Identifier ArpPattern::TREEID_PATTERN = Identifier("pattern"); // NOLINT
 const Identifier ArpPattern::TREEID_TIMEBASE = Identifier("timebase"); // NOLINT
@@ -26,7 +26,7 @@ const Identifier ArpPattern::TREEID_NOTES = Identifier("notes"); // NOLINT
 
 ArpPattern::ArpPattern(int timebase) {
     this->timebase = timebase;
-    this->loopLength = 0;
+    this->loopLength = timebase;
     this->notes = std::vector<ArpNote>();
 }
 
@@ -41,28 +41,35 @@ std::vector<ArpNote> &ArpPattern::getNotes() {
     return this->notes;
 }
 
-std::vector<ArpEvent> ArpPattern::build() {
-    std::map<int64, ArpEvent> eventMap;
 
-    for (ArpNote &note : this->notes) {
-        if (note.endPoint <= note.startPoint) {
-            throw ArpIntegrityException("A note cannot end before it starts and has to be at least one pulse long!");
-        }
+ArpBuiltEvents ArpPattern::buildEvents() {
+    std::map<int64, ArpBuiltEvents::Event> eventMap;
+    ArpBuiltEvents result;
+
+    result.timebase = this->timebase;
+    result.loopLength = this->loopLength;
+
+    for (auto &note : this->notes) {
+        auto dataIndex = result.data.size();
+        result.data.push_back(note.data);
 
         int64 onTime = note.startPoint % loopLength;
-        ArpEvent &onEvent = eventMap[onTime];
+        ArpBuiltEvents::Event &onEvent = eventMap[onTime];
         onEvent.time = onTime;
-        onEvent.ons.push_back(&(note.data));
+        onEvent.ons.insert(dataIndex);
 
         int64 offTime = note.endPoint % loopLength;
-        ArpEvent &offEvent = eventMap[offTime];
+        ArpBuiltEvents::Event &offEvent = eventMap[offTime];
         offEvent.time = offTime;
-        offEvent.offs.push_back(&(note.data));
+        offEvent.offs.insert(dataIndex);
+
+        ArpBuiltEvents::Event &totalOffEvent = eventMap[0];
+        totalOffEvent.time = 0;
+        totalOffEvent.offs.insert(dataIndex);
     }
 
-    std::vector<ArpEvent> result;
-    for (std::pair<int, ArpEvent> pair : eventMap) {
-        result.push_back(pair.second);
+    for (std::pair<int64, ArpBuiltEvents::Event> pair : eventMap) {
+        result.events.push_back(pair.second);
     }
 
     return result;

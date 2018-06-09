@@ -17,26 +17,35 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include "JuceHeader.h"
 
-class NoteData {
+
+class EditorState {
 public:
-    static const Identifier TREEID_NOTE_DATA;
-    static const Identifier TREEID_NOTE_NUMBER;
-    static const Identifier TREEID_VELOCITY;
-    static const Identifier TREEID_PAN;
 
-    int noteNumber;
-    double velocity;
-    double pan;
+    static const Identifier TREEID_EDITOR_STATE;
+    static const Identifier TREEID_WIDTH;
+    static const Identifier TREEID_HEIGHT;
+    static const Identifier TREEID_DIVISOR;
+    static const Identifier TREEID_LAST_NOTE_LENGTH;
+    static const Identifier TREEID_PIXELS_PER_BEAT;
+    static const Identifier TREEID_PIXELS_PER_NOTE;
 
-    int lastNote = -1;
+    EditorState();
 
-    NoteData();
+    // Main
+    int width;
+    int height;
+
+    // Pattern editor
+    int divisor;
+    int64 lastNoteLength;
+    int pixelsPerBeat;
+    int pixelsPerNote;
 
     ValueTree toValueTree();
+    static EditorState fromValueTree(ValueTree &tree);
 
-    static NoteData fromValueTree(ValueTree &tree);
 };
 
 

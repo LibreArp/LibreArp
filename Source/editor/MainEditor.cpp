@@ -12,37 +12,35 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
 #include <sstream>
 #include "../LibreArp.h"
 #include "MainEditor.h"
-#include "../ArpIntegrityException.h"
+#include "../exception/ArpIntegrityException.h"
 
-const Colour RED = Colour(255, 0, 0);
+const int RESIZER_SIZE = 18;
 
-MainEditor::MainEditor(LibreArp &p)
-        : AudioProcessorEditor(&p), processor(p) {
-    setSize(800, 600);
+MainEditor::MainEditor(LibreArp &p, EditorState &e)
+        : AudioProcessorEditor(&p),
+          processor(p),
+          state(e),
+          resizer(this, &boundsConstrainer),
+          tabs(TabbedButtonBar::Orientation::TabsAtTop),
+          patternEditor(p, e),
+          xmlEditor(p) {
 
-    xmlEditor.setMultiLine(true, false);
-    xmlEditor.setReturnKeyStartsNewLine(true);
-    xmlEditor.setText(processor.getPatternXml(), false);
+    setSize(state.width, state.height);
 
-    applyXmlButton.setButtonText("Apply");
+    boundsConstrainer.setMinimumSize(200, 200);
 
-    addAndMakeVisible(xmlEditor, -1);
-    addAndMakeVisible(applyXmlButton, -1);
+    tabs.addTab("Pattern Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
+    tabs.addTab("About", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
+//    tabs.addTab("XML Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
 
-    applyXmlButton.onClick = [this] {
-        try {
-            processor.parsePattern(xmlEditor.getText());
-            xmlEditor.removeColour(TextEditor::outlineColourId);
-        } catch (ArpIntegrityException &e) {
-            xmlEditor.setColour(TextEditor::outlineColourId, RED);
-        }
-    };
+    addAndMakeVisible(tabs);
+    addAndMakeVisible(resizer, 9999);
 }
 
 MainEditor::~MainEditor() = default;
@@ -53,6 +51,9 @@ void MainEditor::paint(Graphics &g) {
 }
 
 void MainEditor::resized() {
-    xmlEditor.setBounds(0, 0, getWidth(), getHeight() - 30);
-    applyXmlButton.setBounds(0, getHeight() - 30, getWidth(), 30);
+    state.width = getWidth();
+    state.height = getHeight();
+
+    tabs.setBounds(getLocalBounds());
+    resizer.setBounds(getWidth() - RESIZER_SIZE, getHeight() - RESIZER_SIZE, RESIZER_SIZE, RESIZER_SIZE);
 }

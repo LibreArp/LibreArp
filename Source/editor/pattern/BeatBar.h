@@ -12,27 +12,30 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
-#include "ArpEvent.h"
+#pragma once
 
-bool ArpEvent::operator<(ArpEvent &other) {
-    return this->time < other.time;
-}
+#include "JuceHeader.h"
+#include "../../LibreArp.h"
 
-bool ArpEvent::operator<=(ArpEvent &other) {
-    return this->time <= other.time;
-}
+class PatternEditorView;
 
-bool ArpEvent::operator>(ArpEvent &other) {
-    return this->time < other.time;
-}
+class BeatBar : public Component {
+public:
 
-bool ArpEvent::operator>=(ArpEvent &other) {
-    return this->time >= other.time;
-}
+    explicit BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec);
 
-bool ArpEvent::operator==(ArpEvent &other) {
-    return this->time == other.time;
-}
+    void paint(Graphics &g) override;
+
+    void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) override;
+
+private:
+
+    LibreArp &processor;
+    EditorState &state;
+    PatternEditorView *editorComponent;
+};
+
+

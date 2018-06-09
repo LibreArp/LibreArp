@@ -12,13 +12,17 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
 #pragma once
 
 #include "JuceHeader.h"
 #include "../LibreArp.h"
+#include "xml/XmlEditor.h"
+#include "pattern/PatternEditor.h"
+#include "pattern/PatternEditorView.h"
+#include "about/AboutBox.h"
 
 /**
  * Main LibreArp editor component.
@@ -26,7 +30,7 @@
 class MainEditor : public AudioProcessorEditor {
 public:
 
-    explicit MainEditor(LibreArp &);
+    explicit MainEditor(LibreArp &, EditorState &);
 
     ~MainEditor() override;
 
@@ -36,13 +40,16 @@ public:
     void resized() override;
 
 private:
-    /**
-     * The underlying audio processor instance.
-     */
     LibreArp &processor;
+    EditorState &state;
 
-    TextEditor xmlEditor;
-    TextButton applyXmlButton;
+    ResizableCornerComponent resizer;
+    ComponentBoundsConstrainer boundsConstrainer;
+    TabbedComponent tabs;
+
+    PatternEditorView patternEditor;
+    XmlEditor xmlEditor;
+    AboutBox aboutBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainEditor);
 };

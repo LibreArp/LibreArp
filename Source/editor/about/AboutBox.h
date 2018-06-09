@@ -12,18 +12,31 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
 #pragma once
 
+#include "JuceHeader.h"
 
-#include <string>
-#include <stdexcept>
 
-class ArpIntegrityException : public std::runtime_error {
+class AboutBox : public Component {
 public:
-    explicit ArpIntegrityException(std::string message);
+
+    explicit AboutBox();
+
+    void resized() override;
+
+private:
+
+    Label nameAndVersionLabel;
+    Label gplLabel;
+
+    HyperlinkButton websiteButton;
+    HyperlinkButton sourceButton;
+    HyperlinkButton juceButton;
+    HyperlinkButton gplButton;
+
 };
 
 

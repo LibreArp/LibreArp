@@ -17,26 +17,42 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include "JuceHeader.h"
+#include "../../LibreArp.h"
+#include "PatternEditor.h"
+#include "BeatBar.h"
 
-class NoteData {
+
+class PatternEditorView : public Component {
 public:
-    static const Identifier TREEID_NOTE_DATA;
-    static const Identifier TREEID_NOTE_NUMBER;
-    static const Identifier TREEID_VELOCITY;
-    static const Identifier TREEID_PAN;
 
-    int noteNumber;
-    double velocity;
-    double pan;
+    explicit PatternEditorView(LibreArp &p, EditorState &editorState);
 
-    int lastNote = -1;
+    void paint(Graphics &g) override;
 
-    NoteData();
+    void resized() override;
 
-    ValueTree toValueTree();
+    void zoomPattern(float deltaX, float deltaY);
 
-    static NoteData fromValueTree(ValueTree &tree);
+    int getRenderWidth();
+    int getRenderHeight();
+
+private:
+
+    LibreArp &processor;
+    EditorState &state;
+
+    Slider snapSlider;
+    Label snapSliderLabel;
+
+    Slider loopResetSlider;
+    Label loopResetSliderLabel;
+
+    Viewport editorViewport;
+    PatternEditor editor;
+
+    Viewport beatBarViewport;
+    BeatBar beatBar;
 };
 
 

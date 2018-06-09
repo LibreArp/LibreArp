@@ -12,17 +12,18 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
 #pragma once
 
 
-#include "../ArpPattern.h"
+#include <string>
+#include <stdexcept>
 
-class PatternUtil {
+class ArpIntegrityException : public std::runtime_error {
 public:
-    static ArpPattern createBasicPattern();
+    explicit ArpIntegrityException(std::string message);
 };
 
 

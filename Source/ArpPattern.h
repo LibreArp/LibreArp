@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "ArpEvent.h"
 #include "ArpNote.h"
+#include "ArpBuiltEvents.h"
 
 class ArpPattern {
 public:
@@ -60,11 +60,11 @@ public:
 
 
     /**
-     * Builds a vector of ArpEvents, sorted by time, from this pattern.
+     * Builds events from this pattern.
      *
-     * @return a vector of ArpEvents
+     * @return ArpBuiltEvents built from this pattern
      */
-    std::vector<ArpEvent> build();
+    ArpBuiltEvents buildEvents();
 
     /**
      * Gets the pattern as a ValueTree.

@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
 #pragma once
@@ -20,6 +20,7 @@
 #include <sstream>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ArpPattern.h"
+#include "editor/EditorState.h"
 
 /**
  * The LibreArp audio processor.
@@ -27,6 +28,7 @@
 class LibreArp : public AudioProcessor {
 public:
     static const Identifier TREEID_LIBREARP;
+    static const Identifier TREEID_LOOP_RESET;
     static const Identifier TREEID_PATTERN_XML;
     static const Identifier TREEID_OCTAVES;
 
@@ -81,6 +83,9 @@ public:
     void setStateInformation(const void *data, int sizeInBytes) override;
 
 
+    void stopAll();
+
+
     void setPattern(ArpPattern &pattern, bool updateXml = true);
 
     void parsePattern(const String &xmlPattern);
@@ -96,24 +101,35 @@ public:
 
     int getNote();
 
+    void setLoopReset(double loopReset);
+
+    double getLoopReset();
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
 
+    EditorState editorState;
+
     ArpPattern pattern;
     String patternXml;
-    std::vector<ArpEvent> events;
-    unsigned long eventsPosition;
+    ArpBuiltEvents events;
 
     AudioParameterBool *octaves;
 
     double sampleRate;
     int64 lastPosition;
+    double loopReset;
     bool wasPlaying;
 
-    SortedSet<int> activeNotes;
+    bool stopScheduled;
+    bool buildScheduled;
+
+    SortedSet<int> inputNotes;
+    SortedSet<int> playingNotes;
     int note;
 
     void processInputMidi(MidiBuffer &midiMessages);
+    void stopAll(MidiBuffer &midi);
 
-    int64 nextTime(ArpEvent &event, int64 position);
+    int64 nextTime(ArpBuiltEvents::Event &event, int64 position, int64 lastPosition);
 };

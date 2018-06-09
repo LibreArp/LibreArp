@@ -12,15 +12,15 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
 #include "LibreArp.h"
 #include "editor/MainEditor.h"
-#include "util/PatternUtil.h"
-#include "ArpIntegrityException.h"
+#include "exception/ArpIntegrityException.h"
 
 const Identifier LibreArp::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NOLINT
+const Identifier LibreArp::TREEID_LOOP_RESET = Identifier("loopReset"); // NOLINT
 const Identifier LibreArp::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
 const Identifier LibreArp::TREEID_OCTAVES = Identifier("octaves"); // NOLINT
 
@@ -37,9 +37,11 @@ LibreArp::LibreArp()
 )
 #endif
 {
-    ArpPattern pattern = PatternUtil::createBasicPattern();
-    setPattern(pattern);
-
+    this->lastPosition = 0;
+    this->wasPlaying = false;
+    this->buildScheduled = false;
+    this->stopScheduled = false;
+    this->loopReset = 0.0;
     addParameter(octaves = new AudioParameterBool(
             "octaves",
             "Octaves",
@@ -107,9 +109,6 @@ void LibreArp::changeProgramName(int index, const String &newName) {
 void LibreArp::prepareToPlay(double sampleRate, int samplesPerBlock) {
     ignoreUnused(samplesPerBlock);
     this->sampleRate = sampleRate;
-    this->lastPosition = 0;
-    this->wasPlaying = false;
-//    this->octaves = true;
 }
 
 void LibreArp::releaseResources() {
@@ -152,71 +151,98 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         audio.clear(i, 0, numSamples);
 
+    // Build events if scheduled
+    if (buildScheduled) {
+        this->stopAll();
+        events = pattern.buildEvents();
+        buildScheduled = false;
+    }
+
     processInputMidi(midi);
 
     AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
     getPlayHead()->getCurrentPosition(cpi);
 
-    if (cpi.isPlaying) {
+    if (cpi.isPlaying && !this->events.events.empty()) {
         midi.clear();
 
-        auto timebase = this->pattern.getTimebase();
+        auto timebase = this->events.timebase;
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = this->sampleRate * pulseLength;
 
-        auto position = static_cast<int64>(std::ceil(cpi.ppqPosition * timebase));
-        auto lastPosition = this->lastPosition;
+        auto lastPosition = static_cast<int64>(std::floor(cpi.ppqPosition * timebase));
+        auto position = lastPosition + static_cast<int64>(std::ceil(numSamples / pulseSamples));
 
-        ArpEvent event;
-        int64 time;
-        if (activeNotes.isEmpty()) {
-            for (auto &note : pattern.getNotes()) {
-                auto &data = note.data;
-                if (data.lastNote > 0) {
-                    midi.addEvent(MidiMessage::noteOff(1, data.lastNote), 0);
-                    data.lastNote = -1;
+        if (stopScheduled) {
+            this->stopAll(midi);
+            stopScheduled = false;
+        }
+
+        for(auto event : events.events) {
+            auto time = nextTime(event, position, lastPosition);
+
+            if (time < position) {
+                auto offsetBase = static_cast<int>(std::floor((time - this->lastPosition) * pulseSamples));
+                int offset = jmin(offsetBase, numSamples - 1);
+
+                if (this->lastPosition > position && offset < 0) {
+                    offset = 0;
                 }
-            }
-        } else {
-            while ((time = nextTime(event = events[eventsPosition], lastPosition)) < position) {
-                auto offsetBase = static_cast<int>(std::ceil((time - this->lastPosition) * pulseSamples));
-                int offset = jmax(0, offsetBase % numSamples);
 
-                for (auto data : event.offs) {
-                    if (data->lastNote >= 0) {
-                        midi.addEvent(MidiMessage::noteOff(1, data->lastNote), offset);
-                        data->lastNote = -1;
+                if (offset >= 0) {
+                    for (auto i : event.offs) {
+                        auto &data = events.data[i];
+                        if (data.lastNote >= 0) {
+                            midi.addEvent(MidiMessage::noteOff(1, data.lastNote), offset);
+                            playingNotes.removeValue(data.lastNote);
+                            data.lastNote = -1;
+                        }
+                    }
+
+                    if (!inputNotes.isEmpty()) {
+                        for (auto i : event.ons) {
+                            auto &data = events.data[i];
+                            auto index = data.noteNumber % inputNotes.size();
+                            if (index < 0) {
+                                index += inputNotes.size();
+                            }
+
+                            auto note = inputNotes[index];
+                            if (octaves->get()) {
+                                auto octave = data.noteNumber / inputNotes.size();
+                                if (data.noteNumber < 0) {
+                                    octave--;
+                                }
+                                note += octave * 12;
+                            }
+
+                            if (data.lastNote != note) {
+                                data.lastNote = note;
+                                midi.addEvent(
+                                        MidiMessage::noteOn(1, note, static_cast<float>(data.velocity)), offset);
+                                playingNotes.add(note);
+                            }
+                        }
                     }
                 }
-
-                for (auto data : event.ons) {
-                    auto note = activeNotes[data->noteNumber % activeNotes.size()];
-                    if (octaves->get()) {
-                        auto octave = data->noteNumber / activeNotes.size();
-                        note += octave * 12;
-                    }
-                    data->lastNote = note;
-
-                    midi.addEvent(
-                            MidiMessage::noteOn(1, note, static_cast<float>(data->velocity)), offset);
-                }
-
-                lastPosition = time;
-                eventsPosition = (eventsPosition + 1) % events.size();
             }
+        }
+
+        if (getActiveEditor() != nullptr && getActiveEditor()->isVisible()) {
+            getActiveEditor()->repaint();
         }
 
         this->lastPosition = position;
         this->wasPlaying = true;
     } else {
-        for (auto &note : pattern.getNotes()) {
-            auto &data = note.data;
-            if (data.lastNote > 0) {
-                midi.addEvent(MidiMessage::noteOff(1, data.lastNote), 0);
-                data.lastNote = -1;
+        if (this->wasPlaying) {
+            if (getActiveEditor() != nullptr && getActiveEditor()->isVisible()) {
+                getActiveEditor()->repaint();
             }
+
+            this->stopAll(midi);
         }
-        this->eventsPosition = 0;
+
         this->lastPosition = 0;
         this->wasPlaying = false;
     }
@@ -228,13 +254,15 @@ bool LibreArp::hasEditor() const {
 }
 
 AudioProcessorEditor *LibreArp::createEditor() {
-    return new MainEditor(*this);
+    return new MainEditor(*this, editorState);
 }
 
 //==============================================================================
 void LibreArp::getStateInformation(MemoryBlock &destData) {
     ValueTree tree = ValueTree(TREEID_LIBREARP);
     tree.appendChild(this->pattern.toValueTree(), nullptr);
+    tree.appendChild(this->editorState.toValueTree(), nullptr);
+    tree.setProperty(TREEID_LOOP_RESET, this->loopReset, nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
     tree.setProperty(TREEID_OCTAVES, this->octaves->get(), nullptr);
 
@@ -253,6 +281,15 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
             ValueTree patternTree = tree.getChildWithName(ArpPattern::TREEID_PATTERN);
             ArpPattern pattern = ArpPattern::fromValueTree(patternTree);
 
+            ValueTree editorTree = tree.getChildWithName(EditorState::TREEID_EDITOR_STATE);
+            if (editorTree.isValid()) {
+                this->editorState = EditorState::fromValueTree(editorTree);
+            }
+
+            if (tree.hasProperty(TREEID_LOOP_RESET)) {
+                this->loopReset = tree.getProperty(TREEID_LOOP_RESET);
+            }
+
             if (tree.hasProperty(TREEID_OCTAVES)) {
                 *this->octaves = tree.getProperty(TREEID_OCTAVES);
             }
@@ -264,9 +301,6 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
                 setPattern(pattern, true);
             }
         }
-    } else {
-        ArpPattern pattern = PatternUtil::createBasicPattern();
-        setPattern(pattern);
     }
 }
 
@@ -291,7 +325,7 @@ void LibreArp::parsePattern(const String &xmlPattern) {
 }
 
 void LibreArp::buildPattern() {
-    this->events = this->pattern.build();
+    this->buildScheduled = true;
 }
 
 ArpPattern &LibreArp::getPattern() {
@@ -312,24 +346,63 @@ int LibreArp::getNote() {
 }
 
 
+void LibreArp::setLoopReset(double loopReset) {
+    this->loopReset = jmax(0.0, loopReset);
+}
+
+double LibreArp::getLoopReset() {
+    return this->loopReset;
+}
+
+
 void LibreArp::processInputMidi(MidiBuffer &midiMessages) {
     int time;
     MidiMessage m;
     for (MidiBuffer::Iterator i(midiMessages); i.getNextEvent(m, time);) {
         if (m.isNoteOn()) {
-            activeNotes.add(m.getNoteNumber());
+            inputNotes.add(m.getNoteNumber());
         } else if (m.isNoteOff()) {
-            activeNotes.removeValue(m.getNoteNumber());
+            inputNotes.removeValue(m.getNoteNumber());
         }
     }
 }
 
+void LibreArp::stopAll() {
+    this->stopScheduled = true;
+}
 
-int64 LibreArp::nextTime(ArpEvent &event, int64 position) {
-    auto result = (((position / pattern.loopLength)) * pattern.loopLength) + event.time;
-    if (result < position) {
-        result += pattern.loopLength;
+void LibreArp::stopAll(MidiBuffer &midi) {
+    midi.clear();
+
+    for (auto noteNumber : playingNotes) {
+        midi.addEvent(MidiMessage::noteOff(1, noteNumber), 0);
     }
+    playingNotes.clear();
+
+    for (auto &data : events.data) {
+        data.lastNote = -1;
+    }
+}
+
+
+int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 position, int64 lastPosition) {
+    int64 result;
+
+    if (loopReset > 0.0) {
+        auto loopResetLength = static_cast<int64>(std::ceil(events.timebase * loopReset));
+        auto resetPosition = position % loopResetLength;
+        auto intermediateResult = resetPosition - (resetPosition % events.loopLength) + event.time;
+        intermediateResult %= loopResetLength;
+
+        result = position - (position % loopResetLength) + intermediateResult;
+    } else {
+        result = position - (position % events.loopLength) + event.time;
+    }
+
+    if (result < lastPosition) {
+        result += events.loopLength;
+    }
+
     return result;
 }
 

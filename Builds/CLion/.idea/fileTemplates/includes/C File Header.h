@@ -12,23 +12,5 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
-
-#pragma once
-
-#include <vector>
-#include "NoteData.h"
-
-class ArpEvent {
-public:
-    int64 time;
-    std::vector<NoteData*> ons;
-    std::vector<NoteData*> offs;
-
-    bool operator<(ArpEvent &other);
-    bool operator<=(ArpEvent &other);
-    bool operator>(ArpEvent &other);
-    bool operator>=(ArpEvent &other);
-    bool operator==(ArpEvent &other);
-};

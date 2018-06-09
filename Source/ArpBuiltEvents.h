@@ -12,33 +12,30 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
-#include "PatternUtil.h"
+#pragma once
 
-ArpPattern PatternUtil::createBasicPattern() {
-    ArpPattern pattern;
+#include <set>
+#include "JuceHeader.h"
+#include "NoteData.h"
 
-    ArpNote note;
-    auto &notes = pattern.getNotes();
+class ArpBuiltEvents {
+public:
 
-    note.data.noteNumber = 0;
-    note.startPoint = 0;
-    note.endPoint = 24;
-    notes.push_back(note);
+    class Event {
+    public:
+        int64 time;
+        std::set<unsigned long> ons;
+        std::set<unsigned long> offs;
+    };
 
-    note.data.noteNumber = 1;
-    note.startPoint = 24;
-    note.endPoint = 48;
-    notes.push_back(note);
+    std::vector<Event> events;
+    std::vector<NoteData> data;
 
-    note.data.noteNumber = 2;
-    note.startPoint = 48;
-    note.endPoint = 72;
-    notes.push_back(note);
+    int timebase;
+    int64 loopLength;
+};
 
-    pattern.loopLength = 72;
 
-    return pattern;
-}
