@@ -36,6 +36,7 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
     boundsConstrainer.setMinimumSize(200, 200);
 
     tabs.addTab("Pattern Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
+    tabs.addTab("About", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
 //    tabs.addTab("XML Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
 
     addAndMakeVisible(tabs);

@@ -22,6 +22,7 @@
 #include "xml/XmlEditor.h"
 #include "pattern/PatternEditor.h"
 #include "pattern/PatternEditorView.h"
+#include "about/AboutBox.h"
 
 /**
  * Main LibreArp editor component.
@@ -48,6 +49,7 @@ private:
 
     PatternEditorView patternEditor;
     XmlEditor xmlEditor;
+    AboutBox aboutBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainEditor);
 };
