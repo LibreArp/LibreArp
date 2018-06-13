@@ -19,6 +19,9 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+/**
+ * The data of a note.
+ */
 class NoteData {
 public:
     static const Identifier TREEID_NOTE_DATA;
@@ -26,16 +29,50 @@ public:
     static const Identifier TREEID_VELOCITY;
     static const Identifier TREEID_PAN;
 
+    /**
+     * The index of the note among the input notes.
+     */
     int noteNumber;
+
+    /**
+     * The velocity of the note.
+     */
     double velocity;
+
+    /**
+     * The panning of the note.
+     */
     double pan;
 
+
+
+    /**
+     * The last played MIDI note number.
+     */
     int lastNote = -1;
 
+
+
+    /**
+     * Constructs new note data.
+     */
     NoteData();
 
+
+
+    /**
+     * Serializes this data into a ValueTree.
+     *
+     * @return a ValueTree representing this note
+     */
     ValueTree toValueTree();
 
+    /**
+     * Deserializes the specified ValueTree into note data.
+     *
+     * @param tree the tree to deserialize
+     * @return the note represented by the ValueTree
+     */
     static NoteData fromValueTree(ValueTree &tree);
 };
 

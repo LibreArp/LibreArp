@@ -21,6 +21,9 @@
 #include "ArpNote.h"
 #include "ArpBuiltEvents.h"
 
+/**
+ * A data class of a pattern, editable by the user.
+ */
 class ArpPattern {
 public:
 
@@ -32,7 +35,12 @@ public:
     static constexpr int DEFAULT_TIMEBASE = 96;
 
 
+    /**
+     * The length of the loop.
+     */
     int64 loopLength;
+
+
 
     /**
      * Constructs a new pattern with the specified timebase.
@@ -41,7 +49,11 @@ public:
      */
     explicit ArpPattern(int timebase = DEFAULT_TIMEBASE);
 
+    /**
+     * Destructs this pattern.
+     */
     ~ArpPattern();
+
 
 
     /**
@@ -59,6 +71,7 @@ public:
     std::vector<ArpNote> &getNotes();
 
 
+
     /**
      * Builds events from this pattern.
      *
@@ -66,17 +79,33 @@ public:
      */
     ArpBuiltEvents buildEvents();
 
+
+
     /**
-     * Gets the pattern as a ValueTree.
+     * Serializes this pattern into a ValueTree.
      *
      * @return the value tree representing this pattern
      */
     ValueTree toValueTree();
 
-
+    /**
+     * Deserializes the specified ValueTree into the pattern it represents.
+     *
+     * @param tree the tree to deserialize
+     * @return the pattern represented by the ValueTree
+     */
     static ArpPattern fromValueTree(ValueTree &tree);
 
 private:
+
+    /**
+     * The timebase of the pattern.
+     * Defines the amount of pulses in one beat.
+     */
     int timebase;
+
+    /**
+     * The notes in the pattern.
+     */
     std::vector<ArpNote> notes;
 };

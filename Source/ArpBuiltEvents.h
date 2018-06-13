@@ -21,20 +21,55 @@
 #include "JuceHeader.h"
 #include "NoteData.h"
 
+/**
+ * A data class of built events of a pattern, ready for playback.
+ */
 class ArpBuiltEvents {
 public:
 
+    /**
+     * Data class of a single event in time. Contains the time the event fires (in the set timebase) and indices of
+     * on-data and off-data.
+     */
     class Event {
     public:
+
+        /**
+         * The time in the pattern on which the event fires.
+         */
         int64 time;
+
+        /**
+         * The indices of on-data.
+         */
         std::set<unsigned long> ons;
+
+        /**
+         * The indices of off-data.
+         */
         std::set<unsigned long> offs;
     };
 
+    /**
+     * The event data.
+     */
     std::vector<Event> events;
+
+    /**
+     * The data of notes in the pattern.
+     */
     std::vector<NoteData> data;
 
+
+
+    /**
+     * The timebase of the built pattern.
+     */
     int timebase;
+
+    /**
+     * The loop length of the built pattern.
+     */
     int64 loopLength;
 };
 

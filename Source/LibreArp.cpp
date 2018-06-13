@@ -108,7 +108,7 @@ void LibreArp::changeProgramName(int index, const String &newName) {
 //==============================================================================
 void LibreArp::prepareToPlay(double sampleRate, int samplesPerBlock) {
     ignoreUnused(samplesPerBlock);
-    this->sampleRate = sampleRate;
+    ignoreUnused(sampleRate);
 }
 
 void LibreArp::releaseResources() {
@@ -168,7 +168,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
 
         auto timebase = this->events.timebase;
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
-        auto pulseSamples = this->sampleRate * pulseLength;
+        auto pulseSamples = getSampleRate() * pulseLength;
 
         auto lastPosition = static_cast<int64>(std::floor(cpi.ppqPosition * timebase));
         auto position = lastPosition + static_cast<int64>(std::ceil(numSamples / pulseSamples));
@@ -339,10 +339,6 @@ String &LibreArp::getPatternXml() {
 
 int64 LibreArp::getLastPosition() {
     return this->lastPosition;
-}
-
-int LibreArp::getNote() {
-    return this->note;
 }
 
 

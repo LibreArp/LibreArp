@@ -83,53 +83,169 @@ public:
     void setStateInformation(const void *data, int sizeInBytes) override;
 
 
+
+    /**
+     * Schedules a stop of all currently playing notes. The stop will occur on the next block process.
+     */
     void stopAll();
 
 
+
+    /**
+     * Sets the pattern to play.
+     *
+     * @param pattern the pattern to play
+     * @param updateXml whether the XML representation should be updated
+     */
     void setPattern(ArpPattern &pattern, bool updateXml = true);
 
+    /**
+     * Parses the pattern to play from the given XML data.
+     *
+     * @param xmlPattern the XML data
+     */
     void parsePattern(const String &xmlPattern);
 
+    /**
+     * Builds the current pattern.
+     */
     void buildPattern();
 
+    /**
+     * Gets the current pattern.
+     *
+     * @return the current pattern
+     */
     ArpPattern &getPattern();
 
+    /**
+     * Gets the current pattern's XML.
+     *
+     * @return the current pattern's XML
+     */
     String &getPatternXml();
 
 
+
+    /**
+     * Gets the last position the processor has played, in pulses.
+     *
+     * @return the last position the processor has played
+     */
     int64 getLastPosition();
 
-    int getNote();
-
+    /**
+     * Sets the amount of beats after which the loop should reset.
+     *
+     * @param loopReset the amount of beats after which the loop should reset
+     */
     void setLoopReset(double loopReset);
 
+    /**
+     * Gets the amount of beats after which the loop should reset.
+     *
+     * @return the amount of beats after which the loop should reset
+     */
     double getLoopReset();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
 
+    /**
+     * The persistent state of the editor.
+     */
     EditorState editorState;
 
+
+
+    /**
+     * The current pattern.
+     */
     ArpPattern pattern;
+
+    /**
+     * The current pattern's XML representation.
+     */
     String patternXml;
+
+    /**
+     * The current pattern, built for playback.
+     */
     ArpBuiltEvents events;
 
+
+
+    /**
+     * Whether the plugin should transpose octaves upon "note overflow".
+     */
     AudioParameterBool *octaves;
 
-    double sampleRate;
+
+
+    /**
+     * The last position the processor has played, in pulses.
+     */
     int64 lastPosition;
+
+    /**
+     * The amount of beats after which the loop should reset.
+     */
     double loopReset;
+
+    /**
+     * Whether the playhead was playing in the last block.
+     */
     bool wasPlaying;
 
+
+
+    /**
+     * Whether stopAll was called.
+     */
     bool stopScheduled;
+
+    /**
+     * Whether buildPattern was called.
+     */
     bool buildScheduled;
 
-    SortedSet<int> inputNotes;
-    SortedSet<int> playingNotes;
-    int note;
 
+
+    /**
+     * The set of currently fed input notes.
+     */
+    SortedSet<int> inputNotes;
+
+    /**
+     * The set of currently playing output notes.
+     */
+    SortedSet<int> playingNotes;
+
+
+
+    /**
+     * Processes input midi messages.
+     *
+     * @param midiMessages the midi messages
+     */
     void processInputMidi(MidiBuffer &midiMessages);
+
+    /**
+     * Sends a noteOff for all currently playing output notes.
+     *
+     * @param midi the midi messages
+     */
     void stopAll(MidiBuffer &midi);
 
+
+
+    /**
+     * Calculates the next time of the specified event.
+     *
+     * @param event the event of which the next time should be calculated
+     * @param position the current processed position
+     * @param lastPosition the last processed position
+     * @return the next time of the event
+     */
     int64 nextTime(ArpBuiltEvents::Event &event, int64 position, int64 lastPosition);
 };
