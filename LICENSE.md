@@ -630,8 +630,8 @@ attach them to the start of each source file to most effectively state
 the exclusion of warranty; and each file should have at least the
 "copyright" line and a pointer to where the full notice is found.
 
-        LibreArp - A libre VST arpeggio generator
-        Copyright (C) 2018 The LibreArp contributors
+        <one line to give the program's name and a brief idea of what it does.>
+        Copyright (C) <year>  <name of author>
 
         This program is free software: you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
@@ -644,7 +644,7 @@ the exclusion of warranty; and each file should have at least the
         GNU General Public License for more details.
 
         You should have received a copy of the GNU General Public License
-        along with this program.  If not, see https://librearp.gitlab.io/license/.
+        along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Also add information on how to contact you by electronic and paper
 mail.
@@ -652,7 +652,7 @@ mail.
 If the program does terminal interaction, make it output a short
 notice like this when it starts in an interactive mode:
 
-        LibreArp Copyright (C) 2018 The LibreArp contributors
+        <program>  Copyright (C) <year>  <name of author>
         This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
         This is free software, and you are welcome to redistribute it
         under certain conditions; type `show c' for details.
@@ -665,7 +665,7 @@ use an "about box".
 You should also get your employer (if you work as a programmer) or
 school, if any, to sign a "copyright disclaimer" for the program, if
 necessary. For more information on this, and how to apply and follow
-the GNU GPL, see https://librearp.gitlab.io/license/.
+the GNU GPL, see <https://www.gnu.org/licenses/>.
 
 The GNU General Public License does not permit incorporating your
 program into proprietary programs. If your program is a subroutine
