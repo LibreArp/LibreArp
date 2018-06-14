@@ -195,6 +195,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                         if (data.lastNote >= 0) {
                             midi.addEvent(MidiMessage::noteOff(1, data.lastNote), offset);
                             playingNotes.removeValue(data.lastNote);
+                            playingPatternIndices.removeValue(data.noteIndex);
                             data.lastNote = -1;
                         }
                     }
@@ -221,6 +222,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                                 midi.addEvent(
                                         MidiMessage::noteOn(1, note, static_cast<float>(data.velocity)), offset);
                                 playingNotes.add(note);
+                                playingPatternIndices.add(data.noteIndex);
                             }
                         }
                     }
@@ -342,6 +344,7 @@ int64 LibreArp::getLastPosition() {
 }
 
 
+
 void LibreArp::setLoopReset(double loopReset) {
     this->loopReset = jmax(0.0, loopReset);
 }
@@ -349,6 +352,13 @@ void LibreArp::setLoopReset(double loopReset) {
 double LibreArp::getLoopReset() {
     return this->loopReset;
 }
+
+
+
+SortedSet<unsigned long>& LibreArp::getPlayingPatternIndices() {
+    return this->playingPatternIndices;
+}
+
 
 
 void LibreArp::processInputMidi(MidiBuffer &midiMessages) {
@@ -363,6 +373,8 @@ void LibreArp::processInputMidi(MidiBuffer &midiMessages) {
     }
 }
 
+
+
 void LibreArp::stopAll() {
     this->stopScheduled = true;
 }
@@ -374,11 +386,13 @@ void LibreArp::stopAll(MidiBuffer &midi) {
         midi.addEvent(MidiMessage::noteOff(1, noteNumber), 0);
     }
     playingNotes.clear();
+    playingPatternIndices.clear();
 
     for (auto &data : events.data) {
         data.lastNote = -1;
     }
 }
+
 
 
 int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 position, int64 lastPosition) {

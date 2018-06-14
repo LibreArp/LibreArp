@@ -148,6 +148,13 @@ public:
      */
     double getLoopReset();
 
+    /**
+     * Gets the currently playing pattern indices.
+     *
+     * @return the currently playing pattern indices
+     */
+    SortedSet<unsigned long> &getPlayingPatternIndices();
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
 
@@ -220,6 +227,11 @@ private:
      * The set of currently playing output notes.
      */
     SortedSet<int> playingNotes;
+
+    /**
+     * The set of currently playing pattern indices.
+     */
+    SortedSet<unsigned long> playingPatternIndices;
 
 
 

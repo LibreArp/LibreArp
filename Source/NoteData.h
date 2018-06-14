@@ -47,13 +47,6 @@ public:
 
 
     /**
-     * The last played MIDI note number.
-     */
-    int lastNote = -1;
-
-
-
-    /**
      * Constructs new note data.
      */
     NoteData();
