@@ -49,9 +49,11 @@ ArpBuiltEvents ArpPattern::buildEvents() {
     result.timebase = this->timebase;
     result.loopLength = this->loopLength;
 
-    for (auto &note : this->notes) {
+    for (unsigned long i = 0; i < this->notes.size(); i++) {
+        auto &note = this->notes[i];
+
         auto dataIndex = result.data.size();
-        result.data.push_back(note.data);
+        result.data.push_back(ArpBuiltEvents::EventNoteData::of(note.data, i));
 
         int64 onTime = note.startPoint % loopLength;
         ArpBuiltEvents::Event &onEvent = eventMap[onTime];

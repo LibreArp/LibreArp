@@ -49,7 +49,7 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
         state.lastNoteLength = processor.getPattern().getTimebase() / state.divisor;
     }
     snapEnabled = true;
-    selection = Rectangle(0, 0, 0, 0);
+    selection = Rectangle<int>(0, 0, 0, 0);
 
     setWantsKeyboardFocus(true);
 }
@@ -91,14 +91,16 @@ void PatternEditor::paint(Graphics &g) {
 
     // Draw notes
     auto &notes = pattern.getNotes();
-    for (int i = 0; i < notes.size(); i++) {
+    for (unsigned long i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
-        Rectangle noteRect = getRectangleForNote(note);
+        Rectangle<int> noteRect = getRectangleForNote(note);
+
+        auto isPlaying = processor.getPlayingPatternIndices().contains(i);
 
         if (selectedNotes.find(i) == selectedNotes.end()) {
-            g.setColour((note.data.lastNote == -1) ? NOTE_FILL_COLOUR : NOTE_ACTIVE_FILL_COLOUR);
+            g.setColour(isPlaying ? NOTE_ACTIVE_FILL_COLOUR : NOTE_FILL_COLOUR);
         } else {
-            g.setColour((note.data.lastNote == -1) ? NOTE_SELECTED_FILL_COLOUR : NOTE_SELECTED_ACTIVE_FILL_COLOUR);
+            g.setColour(isPlaying ? NOTE_SELECTED_ACTIVE_FILL_COLOUR : NOTE_SELECTED_FILL_COLOUR);
         }
         g.fillRect(noteRect);
         g.setColour(NOTE_BORDER_COLOUR);
@@ -296,7 +298,7 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
 
 void PatternEditor::mouseUp(const MouseEvent &event) {
     setDragAction(nullptr);
-    selection = Rectangle(0, 0, 0, 0);
+    selection = Rectangle<int>(0, 0, 0, 0);
     setMouseCursor(MouseCursor::NormalCursor);
     repaint();
     Component::mouseUp(event);
@@ -513,7 +515,7 @@ void PatternEditor::moveSelectedDown() {
 
 
 void PatternEditor::select(const MouseEvent &event, PatternEditor::SelectionDragAction *dragAction) {
-    selection = Rectangle(Point(event.x, event.y), Point(dragAction->startX, dragAction->startY));
+    selection = Rectangle<int>(Point<int>(event.x, event.y), Point<int>(dragAction->startX, dragAction->startY));
 
     selectedNotes.clear();
     auto &notes = processor.getPattern().getNotes();

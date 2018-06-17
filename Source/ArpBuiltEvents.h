@@ -31,8 +31,63 @@ public:
         std::set<unsigned long> offs;
     };
 
+
+
+    /**
+     * Class of note data in an event.
+     */
+    class EventNoteData {
+    public:
+
+        /**
+         * The index of the note among the input notes.
+         */
+        int noteNumber;
+
+        /**
+         * The velocity of the note.
+         */
+        double velocity;
+
+        /**
+         * The panning of the note.
+         */
+        double pan;
+
+
+
+        /**
+         * The last played MIDI note number.
+         */
+        int lastNote = -1;
+
+        /**
+         * The index of the note in the pattern from which the events were built.
+         */
+        unsigned long noteIndex = 0;
+
+
+
+        /**
+         * Creates EventNoteData from NoteData.
+         *
+         * @param orig
+         * @return
+         */
+        static EventNoteData of(NoteData &orig, unsigned long noteIndex);
+    };
+
+
+
+    /**
+     * The event data.
+     */
     std::vector<Event> events;
-    std::vector<NoteData> data;
+
+    /**
+     * The data of notes in the pattern.
+     */
+    std::vector<EventNoteData> data;
 
     int timebase;
     int64 loopLength;

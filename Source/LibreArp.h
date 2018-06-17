@@ -105,6 +105,13 @@ public:
 
     double getLoopReset();
 
+    /**
+     * Gets the currently playing pattern indices.
+     *
+     * @return the currently playing pattern indices
+     */
+    SortedSet<unsigned long> &getPlayingPatternIndices();
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
 
@@ -128,6 +135,18 @@ private:
     SortedSet<int> playingNotes;
     int note;
 
+    /**
+     * The set of currently playing pattern indices.
+     */
+    SortedSet<unsigned long> playingPatternIndices;
+
+
+
+    /**
+     * Processes input midi messages.
+     *
+     * @param midiMessages the midi messages
+     */
     void processInputMidi(MidiBuffer &midiMessages);
     void stopAll(MidiBuffer &midi);
 

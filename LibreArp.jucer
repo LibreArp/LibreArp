@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT name="LibreArp" projectType="audioplug" jucerVersion="5.3.2"
-              version="1.0" buildVST3="1" buildAUv3="0" buildAU="0" buildVST="1"
+              version="1.1" buildVST3="1" buildAUv3="0" buildAU="0" buildVST="1"
               pluginName="LibreArp" pluginDesc="A free (as in free speech) arpeggio sequencer."
               pluginManufacturer="The LibreArp contributors" companyName="The LibreArp contributors"
               pluginWantsMidiIn="1" pluginProducesMidiOut="1" pluginIsMidiEffectPlugin="1"
@@ -16,6 +16,8 @@
               pluginAAXDisableMultiMono="0">
   <MAINGROUP id="FtyPbS" name="LibreArp">
     <GROUP id="{4D6501CE-D613-8A3D-7ABE-D57B9896DB0F}" name="Source">
+      <FILE id="FbDdGI" name="ArpBuiltEvents.cpp" compile="1" resource="0"
+            file="Source/ArpBuiltEvents.cpp"/>
       <GROUP id="{50F657DF-8B13-1330-0F07-913BC78A94FD}" name="exception">
         <FILE id="AaDTLm" name="ArpIntegrityException.cpp" compile="1" resource="0"
               file="Source/exception/ArpIntegrityException.cpp"/>
