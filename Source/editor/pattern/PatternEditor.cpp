@@ -91,14 +91,16 @@ void PatternEditor::paint(Graphics &g) {
 
     // Draw notes
     auto &notes = pattern.getNotes();
-    for (int i = 0; i < notes.size(); i++) {
+    for (unsigned long i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
         Rectangle<int> noteRect = getRectangleForNote(note);
 
+        auto isPlaying = processor.getPlayingPatternIndices().contains(i);
+
         if (selectedNotes.find(i) == selectedNotes.end()) {
-            g.setColour((note.data.lastNote == -1) ? NOTE_FILL_COLOUR : NOTE_ACTIVE_FILL_COLOUR);
+            g.setColour(isPlaying ? NOTE_ACTIVE_FILL_COLOUR : NOTE_FILL_COLOUR);
         } else {
-            g.setColour((note.data.lastNote == -1) ? NOTE_SELECTED_FILL_COLOUR : NOTE_SELECTED_ACTIVE_FILL_COLOUR);
+            g.setColour(isPlaying ? NOTE_SELECTED_ACTIVE_FILL_COLOUR : NOTE_SELECTED_FILL_COLOUR);
         }
         g.fillRect(noteRect);
         g.setColour(NOTE_BORDER_COLOUR);

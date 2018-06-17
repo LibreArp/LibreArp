@@ -15,38 +15,14 @@
 // along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
-#pragma once
+#include "ArpBuiltEvents.h"
 
-#include "../JuceLibraryCode/JuceHeader.h"
+ArpBuiltEvents::EventNoteData ArpBuiltEvents::EventNoteData::of(NoteData &orig, unsigned long noteIndex) {
+    EventNoteData result;
+    result.noteNumber = orig.noteNumber;
+    result.velocity = orig.velocity;
+    result.pan = orig.pan;
+    result.noteIndex = noteIndex;
 
-class NoteData {
-public:
-    static const Identifier TREEID_NOTE_DATA;
-    static const Identifier TREEID_NOTE_NUMBER;
-    static const Identifier TREEID_VELOCITY;
-    static const Identifier TREEID_PAN;
-
-    int noteNumber;
-    double velocity;
-    double pan;
-
-
-
-    /**
-     * The last played MIDI note number.
-     */
-    int lastNote = -1;
-
-
-
-    /**
-     * Constructs new note data.
-     */
-    NoteData();
-
-    ValueTree toValueTree();
-
-    static NoteData fromValueTree(ValueTree &tree);
-};
-
-
+    return result;
+}
