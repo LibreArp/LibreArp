@@ -97,8 +97,6 @@ void PatternEditor::paint(Graphics &g) {
 
         auto isPlaying = processor.getPlayingPatternIndices().contains(i);
 
-        auto isPlaying = processor.getPlayingPatternIndices().contains(i);
-
         if (selectedNotes.find(i) == selectedNotes.end()) {
             g.setColour(isPlaying ? NOTE_ACTIVE_FILL_COLOUR : NOTE_FILL_COLOUR);
         } else {
