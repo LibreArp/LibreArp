@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT name="LibreArp" projectType="audioplug" jucerVersion="5.3.2"
-              version="1.0" buildVST3="1" buildAUv3="0" buildAU="0" buildVST="1"
+              version="1.1" buildVST3="1" buildAUv3="0" buildAU="0" buildVST="1"
               pluginName="LibreArp" pluginDesc="A free (as in free speech) arpeggio sequencer."
               pluginManufacturer="The LibreArp contributors" companyName="The LibreArp contributors"
               pluginWantsMidiIn="1" pluginProducesMidiOut="1" pluginIsMidiEffectPlugin="1"
