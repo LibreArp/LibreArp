@@ -23,6 +23,7 @@
 #include "pattern/PatternEditor.h"
 #include "pattern/PatternEditorView.h"
 #include "about/AboutBox.h"
+#include "LArpLookAndFeel.h"
 
 /**
  * Main LibreArp editor component.
@@ -40,6 +41,8 @@ public:
     void resized() override;
 
 private:
+    LArpLookAndFeel lookAndFeel;
+
     LibreArp &processor;
     EditorState &state;
 

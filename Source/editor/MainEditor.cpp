@@ -20,6 +20,7 @@
 #include "MainEditor.h"
 #include "../exception/ArpIntegrityException.h"
 
+
 const int RESIZER_SIZE = 18;
 
 MainEditor::MainEditor(LibreArp &p, EditorState &e)
@@ -31,10 +32,14 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
           patternEditor(p, e),
           xmlEditor(p) {
 
+    setLookAndFeel(&lookAndFeel);
+    LookAndFeel::setDefaultLookAndFeel(&lookAndFeel);
+
     setSize(state.width, state.height);
 
     boundsConstrainer.setMinimumSize(200, 200);
 
+    tabs.setOutline(8);
     tabs.addTab("Pattern Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
     tabs.addTab("About", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
 //    tabs.addTab("XML Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
@@ -47,13 +52,15 @@ MainEditor::~MainEditor() = default;
 
 //==============================================================================
 void MainEditor::paint(Graphics &g) {
-    g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(LArpLookAndFeel::MAIN_BACKGROUND_COLOUR);
 }
 
 void MainEditor::resized() {
+
+
     state.width = getWidth();
     state.height = getHeight();
 
-    tabs.setBounds(getLocalBounds());
+    tabs.setBounds(getLocalBounds().reduced(8));
     resizer.setBounds(getWidth() - RESIZER_SIZE, getHeight() - RESIZER_SIZE, RESIZER_SIZE, RESIZER_SIZE);
 }

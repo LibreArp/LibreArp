@@ -26,11 +26,11 @@ AboutBox::AboutBox() {
     nameAndVersionLabel.setText(JucePlugin_Name " " JucePlugin_VersionString, NotificationType::dontSendNotification);
 #endif
 
-    nameAndVersionLabel.setFont(Font(32));
+    nameAndVersionLabel.setFont(Font(40));
     nameAndVersionLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(nameAndVersionLabel);
 
-    auto gplFont = gplLabel.getFont();
+    gplLabel.setFont(Font(16));
     gplLabel.setText(LICENSE_NOTICE, NotificationType::dontSendNotification);
     gplLabel.setJustificationType(Justification::topLeft);
     addAndMakeVisible(gplLabel);
@@ -57,10 +57,10 @@ void AboutBox::resized() {
 
     nameAndVersionLabel.setBounds(area.removeFromTop(64));
 
-    juceButton.setBounds(area.removeFromBottom(18));
-    sourceButton.setBounds(area.removeFromBottom(18));
-    websiteButton.setBounds(area.removeFromBottom(18));
-    gplButton.setBounds(area.removeFromBottom(18));
+    juceButton.setBounds(area.removeFromBottom(20));
+    sourceButton.setBounds(area.removeFromBottom(20));
+    websiteButton.setBounds(area.removeFromBottom(20));
+    gplButton.setBounds(area.removeFromBottom(20));
 
     gplLabel.setBounds(area);
 }

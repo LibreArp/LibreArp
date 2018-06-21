@@ -74,12 +74,12 @@ void PatternEditorView::resized() {
     toolBarArea.removeFromBottom(4);
     toolBarArea.removeFromTop(4);
     loopResetSliderLabel.setBounds(
-            toolBarArea.removeFromLeft(loopResetSliderLabel.getFont().getStringWidth(loopResetSliderLabel.getText())));
-    loopResetSlider.setBounds(toolBarArea.removeFromLeft(128));
+            toolBarArea.removeFromLeft(8 + loopResetSliderLabel.getFont().getStringWidth(loopResetSliderLabel.getText())));
+    loopResetSlider.setBounds(toolBarArea.removeFromLeft(96));
     snapSlider.setBounds(toolBarArea.removeFromRight(96));
     snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
 
-    beatBarViewport.setBounds(area.removeFromTop(16));
+    beatBarViewport.setBounds(area.removeFromTop(20));
     editorViewport.setBounds(area);
 }
 
