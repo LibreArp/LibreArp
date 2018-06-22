@@ -192,3 +192,8 @@ void LArpLookAndFeel::drawScrollbar(Graphics &g, ScrollBar &bar, int x, int y, i
     g.setColour(isMouseOver ? c.brighter (0.25f) : c);
     g.fillRect(thumbBounds.reduced (1).toFloat());
 }
+
+LArpLookAndFeel &LArpLookAndFeel::getInstance() {
+    static LArpLookAndFeel instance;
+    return instance;
+}

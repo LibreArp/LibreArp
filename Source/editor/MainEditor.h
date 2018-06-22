@@ -41,8 +41,6 @@ public:
     void resized() override;
 
 private:
-    LArpLookAndFeel lookAndFeel;
-
     LibreArp &processor;
     EditorState &state;
 

@@ -32,8 +32,7 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
           patternEditor(p, e),
           xmlEditor(p) {
 
-    setLookAndFeel(&lookAndFeel);
-    LookAndFeel::setDefaultLookAndFeel(&lookAndFeel);
+    LookAndFeel::setDefaultLookAndFeel(&LArpLookAndFeel::getInstance());
 
     setSize(state.width, state.height);
 
@@ -56,8 +55,6 @@ void MainEditor::paint(Graphics &g) {
 }
 
 void MainEditor::resized() {
-
-
     state.width = getWidth();
     state.height = getHeight();
 

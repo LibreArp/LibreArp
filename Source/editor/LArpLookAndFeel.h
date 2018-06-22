@@ -21,6 +21,7 @@
 
 
 class LArpLookAndFeel : public LookAndFeel_V4 {
+
 public:
 
     static const Colour MAIN_BACKGROUND_COLOUR;
@@ -29,7 +30,6 @@ public:
     static const Colour MAIN_FOREGROUND_COLOUR;
     static const Colour HIGHLIGHT_FOREGROUND_COLOUR;
 
-    explicit LArpLookAndFeel();
 
     void drawTabButton(TabBarButton &button, Graphics &graphics, bool isMouseOver, bool isMouseDown) override;
 
@@ -45,8 +45,11 @@ public:
     drawScrollbar(Graphics &g, ScrollBar &bar, int x, int y, int width, int height, bool isScrollbarVertical,
                   int thumbStartPosition, int thumbSize, bool isMouseOver, bool isMouseDown) override;
 
+    static LArpLookAndFeel &getInstance();
+
 private:
 
+    explicit LArpLookAndFeel();
     Typeface::Ptr mainTypeface;
 
 };
