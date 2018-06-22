@@ -28,7 +28,7 @@ const Colour NOTE_FILL_COLOUR = Colour(171, 204, 41);
 const Colour NOTE_ACTIVE_FILL_COLOUR = Colour(228, 255, 122);
 const Colour NOTE_SELECTED_FILL_COLOUR = Colour(245, 255, 209);
 const Colour NOTE_SELECTED_ACTIVE_FILL_COLOUR = Colour(255, 255, 255);
-const Colour NOTE_BORDER_COLOUR = Colour((uint8) 0, 0, 0, 0.5f);
+const Colour NOTE_BORDER_COLOUR = Colour((uint8) 0, 0, 0, 0.7f);
 
 const Colour CURSOR_TIME_COLOUR = Colour((uint8) 255, 255, 255, 0.7f);
 const Colour CURSOR_NOTE_COLOUR = Colour((uint8) 255, 255, 255, 0.05f);
