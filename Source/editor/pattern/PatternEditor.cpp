@@ -601,7 +601,7 @@ int PatternEditor::pulseToX(int64 pulse) {
 
 int PatternEditor::noteToY(int note) {
     double pixelsPerNote = state.pixelsPerNote;
-    return static_cast<int>(std::round((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote));
+    return static_cast<int>(std::floor((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote));
 }
 
 
