@@ -181,7 +181,7 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, notes, event));
                 } else {
-                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, selectedNotes, notes, event));
+                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, selectedNotes, notes, event));
                 }
                 return;
             } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - NOTE_RESIZE_TOLERANCE)) {
@@ -189,7 +189,7 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, notes, event));
                 } else {
-                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, selectedNotes, notes, event));
+                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, selectedNotes, notes, event));
                 }
                 return;
             } else {
@@ -197,7 +197,7 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, notes, event));
                 } else {
-                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, selectedNotes, notes, event));
+                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, selectedNotes, notes, event));
                 }
                 return;
             }
@@ -261,7 +261,10 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
     if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
         if (this->dragAction == nullptr) {
             if (event.mods.isCtrlDown()) {
-                selectedNotes.clear();
+                if (!event.mods.isShiftDown()) {
+                    selectedNotes.clear();
+                }
+
                 setDragAction(new SelectionDragAction(event.x, event.y));
                 repaint();
             } else {
@@ -281,6 +284,19 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
                         }
                         if (event.mods.isShiftDown() && !event.mods.isCtrlDown() && !event.mods.isAltDown()) {
                             noteDuplicate((NoteDragAction *) (this->dragAction));
+                        }
+                        if (event.mods.isCtrlDown() && !event.mods.isAltDown()) {
+                            if (!event.mods.isShiftDown()) {
+                                selectedNotes.clear();
+                                selectedNotes.insert(((NoteDragAction *) dragAction)->initiatorIndex);
+                            } else {
+                                if (selectedNotes.find(((NoteDragAction *) dragAction)->initiatorIndex) == selectedNotes.end()) {
+                                    selectedNotes.insert(((NoteDragAction *) dragAction)->initiatorIndex);
+                                } else {
+                                    selectedNotes.erase(((NoteDragAction *) dragAction)->initiatorIndex);
+                                }
+                            }
+                            repaint();
                         }
                     }
                     break;
@@ -526,7 +542,10 @@ void PatternEditor::moveSelectedDown() {
 void PatternEditor::select(const MouseEvent &event, PatternEditor::SelectionDragAction *dragAction) {
     selection = Rectangle<int>(Point<int>(event.x, event.y), Point<int>(dragAction->startX, dragAction->startY));
 
-    selectedNotes.clear();
+    if (!event.mods.isShiftDown()) {
+        selectedNotes.clear();
+    }
+
     auto &notes = processor.getPattern().getNotes();
     for(int i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
@@ -624,7 +643,9 @@ PatternEditor::NoteDragAction::NoteDragAction(
         std::vector<ArpNote> &allNotes,
         const MouseEvent &event,
         bool offset)
-        : DragAction(type) {
+        :
+        DragAction(type),
+        initiatorIndex(index) {
 
     noteOffsets.push_back(
             (offset) ? createOffset(editor, allNotes, index, event) : NoteOffset(index));
@@ -633,11 +654,14 @@ PatternEditor::NoteDragAction::NoteDragAction(
 PatternEditor::NoteDragAction::NoteDragAction(
         PatternEditor *editor,
         uint8 type,
+        uint64 initiatorIndex,
         std::set<uint64> &indices,
         std::vector<ArpNote> &allNotes,
         const MouseEvent &event,
         bool offset)
-        : DragAction(type) {
+        :
+        DragAction(type),
+        initiatorIndex(initiatorIndex) {
 
     for (auto index : indices) {
         noteOffsets.push_back(

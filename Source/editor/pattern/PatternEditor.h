@@ -131,6 +131,7 @@ class PatternEditor : public Component {
          *
          * @param editor a pointer to the editor
          * @param type the type of the note drag
+         * @param initiatorIndex the index of the initiator note
          * @param indices a vector containing the indices of the dragged notes
          * @param allNotes the vector containing all notes in the pattern
          * @param event the mouse event
@@ -139,6 +140,7 @@ class PatternEditor : public Component {
         explicit NoteDragAction(
                 PatternEditor *editor,
                 uint8 type,
+                uint64 initiatorIndex,
                 std::set<uint64> &indices,
                 std::vector<ArpNote> &allNotes,
                 const MouseEvent &event,
@@ -148,6 +150,11 @@ class PatternEditor : public Component {
          * The offsets of notes relative to the cursor.
          */
         std::vector<NoteOffset> noteOffsets;
+
+        /**
+         * The index of the initiator note.
+         */
+        uint64 initiatorIndex;
 
     private:
 
