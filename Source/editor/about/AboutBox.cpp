@@ -18,6 +18,8 @@
 #include "AboutBox.h"
 #include "AboutBoxConfig.h"
 
+const int LICENSE_NOTICE_HEIGHT_ADDITION = 32;
+
 AboutBox::AboutBox() {
 
 #if JUCE_DEBUG == 1
@@ -71,5 +73,7 @@ void AboutBox::resized() {
     gplViewport.setBounds(area);
     TextLayout layout;
     layout.createLayout(licenseNotice, gplLabel.getParentWidth());
-    gplLabel.setSize(static_cast<int>(std::ceil(layout.getWidth())), static_cast<int>(std::ceil(layout.getHeight())));
+    gplLabel.setSize(
+            static_cast<int>(std::ceil(layout.getWidth())),
+            static_cast<int>(std::ceil(layout.getHeight()) + LICENSE_NOTICE_HEIGHT_ADDITION));
 }
