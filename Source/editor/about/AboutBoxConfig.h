@@ -24,8 +24,8 @@
 
 #define LICENSE_NAME "GNU General Public License v3"
 
-#define LICENSE_NOTICE L"LibreArp - A libre VST arpeggio generator\n" \
-"Copyright © 2018 The LibreArp contributors\n" \
+#define LICENSE_NOTICE CharPointer_UTF8("LibreArp - A libre VST arpeggio generator\n" \
+"Copyright \xc2\xa9 2018 The LibreArp contributors\n" \
 "\n" \
 "This program is free software: you can redistribute it and/or modify " \
 "it under the terms of the GNU General Public License as published by " \
@@ -38,4 +38,4 @@
 "GNU General Public License for more details.\n" \
 "\n" \
 "LibreArp is powered by the JUCE 5 framework under the GNU General " \
-"Public License, version 3."
+"Public License, version 3.")
