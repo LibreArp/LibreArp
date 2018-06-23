@@ -26,14 +26,20 @@ AboutBox::AboutBox() {
     nameAndVersionLabel.setText(JucePlugin_Name " " JucePlugin_VersionString, NotificationType::dontSendNotification);
 #endif
 
-    nameAndVersionLabel.setFont(Font(32));
+    nameAndVersionLabel.setFont(Font(40));
     nameAndVersionLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(nameAndVersionLabel);
 
-    auto gplFont = gplLabel.getFont();
-    gplLabel.setText(LICENSE_NOTICE, NotificationType::dontSendNotification);
+    auto gplFont = Font(16);
+    licenseNotice.setText(LICENSE_NOTICE);
+    licenseNotice.setFont(gplFont);
+
+    gplLabel.setFont(gplFont);
+    gplLabel.setText(licenseNotice.getText(), NotificationType::dontSendNotification);
     gplLabel.setJustificationType(Justification::topLeft);
-    addAndMakeVisible(gplLabel);
+    gplViewport.setViewedComponent(&gplLabel, false);
+    gplViewport.setScrollBarsShown(true, false);
+    addAndMakeVisible(gplViewport);
 
     websiteButton.setButtonText("Official website");
     websiteButton.setURL(URL(WEBSITE_URL));
@@ -57,10 +63,13 @@ void AboutBox::resized() {
 
     nameAndVersionLabel.setBounds(area.removeFromTop(64));
 
-    juceButton.setBounds(area.removeFromBottom(18));
-    sourceButton.setBounds(area.removeFromBottom(18));
-    websiteButton.setBounds(area.removeFromBottom(18));
-    gplButton.setBounds(area.removeFromBottom(18));
+    juceButton.setBounds(area.removeFromBottom(22));
+    sourceButton.setBounds(area.removeFromBottom(22));
+    websiteButton.setBounds(area.removeFromBottom(22));
+    gplButton.setBounds(area.removeFromBottom(22));
 
-    gplLabel.setBounds(area);
+    gplViewport.setBounds(area);
+    TextLayout layout;
+    layout.createLayout(licenseNotice, gplLabel.getParentWidth());
+    gplLabel.setSize(static_cast<int>(std::ceil(layout.getWidth())), static_cast<int>(std::ceil(layout.getHeight())));
 }

@@ -29,8 +29,11 @@ public:
 
 private:
 
+    AttributedString licenseNotice;
+
     Label nameAndVersionLabel;
     Label gplLabel;
+    Viewport gplViewport;
 
     HyperlinkButton websiteButton;
     HyperlinkButton sourceButton;

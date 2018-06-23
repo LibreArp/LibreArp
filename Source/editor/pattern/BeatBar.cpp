@@ -18,12 +18,12 @@
 #include "BeatBar.h"
 #include "PatternEditorView.h"
 
-const Colour BACKGROUND_COLOUR = Colour((uint8) 0, 0, 0, 0.3f);
+const Colour BACKGROUND_COLOUR = Colour(42, 40, 34);
 const Colour BOTTOM_LINE_COLOUR = Colour(0, 0, 0);
-const Colour BEAT_LINE_COLOUR = Colour(255, 255, 255);
-const Colour BEAT_NUMBER_COLOUR = Colour(255, 255, 255);
-const Colour LOOP_LINE_COLOUR = Colour(255, 0, 0);
-const Colour LOOP_TEXT_COLOUR = Colour((uint8) 255, 0, 0, 0.5f);
+const Colour BEAT_LINE_COLOUR = Colour(107, 104, 94);
+const Colour BEAT_NUMBER_COLOUR = Colour(107, 104, 94);
+const Colour LOOP_LINE_COLOUR = Colour(155, 36, 36);
+const Colour LOOP_TEXT_COLOUR = Colour((uint8) 155, 36, 36);
 
 const String LOOP_TEXT = "loop"; // NOLINT
 
@@ -47,21 +47,23 @@ void BeatBar::paint(Graphics &g) {
     g.setColour(BOTTOM_LINE_COLOUR);
     g.drawLine(0, getHeight(), getWidth(), getHeight());
 
+    auto loopLine = static_cast<int>((pattern.loopLength / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat);
+
     // Draw beat lines
-    g.setFont(12);
+    g.setFont(20);
     int n = 1;
     for (float i = 0; i < getWidth(); i += pixelsPerBeat, n++) {
         g.setColour(BEAT_LINE_COLOUR);
-        g.drawLine(i, 0, i, getHeight(), 0.5);
+        g.drawLine(i, 0, i, getHeight(), 4);
 
-        g.setColour(BEAT_NUMBER_COLOUR);
+        g.setColour((i == loopLine) ? LOOP_TEXT_COLOUR : BEAT_NUMBER_COLOUR);
         g.drawText(String(n), static_cast<int>(i) + TEXT_OFFSET, 0, 32, getHeight(), Justification::centredLeft);
     }
 
     // Draw loop line
+    g.setFont(16);
     g.setColour(LOOP_LINE_COLOUR);
-    auto loopLine = static_cast<int>((pattern.loopLength / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat);
-    g.drawLine(loopLine, 0, loopLine, getHeight(), 1);
+    g.drawLine(loopLine, 0, loopLine, getHeight(), 4);
 
     g.setColour(LOOP_TEXT_COLOUR);
     auto loopTextWidth = g.getCurrentFont().getStringWidth(LOOP_TEXT);

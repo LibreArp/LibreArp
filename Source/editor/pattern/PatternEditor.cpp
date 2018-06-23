@@ -18,16 +18,17 @@
 #include "PatternEditor.h"
 #include "PatternEditorView.h"
 
-const Colour GRIDLINES_COLOUR = Colour(0, 0, 0);
+const Colour BACKGROUND_COLOUR = Colour(82, 78, 67);
+const Colour GRIDLINES_COLOUR = Colour(42, 40, 34);
 const Colour POSITION_INDICATOR_COLOUR = Colour(255, 255, 255);
-const Colour LOOP_LINE_COLOUR = Colour(255, 0, 0);
+const Colour LOOP_LINE_COLOUR = Colour(155, 36, 36);
 const Colour ZERO_LINE_COLOUR = Colour((uint8) 0, 0, 0, 0.10f);
 
-const Colour NOTE_FILL_COLOUR = Colour((uint8) 117, 169, 255, 0.7f);
-const Colour NOTE_ACTIVE_FILL_COLOUR = Colour(191, 215, 255);
-const Colour NOTE_SELECTED_FILL_COLOUR = Colour(244, 152, 66);
-const Colour NOTE_SELECTED_ACTIVE_FILL_COLOUR = Colour(255, 199, 147);
-const Colour NOTE_BORDER_COLOUR = Colour((uint8) 0, 0, 0, 0.5f);
+const Colour NOTE_FILL_COLOUR = Colour(171, 204, 41);
+const Colour NOTE_ACTIVE_FILL_COLOUR = Colour(228, 255, 122);
+const Colour NOTE_SELECTED_FILL_COLOUR = Colour(245, 255, 209);
+const Colour NOTE_SELECTED_ACTIVE_FILL_COLOUR = Colour(255, 255, 255);
+const Colour NOTE_BORDER_COLOUR = Colour((uint8) 0, 0, 0, 0.7f);
 
 const Colour CURSOR_TIME_COLOUR = Colour((uint8) 255, 255, 255, 0.7f);
 const Colour CURSOR_NOTE_COLOUR = Colour((uint8) 255, 255, 255, 0.05f);
@@ -68,24 +69,30 @@ void PatternEditor::paint(Graphics &g) {
             jmax(view->getRenderWidth(), getParentWidth()),
             jmax(view->getRenderHeight(), getParentHeight()));
 
+    // Draw background
+    g.setColour(BACKGROUND_COLOUR);
+    g.fillRect(getLocalBounds());
+
     // Draw note 0
     int noteZeroY = noteToY(0);
     g.setColour(ZERO_LINE_COLOUR);
     g.fillRect(0, noteZeroY, getWidth(), pixelsPerNote);
 
     // Draw gridlines
+    // - Horizontal
     g.setColour(GRIDLINES_COLOUR);
     for (int i = (getHeight() / 2) % pixelsPerNote - pixelsPerNote / 2; i < getHeight(); i += pixelsPerNote) {
-        g.drawLine(0, i, getWidth(), i, 0.5);
+        g.drawLine(0, i, getWidth(), i, 2);
     }
 
+    // - Vertical
     float beatDiv = (pixelsPerBeat / static_cast<float>(state.divisor));
-    int n = 1;
-    for (float i = beatDiv; i < getWidth(); i += beatDiv, n++) {
+    int n = 0;
+    for (float i = 0; i < getWidth(); i += beatDiv, n++) {
         if (n % state.divisor == 0) {
-            g.drawLine(i, 0, i, getHeight(), 1.5);
+            g.drawLine(i, 0, i, getHeight(), 4);
         } else {
-            g.drawLine(i, 0, i, getHeight(), 0.5);
+            g.drawLine(i, 0, i, getHeight(), 2);
         }
     }
 
@@ -104,28 +111,30 @@ void PatternEditor::paint(Graphics &g) {
         }
         g.fillRect(noteRect);
         g.setColour(NOTE_BORDER_COLOUR);
-        g.drawRect(noteRect);
+        g.drawRect(noteRect, 2);
     }
-
-    // Draw loop line
-    g.setColour(LOOP_LINE_COLOUR);
-    auto loopLine = pulseToX(pattern.loopLength);
-    g.drawLine(loopLine, 0, loopLine, getHeight(), 1);
-
-    // Draw position indicator
-    g.setColour(POSITION_INDICATOR_COLOUR);
-    auto position = processor.getLastPosition();
-    if (processor.getLoopReset() > 0.0) {
-        position %= static_cast<int64>(processor.getLoopReset() * pattern.getTimebase());
-    }
-    position %= pattern.loopLength;
-    auto positionX = pulseToX(position);
-    g.drawLine(positionX, 0, positionX, getHeight());
 
     // Draw cursor indicator
     g.setColour(CURSOR_TIME_COLOUR);
     auto cursorPulseX = pulseToX(cursorPulse);
     g.drawLine(cursorPulseX, 0, cursorPulseX, getHeight());
+
+    // Draw loop line
+    g.setColour(LOOP_LINE_COLOUR);
+    auto loopLine = pulseToX(pattern.loopLength);
+    g.drawLine(loopLine, 0, loopLine, getHeight(), 4);
+
+    // Draw position indicator
+    auto position = processor.getLastPosition();
+    if (position > 0) {
+        g.setColour(POSITION_INDICATOR_COLOUR);
+        if (processor.getLoopReset() > 0.0) {
+            position %= static_cast<int64>(processor.getLoopReset() * pattern.getTimebase());
+        }
+        position %= pattern.loopLength;
+        auto positionX = pulseToX(position);
+        g.drawLine(positionX, 0, positionX, getHeight());
+    }
 
     // Draw selection
     if (selection.getWidth() != 0 && selection.getHeight() != 0) {
@@ -592,7 +601,7 @@ int PatternEditor::pulseToX(int64 pulse) {
 
 int PatternEditor::noteToY(int note) {
     double pixelsPerNote = state.pixelsPerNote;
-    return static_cast<int>(std::round((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote));
+    return static_cast<int>(std::floor((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote));
 }
 
 

@@ -15,27 +15,17 @@
               pluginRTASDisableBypass="0" pluginRTASDisableMultiMono="0" pluginAAXDisableBypass="0"
               pluginAAXDisableMultiMono="0">
   <MAINGROUP id="FtyPbS" name="LibreArp">
+    <GROUP id="{9258CAB9-5F61-DBAD-E552-78EB541BE77E}" name="Fonts">
+      <FILE id="GF8QbK" name="overpass-regular.otf" compile="0" resource="1"
+            file="Fonts/overpass-regular.otf"/>
+    </GROUP>
     <GROUP id="{4D6501CE-D613-8A3D-7ABE-D57B9896DB0F}" name="Source">
-      <FILE id="FbDdGI" name="ArpBuiltEvents.cpp" compile="1" resource="0"
-            file="Source/ArpBuiltEvents.cpp"/>
-      <GROUP id="{50F657DF-8B13-1330-0F07-913BC78A94FD}" name="exception">
-        <FILE id="AaDTLm" name="ArpIntegrityException.cpp" compile="1" resource="0"
-              file="Source/exception/ArpIntegrityException.cpp"/>
-        <FILE id="XynWej" name="ArpIntegrityException.h" compile="0" resource="0"
-              file="Source/exception/ArpIntegrityException.h"/>
-      </GROUP>
       <GROUP id="{916A40E5-BC88-61B9-D0D5-8A490632E866}" name="editor">
         <GROUP id="{638A0178-D6A6-FB82-B670-D86059D7A146}" name="about">
           <FILE id="EaPbwm" name="AboutBox.cpp" compile="1" resource="0" file="Source/editor/about/AboutBox.cpp"/>
           <FILE id="uariA5" name="AboutBox.h" compile="0" resource="0" file="Source/editor/about/AboutBox.h"/>
           <FILE id="npj43I" name="AboutBoxConfig.h" compile="0" resource="0"
                 file="Source/editor/about/AboutBoxConfig.h"/>
-        </GROUP>
-        <FILE id="xu0lJy" name="EditorState.cpp" compile="1" resource="0" file="Source/editor/EditorState.cpp"/>
-        <FILE id="IME8s2" name="EditorState.h" compile="0" resource="0" file="Source/editor/EditorState.h"/>
-        <GROUP id="{08EE391D-EA98-DD24-CD7B-9B776718130D}" name="xml">
-          <FILE id="jztN0C" name="XmlEditor.cpp" compile="1" resource="0" file="Source/editor/xml/XmlEditor.cpp"/>
-          <FILE id="gBwqaQ" name="XmlEditor.h" compile="0" resource="0" file="Source/editor/xml/XmlEditor.h"/>
         </GROUP>
         <GROUP id="{E1567BF7-D972-D3FD-9442-4184BBF160FF}" name="pattern">
           <FILE id="zGkUCF" name="BeatBar.cpp" compile="1" resource="0" file="Source/editor/pattern/BeatBar.cpp"/>
@@ -48,12 +38,30 @@
           <FILE id="ok2XbK" name="PatternEditorView.h" compile="0" resource="0"
                 file="Source/editor/pattern/PatternEditorView.h"/>
         </GROUP>
+        <GROUP id="{08EE391D-EA98-DD24-CD7B-9B776718130D}" name="xml">
+          <FILE id="jztN0C" name="XmlEditor.cpp" compile="1" resource="0" file="Source/editor/xml/XmlEditor.cpp"/>
+          <FILE id="gBwqaQ" name="XmlEditor.h" compile="0" resource="0" file="Source/editor/xml/XmlEditor.h"/>
+        </GROUP>
+        <FILE id="xu0lJy" name="EditorState.cpp" compile="1" resource="0" file="Source/editor/EditorState.cpp"/>
+        <FILE id="IME8s2" name="EditorState.h" compile="0" resource="0" file="Source/editor/EditorState.h"/>
+        <FILE id="I8a3Se" name="LArpLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/editor/LArpLookAndFeel.cpp"/>
+        <FILE id="bwcBIt" name="LArpLookAndFeel.h" compile="0" resource="0"
+              file="Source/editor/LArpLookAndFeel.h"/>
         <FILE id="xVzivl" name="MainEditor.cpp" compile="1" resource="0" file="Source/editor/MainEditor.cpp"/>
         <FILE id="nJdJiZ" name="MainEditor.h" compile="0" resource="0" file="Source/editor/MainEditor.h"/>
       </GROUP>
-      <FILE id="y4lGFE" name="ArpNote.cpp" compile="1" resource="0" file="Source/ArpNote.cpp"/>
+      <GROUP id="{50F657DF-8B13-1330-0F07-913BC78A94FD}" name="exception">
+        <FILE id="AaDTLm" name="ArpIntegrityException.cpp" compile="1" resource="0"
+              file="Source/exception/ArpIntegrityException.cpp"/>
+        <FILE id="XynWej" name="ArpIntegrityException.h" compile="0" resource="0"
+              file="Source/exception/ArpIntegrityException.h"/>
+      </GROUP>
+      <FILE id="FbDdGI" name="ArpBuiltEvents.cpp" compile="1" resource="0"
+            file="Source/ArpBuiltEvents.cpp"/>
       <FILE id="EG63G7" name="ArpBuiltEvents.h" compile="0" resource="0"
             file="Source/ArpBuiltEvents.h"/>
+      <FILE id="y4lGFE" name="ArpNote.cpp" compile="1" resource="0" file="Source/ArpNote.cpp"/>
       <FILE id="TpttHS" name="ArpNote.h" compile="0" resource="0" file="Source/ArpNote.h"/>
       <FILE id="jfnte9" name="ArpPattern.cpp" compile="1" resource="0" file="Source/ArpPattern.cpp"/>
       <FILE id="pYhY9N" name="ArpPattern.h" compile="0" resource="0" file="Source/ArpPattern.h"/>
