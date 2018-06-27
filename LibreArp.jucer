@@ -8,10 +8,10 @@
               bundleIdentifier="io.gitlab.librearp.LibreArp" cppLanguageStandard="17"
               pluginAUExportPrefix="LibreArpAU" aaxIdentifier="org.librearp.LibreArp"
               pluginManufacturerCode="LArp" pluginCode="LArp" binaryDataNamespace="LArpBin"
-              id="B2JXLb" pluginFormats="buildVST,buildVST3" pluginCharacteristicsValue="pluginWantsMidiIn,pluginProducesMidiOut,pluginIsMidiEffectPlugin,pluginEditorRequiresKeys"
+              id="B2JXLb" pluginFormats="buildVST,buildVST3" pluginCharacteristicsValue="pluginEditorRequiresKeys,pluginIsMidiEffectPlugin,pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
               pluginVSTCategory="kPlugCategUnknown" pluginVST3Category="Fx,Instrument,Tools"
               reportAppUsage="0" displaySplashScreen="0" includeBinaryInAppConfig="0"
-              pluginIsSynth="0" pluginEditorRequiresKeys="1" pluginRTASDisableBypass="0"
+              pluginIsSynth="1" pluginEditorRequiresKeys="1" pluginRTASDisableBypass="0"
               pluginRTASDisableMultiMono="0" pluginAAXDisableBypass="0" pluginAAXDisableMultiMono="0"
               pluginAUMainType="'aumi'">
   <MAINGROUP id="FtyPbS" name="LibreArp">
