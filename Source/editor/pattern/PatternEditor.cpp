@@ -108,9 +108,9 @@ void PatternEditor::paint(Graphics &g) {
 
     // - Vertical
     float beatDiv = (pixelsPerBeat / static_cast<float>(state.divisor));
-    int n = 0;
-    for (float i = 0; i < getWidth(); i += beatDiv, n++) {
-        if (n % state.divisor == 0) {
+    int beatN = 0;
+    for (float i = 0; i < getWidth(); i += beatDiv, beatN++) {
+        if (beatN % state.divisor == 0) {
             g.drawLine(i, 0, i, getHeight(), 4);
         } else {
             g.drawLine(i, 0, i, getHeight(), 2);
@@ -121,7 +121,8 @@ void PatternEditor::paint(Graphics &g) {
     if (numInputNotes > 0) {
         g.setColour(OCTAVE_LINE_COLOUR);
         auto pixelsPerOctave = pixelsPerNote * numInputNotes;
-        int i = (getHeight() / 2) % pixelsPerNote - pixelsPerNote / 2;
+
+        int i = (getHeight() / 2) % pixelsPerOctave - pixelsPerNote / 2 + pixelsPerNote;
         for (/* above */; i < getHeight(); i += pixelsPerOctave) {
             g.drawLine(0, i, getWidth(), i, 1);
         }
