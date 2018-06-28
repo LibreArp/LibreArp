@@ -359,12 +359,12 @@ bool PatternEditor::keyPressed(const KeyPress &key) {
     }
 
     if (key.isKeyCode(KeyPress::upKey)) {
-        moveSelectedUp();
+        moveSelectedUp(key.getModifiers().isCtrlDown());
         return false;
     }
 
     if (key.isKeyCode(KeyPress::downKey)) {
-        moveSelectedDown();
+        moveSelectedDown(key.getModifiers().isCtrlDown());
         return false;
     }
 
@@ -542,19 +542,27 @@ void PatternEditor::deleteSelected() {
     repaint();
 }
 
-void PatternEditor::moveSelectedUp() {
+void PatternEditor::moveSelectedUp(bool octave) {
     auto &notes = processor.getPattern().getNotes();
     for (auto index : selectedNotes) {
-        notes[index].data.noteNumber++;
+        if (octave) {
+            notes[index].data.noteNumber += processor.getNumInputNotes();
+        } else {
+            notes[index].data.noteNumber++;
+        }
     }
     processor.buildPattern();
     repaint();
 }
 
-void PatternEditor::moveSelectedDown() {
+void PatternEditor::moveSelectedDown(bool octave) {
     auto &notes = processor.getPattern().getNotes();
     for (auto index : selectedNotes) {
-        notes[index].data.noteNumber--;
+        if (octave) {
+            notes[index].data.noteNumber -= processor.getNumInputNotes();
+        } else {
+            notes[index].data.noteNumber--;
+        }
     }
     processor.buildPattern();
     repaint();

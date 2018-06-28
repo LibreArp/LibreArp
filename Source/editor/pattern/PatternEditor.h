@@ -380,12 +380,12 @@ private:
     /**
      * Moves the selected notes up one position.
      */
-    void moveSelectedUp();
+    void moveSelectedUp(bool octave = false);
 
     /**
      * Moves the selected notes down one position.
      */
-    void moveSelectedDown();
+    void moveSelectedDown(bool octave = false);
 
 
 
