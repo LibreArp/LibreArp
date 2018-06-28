@@ -22,7 +22,10 @@ const Colour BACKGROUND_COLOUR = Colour(82, 78, 67);
 const Colour GRIDLINES_COLOUR = Colour(42, 40, 34);
 const Colour POSITION_INDICATOR_COLOUR = Colour(255, 255, 255);
 const Colour LOOP_LINE_COLOUR = Colour(155, 36, 36);
-const Colour ZERO_LINE_COLOUR = Colour((uint8) 0, 0, 0, 0.10f);
+
+const Colour ZERO_LINE_COLOUR = Colour((uint8) 0, 0, 0, 0.1f);
+const Colour ZERO_OCTAVE_COLOUR = Colour((uint8) 171, 204, 41, 0.1f);
+const Colour OCTAVE_LINE_COLOUR = Colour((uint8) 0, 0, 0, 1.0f);
 
 const Colour NOTE_FILL_COLOUR = Colour(171, 204, 41);
 const Colour NOTE_ACTIVE_FILL_COLOUR = Colour(228, 255, 122);
@@ -52,6 +55,7 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
     snapEnabled = true;
     selection = Rectangle<int>(0, 0, 0, 0);
 
+
     setWantsKeyboardFocus(true);
 }
 
@@ -73,10 +77,18 @@ void PatternEditor::paint(Graphics &g) {
     g.setColour(BACKGROUND_COLOUR);
     g.fillRect(getLocalBounds());
 
-    // Draw note 0
+    // Draw octave 0
+    auto numInputNotes = processor.getNumInputNotes();
     int noteZeroY = noteToY(0);
-    g.setColour(ZERO_LINE_COLOUR);
-    g.fillRect(0, noteZeroY, getWidth(), pixelsPerNote);
+    if (numInputNotes > 0) {
+        g.setColour(ZERO_OCTAVE_COLOUR);
+        auto height = numInputNotes * pixelsPerNote;
+        g.fillRect(0, noteZeroY - height + pixelsPerNote, getWidth(), height);
+    } else {
+        g.setColour(ZERO_LINE_COLOUR);
+        g.fillRect(0, noteZeroY, getWidth(), pixelsPerNote);
+    }
+
 
     // Draw gridlines
     // - Horizontal
@@ -93,6 +105,16 @@ void PatternEditor::paint(Graphics &g) {
             g.drawLine(i, 0, i, getHeight(), 4);
         } else {
             g.drawLine(i, 0, i, getHeight(), 2);
+        }
+    }
+
+    // Draw octaves
+    if (numInputNotes > 0) {
+        g.setColour(OCTAVE_LINE_COLOUR);
+        auto pixelsPerOctave = pixelsPerNote * numInputNotes;
+        int i = (getHeight() / 2) % pixelsPerOctave - pixelsPerOctave / 2 - pixelsPerNote;
+        for (/* above */; i < getHeight(); i += pixelsPerOctave) {
+            g.drawLine(0, i, getWidth(), i, 1);
         }
     }
 

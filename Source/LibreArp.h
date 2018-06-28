@@ -31,6 +31,7 @@ public:
     static const Identifier TREEID_LOOP_RESET;
     static const Identifier TREEID_PATTERN_XML;
     static const Identifier TREEID_OCTAVES;
+    static const Identifier TREEID_NUM_INPUT_NOTES;
 
 
     LibreArp();
@@ -155,6 +156,16 @@ public:
      */
     SortedSet<unsigned long> &getPlayingPatternIndices();
 
+
+
+    /**
+     * Gets the last active number of input notes.
+     * @return the last active number of input notes
+     */
+    int getNumInputNotes();
+
+
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
 
@@ -232,6 +243,11 @@ private:
      * The set of currently playing pattern indices.
      */
     SortedSet<unsigned long> playingPatternIndices;
+
+    /**
+     * The last active number of input notes.
+     */
+    int numInputNotes;
 
 
 

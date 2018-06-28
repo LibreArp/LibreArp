@@ -23,6 +23,7 @@ const Identifier LibreArp::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NO
 const Identifier LibreArp::TREEID_LOOP_RESET = Identifier("loopReset"); // NOLINT
 const Identifier LibreArp::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
 const Identifier LibreArp::TREEID_OCTAVES = Identifier("octaves"); // NOLINT
+const Identifier LibreArp::TREEID_NUM_INPUT_NOTES = Identifier("numInputNotes"); // NOLINT
 
 //==============================================================================
 LibreArp::LibreArp()
@@ -42,6 +43,7 @@ LibreArp::LibreArp()
     this->buildScheduled = false;
     this->stopScheduled = false;
     this->loopReset = 0.0;
+    this->numInputNotes = 0;
     addParameter(octaves = new AudioParameterBool(
             "octaves",
             "Octaves",
@@ -178,6 +180,10 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
             stopScheduled = false;
         }
 
+        if (inputNotes.size() != 0) {
+            numInputNotes = inputNotes.size();
+        }
+
         for(auto event : events.events) {
             auto time = nextTime(event, position, lastPosition);
 
@@ -267,6 +273,7 @@ void LibreArp::getStateInformation(MemoryBlock &destData) {
     tree.setProperty(TREEID_LOOP_RESET, this->loopReset, nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
     tree.setProperty(TREEID_OCTAVES, this->octaves->get(), nullptr);
+    tree.setProperty(TREEID_NUM_INPUT_NOTES, this->numInputNotes, nullptr);
 
     destData.reset();
     MemoryOutputStream(destData, true).writeString(tree.toXmlString());
@@ -294,6 +301,10 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
 
             if (tree.hasProperty(TREEID_OCTAVES)) {
                 *this->octaves = tree.getProperty(TREEID_OCTAVES);
+            }
+
+            if (tree.hasProperty(TREEID_NUM_INPUT_NOTES)) {
+                this->numInputNotes = tree.getProperty(TREEID_NUM_INPUT_NOTES);
             }
 
             if (tree.hasProperty(TREEID_PATTERN_XML)) {
@@ -357,6 +368,12 @@ double LibreArp::getLoopReset() {
 
 SortedSet<unsigned long>& LibreArp::getPlayingPatternIndices() {
     return this->playingPatternIndices;
+}
+
+
+
+int LibreArp::getNumInputNotes() {
+    return this->numInputNotes;
 }
 
 
