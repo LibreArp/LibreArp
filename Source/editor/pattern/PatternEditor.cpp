@@ -112,7 +112,7 @@ void PatternEditor::paint(Graphics &g) {
     if (numInputNotes > 0) {
         g.setColour(OCTAVE_LINE_COLOUR);
         auto pixelsPerOctave = pixelsPerNote * numInputNotes;
-        int i = (getHeight() / 2) % pixelsPerOctave - pixelsPerOctave / 2 - pixelsPerNote;
+        int i = (getHeight() / 2) % pixelsPerNote - pixelsPerNote / 2;
         for (/* above */; i < getHeight(); i += pixelsPerOctave) {
             g.drawLine(0, i, getWidth(), i, 1);
         }
