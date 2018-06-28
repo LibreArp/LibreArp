@@ -160,9 +160,24 @@ public:
 
     /**
      * Gets the last active number of input notes.
+     *
      * @return the last active number of input notes
      */
     int getNumInputNotes();
+
+    /**
+     * Gets the time signature numerator.
+     *
+     * @return the time signature numerator
+     */
+    int getTimeSigNumerator();
+
+    /**
+     * Gets the time signature denominator.
+     *
+     * @return the time signature denominator
+     */
+    int getTimeSigDenominator();
 
 
 
@@ -248,6 +263,16 @@ private:
      * The last active number of input notes.
      */
     int numInputNotes;
+
+    /**
+     * Time signature numerator.
+     */
+    int timeSigNumerator;
+
+    /**
+     * Time signature denominator.
+     */
+    int timeSigDenominator;
 
 
 

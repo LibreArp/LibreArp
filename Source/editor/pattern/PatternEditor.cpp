@@ -27,6 +27,8 @@ const Colour ZERO_LINE_COLOUR = Colour((uint8) 0, 0, 0, 0.1f);
 const Colour ZERO_OCTAVE_COLOUR = Colour((uint8) 171, 204, 41, 0.1f);
 const Colour OCTAVE_LINE_COLOUR = Colour((uint8) 0, 0, 0, 1.0f);
 
+const Colour BAR_SHADE_COLOUR = Colour((uint8) 0, 0, 0, 0.1f);
+
 const Colour NOTE_FILL_COLOUR = Colour(171, 204, 41);
 const Colour NOTE_ACTIVE_FILL_COLOUR = Colour(228, 255, 122);
 const Colour NOTE_SELECTED_FILL_COLOUR = Colour(245, 255, 209);
@@ -77,6 +79,14 @@ void PatternEditor::paint(Graphics &g) {
     g.setColour(BACKGROUND_COLOUR);
     g.fillRect(getLocalBounds());
 
+    // Draw bars
+    auto beat = (pixelsPerBeat * 4) / processor.getTimeSigDenominator();
+    auto bar = beat * processor.getTimeSigNumerator();
+    g.setColour(BAR_SHADE_COLOUR);
+    for (int i = 0; i < getWidth(); i += bar * 2) {
+        g.fillRect(i + bar, 0, bar, getHeight());
+    }
+
     // Draw octave 0
     auto numInputNotes = processor.getNumInputNotes();
     int noteZeroY = noteToY(0);
@@ -88,7 +98,6 @@ void PatternEditor::paint(Graphics &g) {
         g.setColour(ZERO_LINE_COLOUR);
         g.fillRect(0, noteZeroY, getWidth(), pixelsPerNote);
     }
-
 
     // Draw gridlines
     // - Horizontal

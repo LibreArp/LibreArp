@@ -165,6 +165,9 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
     getPlayHead()->getCurrentPosition(cpi);
 
+    this->timeSigNumerator = cpi.timeSigNumerator;
+    this->timeSigDenominator = cpi.timeSigDenominator;
+
     if (cpi.isPlaying && !this->events.events.empty()) {
         midi.clear();
 
@@ -374,6 +377,14 @@ SortedSet<unsigned long>& LibreArp::getPlayingPatternIndices() {
 
 int LibreArp::getNumInputNotes() {
     return this->numInputNotes;
+}
+
+int LibreArp::getTimeSigNumerator() {
+    return this->timeSigNumerator;
+}
+
+int LibreArp::getTimeSigDenominator() {
+    return this->timeSigDenominator;
 }
 
 
