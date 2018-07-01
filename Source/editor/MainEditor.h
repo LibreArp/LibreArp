@@ -48,6 +48,8 @@ private:
     ComponentBoundsConstrainer boundsConstrainer;
     TabbedComponent tabs;
 
+    Label placeholderLabel;
+
     PatternEditorView patternEditor;
     XmlEditor xmlEditor;
     AboutBox aboutBox;

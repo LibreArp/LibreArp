@@ -38,10 +38,17 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
 
     boundsConstrainer.setMinimumSize(200, 200);
 
+    placeholderLabel.setText("Unimplemented component", NotificationType::dontSendNotification);
+    placeholderLabel.setJustificationType(Justification::centred);
+    placeholderLabel.setFont(Font(32.0f));
+    placeholderLabel.setColour(Label::textColourId, Colour(255, 0, 0));
+
     tabs.setOutline(0);
     tabs.addTab("Pattern Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
-    tabs.addTab("About", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
+    tabs.addTab("Behaviour", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &placeholderLabel, false);
+    tabs.addTab("MIDI", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &placeholderLabel, false);
 //    tabs.addTab("XML Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
+    tabs.addTab("About", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
 
     addAndMakeVisible(tabs);
     addAndMakeVisible(resizer, 9999);
