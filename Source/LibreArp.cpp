@@ -24,6 +24,8 @@ const Identifier LibreArp::TREEID_LOOP_RESET = Identifier("loopReset"); // NOLIN
 const Identifier LibreArp::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
 const Identifier LibreArp::TREEID_OCTAVES = Identifier("octaves"); // NOLINT
 const Identifier LibreArp::TREEID_NUM_INPUT_NOTES = Identifier("numInputNotes"); // NOLINT
+const Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = Identifier("outputMidiChannel"); // NOLINT
+const Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = Identifier("inputMidiChannel"); // NOLINT
 
 //==============================================================================
 LibreArp::LibreArp()
@@ -44,6 +46,9 @@ LibreArp::LibreArp()
     this->stopScheduled = false;
     this->loopReset = 0.0;
     this->numInputNotes = 0;
+    this->outputMidiChannel = 1;
+    this->inputMidiChannel = 0;
+
     addParameter(octaves = new AudioParameterBool(
             "octaves",
             "Octaves",
@@ -202,7 +207,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                     for (auto i : event.offs) {
                         auto &data = events.data[i];
                         if (data.lastNote >= 0) {
-                            midi.addEvent(MidiMessage::noteOff(1, data.lastNote), offset);
+                            midi.addEvent(MidiMessage::noteOff(outputMidiChannel, data.lastNote), offset);
                             playingNotes.removeValue(data.lastNote);
                             playingPatternIndices.removeValue(data.noteIndex);
                             data.lastNote = -1;
@@ -229,7 +234,8 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                             if (data.lastNote != note) {
                                 data.lastNote = note;
                                 midi.addEvent(
-                                        MidiMessage::noteOn(1, note, static_cast<float>(data.velocity)), offset);
+                                        MidiMessage::noteOn(
+                                                outputMidiChannel, note, static_cast<float>(data.velocity)), offset);
                                 playingNotes.add(note);
                                 playingPatternIndices.add(data.noteIndex);
                             }
@@ -277,6 +283,8 @@ void LibreArp::getStateInformation(MemoryBlock &destData) {
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
     tree.setProperty(TREEID_OCTAVES, this->octaves->get(), nullptr);
     tree.setProperty(TREEID_NUM_INPUT_NOTES, this->numInputNotes, nullptr);
+    tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
+    tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
 
     destData.reset();
     MemoryOutputStream(destData, true).writeString(tree.toXmlString());
@@ -308,6 +316,14 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
 
             if (tree.hasProperty(TREEID_NUM_INPUT_NOTES)) {
                 this->numInputNotes = tree.getProperty(TREEID_NUM_INPUT_NOTES);
+            }
+
+            if (tree.hasProperty(TREEID_OUTPUT_MIDI_CHANNEL)) {
+                this->outputMidiChannel = tree.getProperty(TREEID_OUTPUT_MIDI_CHANNEL);
+            }
+
+            if (tree.hasProperty(TREEID_INPUT_MIDI_CHANNEL)) {
+                this->inputMidiChannel = tree.getProperty(TREEID_INPUT_MIDI_CHANNEL);
             }
 
             if (tree.hasProperty(TREEID_PATTERN_XML)) {
@@ -389,14 +405,39 @@ int LibreArp::getTimeSigDenominator() {
 
 
 
+int LibreArp::getOutputMidiChannel() {
+    return this->outputMidiChannel;
+}
+
+void LibreArp::setOutputMidiChannel(int channel) {
+    jassert(channel >= 1 && channel <= 16);
+    this->outputMidiChannel = channel;
+}
+
+
+
+int LibreArp::getInputMidiChannel() {
+    return this->inputMidiChannel;
+}
+
+void LibreArp::setInputMidiChannel(int channel) {
+    jassert(channel >= 0 && channel <= 16);
+    this->inputMidiChannel = channel;
+}
+
+
+
 void LibreArp::processInputMidi(MidiBuffer &midiMessages) {
     int time;
     MidiMessage m;
+
     for (MidiBuffer::Iterator i(midiMessages); i.getNextEvent(m, time);) {
-        if (m.isNoteOn()) {
-            inputNotes.add(m.getNoteNumber());
-        } else if (m.isNoteOff()) {
-            inputNotes.removeValue(m.getNoteNumber());
+        if (!inputMidiChannel || m.getChannel() == inputMidiChannel) {
+            if (m.isNoteOn()) {
+                inputNotes.add(m.getNoteNumber());
+            } else if (m.isNoteOff()) {
+                inputNotes.removeValue(m.getNoteNumber());
+            }
         }
     }
 }
@@ -411,7 +452,7 @@ void LibreArp::stopAll(MidiBuffer &midi) {
     midi.clear();
 
     for (auto noteNumber : playingNotes) {
-        midi.addEvent(MidiMessage::noteOff(1, noteNumber), 0);
+        midi.addEvent(MidiMessage::noteOff(outputMidiChannel, noteNumber), 0);
     }
     playingNotes.clear();
     playingPatternIndices.clear();

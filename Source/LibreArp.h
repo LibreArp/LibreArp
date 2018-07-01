@@ -32,6 +32,8 @@ public:
     static const Identifier TREEID_PATTERN_XML;
     static const Identifier TREEID_OCTAVES;
     static const Identifier TREEID_NUM_INPUT_NOTES;
+    static const Identifier TREEID_OUTPUT_MIDI_CHANNEL;
+    static const Identifier TREEID_INPUT_MIDI_CHANNEL;
 
 
     LibreArp();
@@ -181,6 +183,39 @@ public:
 
 
 
+    /**
+     * Gets the MIDI channel output notes are sent into.
+     *
+     * @return the MIDI channel output notes are sent into
+     */
+    int getOutputMidiChannel();
+
+    /**
+     * Sets the MIDI channel output notes are sent into.
+     *
+     * @param channel the MIDI channel output notes are sent into. An integer from range 1-16.
+     */
+    void setOutputMidiChannel(int channel);
+
+
+
+    /**
+     * Gets the MIDI channel input notes are read from.
+     *
+     * @return the MIDI channel input notes are read from
+     */
+    int getInputMidiChannel();
+
+    /**
+     * Sets the MIDI channel input notes are read from.
+     *
+     * @param channel the MIDI channel input notes are read from. An integer from range 0-16. Notes from all channels
+     * are read if zero.
+     */
+    void setInputMidiChannel(int channel);
+
+
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
 
@@ -273,6 +308,18 @@ private:
      * Time signature denominator.
      */
     int timeSigDenominator;
+
+
+
+    /**
+     * The MIDI channel output notes are sent to.
+     */
+    int outputMidiChannel;
+
+    /**
+     * The MIDI channel input notes are read from. Notes from all channels are read if zero.
+     */
+    int inputMidiChannel;
 
 
 
