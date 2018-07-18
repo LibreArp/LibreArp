@@ -174,8 +174,6 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     this->timeSigDenominator = cpi.timeSigDenominator;
 
     if (cpi.isPlaying && !this->events.events.empty()) {
-        midi.clear();
-
         auto timebase = this->events.timebase;
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = getSampleRate() * pulseLength;
@@ -427,19 +425,26 @@ void LibreArp::setInputMidiChannel(int channel) {
 
 
 
-void LibreArp::processInputMidi(MidiBuffer &midiMessages) {
-    int time;
-    MidiMessage m;
+void LibreArp::processInputMidi(MidiBuffer &inMidi) {
+    int sample;
+    MidiBuffer outMidi;
+    MidiMessage message;
 
-    for (MidiBuffer::Iterator i(midiMessages); i.getNextEvent(m, time);) {
-        if (!inputMidiChannel || m.getChannel() == inputMidiChannel) {
-            if (m.isNoteOn()) {
-                inputNotes.add(m.getNoteNumber());
-            } else if (m.isNoteOff()) {
-                inputNotes.removeValue(m.getNoteNumber());
+    for (MidiBuffer::Iterator i(inMidi); i.getNextEvent(message, sample);) {
+        if (inputMidiChannel == 0 || message.getChannel() == inputMidiChannel) {
+            if (message.isNoteOn()) {
+                inputNotes.add(message.getNoteNumber());
+            } else if (message.isNoteOff()) {
+                inputNotes.removeValue(message.getNoteNumber());
+            } else {
+                outMidi.addEvent(message, sample);
             }
+        } else {
+            outMidi.addEvent(message, sample);
         }
     }
+
+    inMidi.swapWith(outMidi);
 }
 
 
@@ -449,8 +454,6 @@ void LibreArp::stopAll() {
 }
 
 void LibreArp::stopAll(MidiBuffer &midi) {
-    midi.clear();
-
     for (auto noteNumber : playingNotes) {
         midi.addEvent(MidiMessage::noteOff(outputMidiChannel, noteNumber), 0);
     }

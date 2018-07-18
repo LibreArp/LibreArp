@@ -324,11 +324,11 @@ private:
 
 
     /**
-     * Processes input midi messages.
+     * Processes input MIDI messages.
      *
-     * @param midiMessages the midi messages
+     * @param inMidi the input MIDI messages
      */
-    void processInputMidi(MidiBuffer &midiMessages);
+    void processInputMidi(MidiBuffer &inMidi);
 
     /**
      * Sends a noteOff for all currently playing output notes.
