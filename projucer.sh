@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 JUCER_FILE="LibreArp.jucer"
 HELP_TEXT="Usage: ${0} <switches>
