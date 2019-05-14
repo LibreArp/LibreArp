@@ -153,7 +153,7 @@ void LArpLookAndFeel::drawButtonBackground(Graphics &g, Button &button, const Co
         g.strokePath (path, PathStrokeType (1.0f));
 
         if (button.isConnectedOnLeft()) {
-            g.drawLine(bounds.getX() + 1, bounds.getY(), bounds.getX() + 1, bounds.getBottom());
+            g.fillRect(roundToInt(bounds.getX()), roundToInt(bounds.getY()), 1, roundToInt(bounds.getHeight()));
         }
     }
     else {

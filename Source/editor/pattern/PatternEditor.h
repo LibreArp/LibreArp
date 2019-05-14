@@ -278,12 +278,15 @@ private:
     std::set<uint64> selectedNotes;
 
 
+    /**
+     * A memory buffer for drag action.
+     */
+    char dragActionBuffer[512];
 
     /**
-     * Current drag action pointer. May be null.
+     * Current drag action pointer. Points to the <code>dragActionBuffer</code>.
      */
-    DragAction *dragAction;
-
+    DragAction *dragAction = (DragAction *) dragActionBuffer;
 
 
     /**

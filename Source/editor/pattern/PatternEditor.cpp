@@ -15,6 +15,8 @@
 // along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
+#include <new>
+
 #include "PatternEditor.h"
 #include "PatternEditorView.h"
 
@@ -50,7 +52,7 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
     setSize(1, 1); // We have to set this, otherwise it won't render at all
 
     cursorPulse = 0;
-    dragAction = nullptr;
+    new(dragAction) DragAction(); // initialize a no-op drag action
     if (state.lastNoteLength < 1) {
         state.lastNoteLength = processor.getPattern().getTimebase() / state.divisor;
     }
@@ -62,7 +64,7 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
 }
 
 PatternEditor::~PatternEditor() {
-    delete dragAction;
+//    delete dragAction;
 }
 
 void PatternEditor::paint(Graphics &g) {
@@ -103,7 +105,7 @@ void PatternEditor::paint(Graphics &g) {
     // - Horizontal
     g.setColour(GRIDLINES_COLOUR);
     for (int i = (getHeight() / 2) % pixelsPerNote - pixelsPerNote / 2; i < getHeight(); i += pixelsPerNote) {
-        g.drawLine(0, i, getWidth(), i, 2);
+        g.fillRect(0, i, getWidth(), 2);
     }
 
     // - Vertical
@@ -111,9 +113,9 @@ void PatternEditor::paint(Graphics &g) {
     int beatN = 0;
     for (float i = 0; i < getWidth(); i += beatDiv, beatN++) {
         if (beatN % state.divisor == 0) {
-            g.drawLine(i, 0, i, getHeight(), 4);
+            g.fillRect(roundToInt(i), 0, 4, getHeight());
         } else {
-            g.drawLine(i, 0, i, getHeight(), 2);
+            g.fillRect(roundToInt(i), 0, 2, getHeight());
         }
     }
 
@@ -124,7 +126,7 @@ void PatternEditor::paint(Graphics &g) {
 
         int i = (getHeight() / 2) % pixelsPerOctave - pixelsPerNote / 2 + pixelsPerNote;
         for (/* above */; i < getHeight(); i += pixelsPerOctave) {
-            g.drawLine(0, i, getWidth(), i, 1);
+            g.fillRect(0, i, getWidth(), 1);
         }
     }
 
@@ -149,12 +151,12 @@ void PatternEditor::paint(Graphics &g) {
     // Draw cursor indicator
     g.setColour(CURSOR_TIME_COLOUR);
     auto cursorPulseX = pulseToX(cursorPulse);
-    g.drawLine(cursorPulseX, 0, cursorPulseX, getHeight());
+    g.fillRect(cursorPulseX, 0, 1, getHeight());
 
     // Draw loop line
     g.setColour(LOOP_LINE_COLOUR);
     auto loopLine = pulseToX(pattern.loopLength);
-    g.drawLine(loopLine, 0, loopLine, getHeight(), 4);
+    g.fillRect(loopLine, 0, 4, getHeight());
 
     // Draw position indicator
     auto position = processor.getLastPosition();
@@ -165,7 +167,7 @@ void PatternEditor::paint(Graphics &g) {
         }
         position %= pattern.loopLength;
         auto positionX = pulseToX(position);
-        g.drawLine(positionX, 0, positionX, getHeight());
+        g.fillRect(positionX, 0, 1, getHeight());
     }
 
     // Draw selection
@@ -181,8 +183,8 @@ void PatternEditor::paint(Graphics &g) {
 
 
 void PatternEditor::setDragAction(DragAction *newDragAction) {
-    delete this->dragAction;
-    this->dragAction = newDragAction;
+//    delete this->dragAction;
+//    this->dragAction = newDragAction;
 }
 
 
@@ -211,25 +213,25 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
             if (event.x <= (noteRect.getX() + NOTE_RESIZE_TOLERANCE)) {
                 setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
                 if (selectedNotes.find(i) == selectedNotes.end()) {
-                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, notes, event));
+                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, notes, event);
                 } else {
-                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, selectedNotes, notes, event));
+                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, selectedNotes, notes, event);
                 }
                 return;
             } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - NOTE_RESIZE_TOLERANCE)) {
                 setMouseCursor(MouseCursor::RightEdgeResizeCursor);
                 if (selectedNotes.find(i) == selectedNotes.end()) {
-                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, notes, event));
+                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, notes, event);
                 } else {
-                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, selectedNotes, notes, event));
+                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, selectedNotes, notes, event);
                 }
                 return;
             } else {
                 setMouseCursor(MouseCursor::DraggingHandCursor);
                 if (selectedNotes.find(i) == selectedNotes.end()) {
-                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, notes, event));
+                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, notes, event);
                 } else {
-                    setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, selectedNotes, notes, event));
+                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, selectedNotes, notes, event);
                 }
                 return;
             }
@@ -239,18 +241,18 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
     auto loopRect = getRectangleForLoop();
     if (loopRect.contains(event.x, event.y)) {
         setMouseCursor(MouseCursor::LeftRightResizeCursor);
-        setDragAction(new DragAction(DragAction::TYPE_LOOP_RESIZE));
+        new(dragAction) DragAction(DragAction::TYPE_LOOP_RESIZE);
         return;
     }
 
-    setDragAction(nullptr);
+    new(dragAction) DragAction();
 }
 
 void PatternEditor::mouseDrag(const MouseEvent &event) {
     mouseAnyMove(event);
 
     if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
-        if (this->dragAction != nullptr) {
+        if (this->dragAction != nullptr && this->dragAction->type != DragAction::TYPE_NONE) {
             switch (this->dragAction->type) {
                 case DragAction::TYPE_LOOP_RESIZE:
                     loopResize(event);
@@ -291,13 +293,13 @@ void PatternEditor::mouseAnyMove(const MouseEvent &event) {
 
 void PatternEditor::mouseDown(const MouseEvent &event) {
     if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
-        if (this->dragAction == nullptr) {
+        if (this->dragAction == nullptr || this->dragAction->type == DragAction::TYPE_NONE) {
             if (event.mods.isCtrlDown()) {
                 if (!event.mods.isShiftDown()) {
                     selectedNotes.clear();
                 }
 
-                setDragAction(new SelectionDragAction(event.x, event.y));
+                new(dragAction) SelectionDragAction(event.x, event.y);
                 repaint();
             } else {
                 selectedNotes.clear();
@@ -354,7 +356,8 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
 }
 
 void PatternEditor::mouseUp(const MouseEvent &event) {
-    setDragAction(nullptr);
+//    setDragAction(nullptr);
+    new(dragAction) DragAction();
     selection = Rectangle<int>(0, 0, 0, 0);
     setMouseCursor(MouseCursor::NormalCursor);
     repaint();
@@ -496,9 +499,9 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
     repaint();
 
     if (event.mods.isShiftDown()) {
-        setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, index, notes, event, false));
+        new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, index, notes, event, false);
     } else {
-        setDragAction(new NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, index, notes, event));
+        new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, index, notes, event);
     }
 }
 
@@ -514,7 +517,7 @@ void PatternEditor::noteDelete(const MouseEvent &event) {
         if (noteRect.contains(event.x, event.y)) {
             notes.erase(it);
             erased = true;
-            setDragAction(nullptr);
+            new(dragAction) DragAction();
             break;
         }
     }
@@ -547,7 +550,7 @@ void PatternEditor::deleteSelected() {
         notes.pop_back();
     }
     selectedNotes.clear();
-    setDragAction(nullptr);
+    new(dragAction) DragAction();
     processor.buildPattern();
     repaint();
 }
@@ -655,12 +658,12 @@ int PatternEditor::pulseToX(int64 pulse) {
     auto &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
 
-    return static_cast<int>((pulse / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat);
+    return roundToInt((pulse / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1;
 }
 
 int PatternEditor::noteToY(int note) {
     double pixelsPerNote = state.pixelsPerNote;
-    return static_cast<int>(std::floor((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote));
+    return roundToInt(std::floor((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote)) + 1;
 }
 
 

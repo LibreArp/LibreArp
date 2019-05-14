@@ -27,7 +27,7 @@ const Colour LOOP_TEXT_COLOUR = Colour((uint8) 155, 36, 36);
 
 const String LOOP_TEXT = "loop"; // NOLINT
 
-const int TEXT_OFFSET = 4;
+const int TEXT_OFFSET = 6;
 
 BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec)
         : processor(p), state(e), editorComponent(ec) {
@@ -45,16 +45,16 @@ void BeatBar::paint(Graphics &g) {
     g.setColour(BACKGROUND_COLOUR);
     g.fillRect(getLocalBounds());
     g.setColour(BOTTOM_LINE_COLOUR);
-    g.drawLine(0, getHeight(), getWidth(), getHeight());
+    g.fillRect(0, getHeight() - 1, getWidth(), 1);
 
-    auto loopLine = static_cast<int>((pattern.loopLength / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat);
+    auto loopLine = static_cast<int>((pattern.loopLength / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1;
 
     // Draw beat lines
     g.setFont(20);
     int n = 1;
-    for (float i = 0; i < getWidth(); i += pixelsPerBeat, n++) {
+    for (float i = 1; i < getWidth(); i += pixelsPerBeat, n++) {
         g.setColour(BEAT_LINE_COLOUR);
-        g.drawLine(i, 0, i, getHeight(), 4);
+        g.fillRect(roundToInt(i), 0, 4, getHeight());
 
         g.setColour((i == loopLine) ? LOOP_TEXT_COLOUR : BEAT_NUMBER_COLOUR);
         g.drawText(String(n), static_cast<int>(i) + TEXT_OFFSET, 0, 32, getHeight(), Justification::centredLeft);
@@ -63,7 +63,7 @@ void BeatBar::paint(Graphics &g) {
     // Draw loop line
     g.setFont(16);
     g.setColour(LOOP_LINE_COLOUR);
-    g.drawLine(loopLine, 0, loopLine, getHeight(), 4);
+    g.fillRect(loopLine, 0, 4, getHeight());
 
     g.setColour(LOOP_TEXT_COLOUR);
     auto loopTextWidth = g.getCurrentFont().getStringWidth(LOOP_TEXT);
