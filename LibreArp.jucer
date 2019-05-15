@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT name="LibreArp" projectType="audioplug" jucerVersion="5.3.2"
+<JUCERPROJECT name="LibreArp" projectType="audioplug" jucerVersion="5.4.3"
               version="1.1" buildVST3="1" buildAUv3="0" buildAU="0" buildVST="1"
               pluginName="LibreArp" pluginDesc="A free (as in free speech) arpeggio sequencer."
               pluginManufacturer="The LibreArp contributors" companyName="The LibreArp contributors"
@@ -8,12 +8,12 @@
               bundleIdentifier="io.gitlab.librearp.LibreArp" cppLanguageStandard="17"
               pluginAUExportPrefix="LibreArpAU" aaxIdentifier="org.librearp.LibreArp"
               pluginManufacturerCode="LArp" pluginCode="LArp" binaryDataNamespace="LArpBin"
-              id="B2JXLb" pluginFormats="buildVST,buildVST3" pluginCharacteristicsValue="pluginEditorRequiresKeys,pluginIsMidiEffectPlugin,pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
+              id="B2JXLb" pluginFormats="buildVST,buildVST3" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn,pluginProducesMidiOut,pluginIsMidiEffectPlugin,pluginEditorRequiresKeys"
               pluginVSTCategory="kPlugCategUnknown" pluginVST3Category="Fx,Instrument,Tools"
               reportAppUsage="0" displaySplashScreen="0" includeBinaryInAppConfig="0"
               pluginIsSynth="1" pluginEditorRequiresKeys="1" pluginRTASDisableBypass="0"
               pluginRTASDisableMultiMono="0" pluginAAXDisableBypass="0" pluginAAXDisableMultiMono="0"
-              pluginAUMainType="'aumi'">
+              pluginAUMainType="'aumi'" projectLineFeed="&#10;">
   <MAINGROUP id="FtyPbS" name="LibreArp">
     <GROUP id="{9258CAB9-5F61-DBAD-E552-78EB541BE77E}" name="Fonts">
       <FILE id="GF8QbK" name="overpass-regular.otf" compile="0" resource="1"

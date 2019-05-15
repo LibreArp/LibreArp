@@ -291,9 +291,8 @@ void LibreArp::getStateInformation(MemoryBlock &destData) {
 void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
     if (sizeInBytes > 0) {
         String xml = MemoryInputStream(data, static_cast<size_t>(sizeInBytes), false).readString();
-        XmlElement *doc = XmlDocument::parse(xml);
+        std::unique_ptr<XmlElement> doc = XmlDocument::parse(xml);
         ValueTree tree = ValueTree::fromXml(*doc);
-        delete doc;
 
         if (tree.isValid() && tree.hasType(TREEID_LIBREARP)) {
             ValueTree patternTree = tree.getChildWithName(ArpPattern::TREEID_PATTERN);
@@ -343,12 +342,11 @@ void LibreArp::setPattern(ArpPattern &pattern, bool updateXml) {
 }
 
 void LibreArp::parsePattern(const String &xmlPattern) {
-    XmlElement *doc = XmlDocument::parse(xmlPattern);
+    std::unique_ptr<XmlElement> doc = XmlDocument::parse(xmlPattern);
     if (doc == nullptr) {
         throw ArpIntegrityException("Malformed XML!");
     }
     ValueTree tree = ValueTree::fromXml(*doc);
-    delete doc;
     ArpPattern pattern = ArpPattern::fromValueTree(tree);
     setPattern(pattern, false);
     this->patternXml = xmlPattern;

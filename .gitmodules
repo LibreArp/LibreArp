@@ -4,3 +4,6 @@
 [submodule "Vendor/juce"]
 	path = Vendor/juce
 	url = https://github.com/WeAreROLI/JUCE.git
+[submodule "Vendor/fst"]
+	path = Vendor/fst
+	url = https://git.iem.at/zmoelnig/FST.git
