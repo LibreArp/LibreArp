@@ -207,11 +207,6 @@ public:
      */
     explicit PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec);
 
-    /**
-     * Destructs the pattern editor.
-     */
-    ~PatternEditor() override;
-
     void paint(Graphics &g) override;
 
     void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) override;
@@ -288,13 +283,6 @@ private:
      */
     DragAction *dragAction = (DragAction *) dragActionBuffer;
 
-
-    /**
-     * Sets a new drag action, frees the current one.
-     *
-     * @param newDragAction a pointer to the new drag action
-     */
-    void setDragAction(DragAction *newDragAction);
 
     /**
      * Fired on any cursor movement (dragging or non-dragging).

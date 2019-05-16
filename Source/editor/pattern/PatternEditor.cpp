@@ -63,10 +63,6 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
     setWantsKeyboardFocus(true);
 }
 
-PatternEditor::~PatternEditor() {
-//    delete dragAction;
-}
-
 void PatternEditor::paint(Graphics &g) {
     ArpPattern &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
@@ -179,12 +175,6 @@ void PatternEditor::paint(Graphics &g) {
     g.setColour(CURSOR_NOTE_COLOUR);
     auto cursorNoteY = noteToY(cursorNote);
     g.fillRect(0, cursorNoteY, getWidth(), pixelsPerNote);
-}
-
-
-void PatternEditor::setDragAction(DragAction *newDragAction) {
-//    delete this->dragAction;
-//    this->dragAction = newDragAction;
 }
 
 
