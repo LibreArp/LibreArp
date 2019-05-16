@@ -42,8 +42,8 @@ const Colour CURSOR_NOTE_COLOUR = Colour((uint8) 255, 255, 255, 0.05f);
 
 const Colour SELECTION_BORDER_COLOUR = Colour(255, 0, 0);
 
-const int NOTE_RESIZE_TOLERANCE = 6;
-const int LOOP_RESIZE_TOLERANCE = 3;
+const int NOTE_RESIZE_TOLERANCE = 8;
+const int LOOP_RESIZE_TOLERANCE = 5;
 
 
 PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
