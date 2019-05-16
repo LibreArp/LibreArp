@@ -244,7 +244,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         }
 
         if (getActiveEditor() != nullptr && getActiveEditor()->isVisible()) {
-            getActiveEditor()->repaint();
+            ((MainEditor *) getActiveEditor())->audioUpdate();
         }
 
         this->lastPosition = position;
@@ -252,7 +252,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     } else {
         if (this->wasPlaying) {
             if (getActiveEditor() != nullptr && getActiveEditor()->isVisible()) {
-                getActiveEditor()->repaint();
+                ((MainEditor *) getActiveEditor())->audioUpdate();
             }
 
             this->stopAll(midi);

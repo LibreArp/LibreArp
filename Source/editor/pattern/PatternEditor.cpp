@@ -59,7 +59,6 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
     snapEnabled = true;
     selection = Rectangle<int>(0, 0, 0, 0);
 
-
     setWantsKeyboardFocus(true);
 }
 
@@ -155,15 +154,11 @@ void PatternEditor::paint(Graphics &g) {
     g.fillRect(loopLine, 0, 4, getHeight());
 
     // Draw position indicator
-    auto position = processor.getLastPosition();
-    if (position > 0) {
+    if (lastPlayPositionX > 0) {
         g.setColour(POSITION_INDICATOR_COLOUR);
-        if (processor.getLoopReset() > 0.0) {
-            position %= static_cast<int64>(processor.getLoopReset() * pattern.getTimebase());
-        }
-        position %= pattern.loopLength;
-        auto positionX = pulseToX(position);
-        g.fillRect(positionX, 0, 1, getHeight());
+        auto positionRect = Rectangle<int>(lastPlayPositionX, 0, 1, getHeight());
+        g.fillRect(positionRect);
+        repaint(positionRect);
     }
 
     // Draw selection
@@ -272,13 +267,18 @@ void PatternEditor::mouseDrag(const MouseEvent &event) {
 }
 
 void PatternEditor::mouseAnyMove(const MouseEvent &event) {
+    repaint(pulseToX(cursorPulse), 0, 1, getHeight());
+    repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
+
     cursorPulse = xToPulse(event.x);
     cursorNote = yToNote(event.y);
 
     snapEnabled = !(event.mods.isAltDown() || (event.mods.isCtrlDown() && event.mods.isShiftDown()));
 
     setMouseCursor(MouseCursor::NormalCursor);
-    repaint();
+
+    repaint(pulseToX(cursorPulse), 0, 1, getHeight());
+    repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
 }
 
 void PatternEditor::mouseDown(const MouseEvent &event) {
@@ -290,15 +290,16 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
                 }
 
                 new(dragAction) SelectionDragAction(event.x, event.y);
-                repaint();
+                repaintNotes();
             } else {
                 selectedNotes.clear();
                 noteCreate(event);
-                repaint();
+                repaintNotes();
             }
         } else {
             switch(this->dragAction->type) {
                 case DragAction::TYPE_NOTE_MOVE: {
+                    repaintNotes();
                         if (selectedNotes.empty()) {
                             auto &offsets = ((NoteDragAction *) this->dragAction)->noteOffsets;
                             if (offsets.size() == 1) {
@@ -320,7 +321,7 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
                                     selectedNotes.erase(((NoteDragAction *) dragAction)->initiatorIndex);
                                 }
                             }
-                            repaint();
+                            repaintNotes();
                         }
                     }
                     break;
@@ -336,21 +337,20 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
     if (!event.mods.isLeftButtonDown() && event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
         selectedNotes.clear();
         noteDelete(event);
-        repaint();
+        repaintNotes();
         Component::mouseDown(event);
         return;
     }
 
-    repaint();
     Component::mouseDown(event);
 }
 
 void PatternEditor::mouseUp(const MouseEvent &event) {
-//    setDragAction(nullptr);
     new(dragAction) DragAction();
+    repaint(selection);
     selection = Rectangle<int>(0, 0, 0, 0);
     setMouseCursor(MouseCursor::NormalCursor);
-    repaint();
+    repaintNotes();
     Component::mouseUp(event);
 }
 
@@ -404,6 +404,7 @@ void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dra
     auto timebase = processor.getPattern().getTimebase();
     auto &notes = processor.getPattern().getNotes();
 
+    repaintNotes();
     for (auto &noteOffset : dragAction->noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
         int64 minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
@@ -413,7 +414,7 @@ void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dra
     }
 
     processor.buildPattern();
-    repaint();
+    repaintNotes();
     setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
 }
 
@@ -421,6 +422,7 @@ void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragA
     auto timebase = processor.getPattern().getTimebase();
     auto &notes = processor.getPattern().getNotes();
 
+    repaintNotes();
     for (auto &noteOffset : dragAction->noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
         int64 minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
@@ -432,11 +434,12 @@ void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragA
     }
 
     processor.buildPattern();
-    repaint();
+    repaintNotes();
     setMouseCursor(MouseCursor::RightEdgeResizeCursor);
 }
 
 void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAction *dragAction) {
+    repaintNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto &noteOffset : dragAction->noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
@@ -456,7 +459,7 @@ void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAct
     }
 
     processor.buildPattern();
-    repaint();
+    repaintNotes();
 
     setMouseCursor(MouseCursor::DraggingHandCursor);
 }
@@ -486,7 +489,7 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
     notes.push_back(note);
 
     processor.buildPattern();
-    repaint();
+    repaintNotes();
 
     if (event.mods.isShiftDown()) {
         new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, index, notes, event, false);
@@ -514,7 +517,7 @@ void PatternEditor::noteDelete(const MouseEvent &event) {
 
     if (erased) {
         processor.buildPattern();
-        repaint();
+        repaintNotes();
     }
 }
 
@@ -524,15 +527,16 @@ void PatternEditor::selectAll() {
     for (int i = 0; i < notes.size(); i++) {
         selectedNotes.insert(i);
     }
-    repaint();
+    repaintNotes();
 }
 
 void PatternEditor::deselectAll() {
     selectedNotes.clear();
-    repaint();
+    repaintNotes();
 }
 
 void PatternEditor::deleteSelected() {
+    repaintNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto it = selectedNotes.rbegin(); it != selectedNotes.rend(); it++) {
         auto index = *it;
@@ -542,10 +546,11 @@ void PatternEditor::deleteSelected() {
     selectedNotes.clear();
     new(dragAction) DragAction();
     processor.buildPattern();
-    repaint();
+    repaintNotes();
 }
 
 void PatternEditor::moveSelectedUp(bool octave) {
+    repaintNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto index : selectedNotes) {
         if (octave) {
@@ -555,10 +560,11 @@ void PatternEditor::moveSelectedUp(bool octave) {
         }
     }
     processor.buildPattern();
-    repaint();
+    repaintNotes();
 }
 
 void PatternEditor::moveSelectedDown(bool octave) {
+    repaintNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto index : selectedNotes) {
         if (octave) {
@@ -568,12 +574,15 @@ void PatternEditor::moveSelectedDown(bool octave) {
         }
     }
     processor.buildPattern();
-    repaint();
+    repaintNotes();
 }
 
 
 void PatternEditor::select(const MouseEvent &event, PatternEditor::SelectionDragAction *dragAction) {
+    repaint(selection);
     selection = Rectangle<int>(Point<int>(event.x, event.y), Point<int>(dragAction->startX, dragAction->startY));
+    repaint(selection);
+    repaintNotes();
 
     if (!event.mods.isShiftDown()) {
         selectedNotes.clear();
@@ -589,6 +598,39 @@ void PatternEditor::select(const MouseEvent &event, PatternEditor::SelectionDrag
     }
 }
 
+
+void PatternEditor::audioUpdate() {
+    auto position = processor.getLastPosition();
+    if (position > 0) {
+        if (processor.getLoopReset() > 0.0) {
+            position %= static_cast<int64>(processor.getLoopReset() * processor.getPattern().getTimebase());
+        }
+        position %= processor.getPattern().loopLength;
+        lastPlayPositionX = pulseToX(position);
+        repaint(lastPlayPositionX, 0, 1, getHeight());
+    }
+
+    repaintNotes();
+}
+
+void PatternEditor::repaintNotes() {
+    bool willRepaint = false;
+    auto notesRect = Rectangle<int>::leftTopRightBottom(INT32_MAX, INT32_MAX, 0, 0);
+    auto &notes = processor.getPattern().getNotes();
+    for(int i = 0; i < notes.size(); i++) {
+        auto &note = notes[i];
+        auto noteRect = getRectangleForNote(note);
+        notesRect.setLeft(jmin(notesRect.getX(), noteRect.getX()));
+        notesRect.setTop(jmin(notesRect.getY(), noteRect.getY()));
+        notesRect.setRight(jmax(notesRect.getRight(), noteRect.getRight()));
+        notesRect.setBottom(jmax(notesRect.getBottom(), noteRect.getBottom()));
+        willRepaint = true;
+    }
+
+    if (willRepaint) {
+        repaint(notesRect);
+    }
+}
 
 PatternEditorView* PatternEditor::getView() {
     return view;
@@ -655,7 +697,6 @@ int PatternEditor::noteToY(int note) {
     double pixelsPerNote = state.pixelsPerNote;
     return roundToInt(std::floor((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote)) + 1;
 }
-
 
 
 PatternEditor::NoteDragAction::NoteOffset::NoteOffset(uint64 i)

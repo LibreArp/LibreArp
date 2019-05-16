@@ -58,7 +58,8 @@ MainEditor::~MainEditor() = default;
 
 //==============================================================================
 void MainEditor::paint(Graphics &g) {
-    g.fillAll(LArpLookAndFeel::MAIN_BACKGROUND_COLOUR);
+    g.setColour(LArpLookAndFeel::MAIN_BACKGROUND_COLOUR);
+    g.fillRect(getLocalBounds());
 }
 
 void MainEditor::resized() {
@@ -67,4 +68,8 @@ void MainEditor::resized() {
 
     tabs.setBounds(getLocalBounds().reduced(8));
     resizer.setBounds(getWidth() - RESIZER_SIZE, getHeight() - RESIZER_SIZE, RESIZER_SIZE, RESIZER_SIZE);
+}
+
+void MainEditor::audioUpdate() {
+    patternEditor.audioUpdate();
 }

@@ -21,9 +21,10 @@
 #include "../../LibreArp.h"
 #include "PatternEditor.h"
 #include "BeatBar.h"
+#include "../../AudioUpdatable.h"
 
 
-class PatternEditorView : public Component {
+class PatternEditorView : public Component, public AudioUpdatable {
 public:
 
     explicit PatternEditorView(LibreArp &p, EditorState &editorState);
@@ -36,6 +37,8 @@ public:
 
     int getRenderWidth();
     int getRenderHeight();
+
+    void audioUpdate() override;
 
 private:
 

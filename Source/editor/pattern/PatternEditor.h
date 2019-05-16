@@ -20,13 +20,14 @@
 #include <set>
 #include "JuceHeader.h"
 #include "../../LibreArp.h"
+#include "../../AudioUpdatable.h"
 
 class PatternEditorView;
 
 /**
  * The pattern editor component class.
  */
-class PatternEditor : public Component {
+class PatternEditor : public Component, public AudioUpdatable {
 
     /**
      * The data class of a dragging action.
@@ -217,6 +218,8 @@ public:
 
     bool keyPressed(const KeyPress &key) override;
 
+    void audioUpdate() override;
+
     /**
      * Gets the pointer to the parent editor view.
      *
@@ -282,6 +285,11 @@ private:
      * Current drag action pointer. Points to the <code>dragActionBuffer</code>.
      */
     DragAction *dragAction = (DragAction *) dragActionBuffer;
+
+    /**
+     * Last position of the playhead in the X coordinates of the editor since the last audioUpdate.
+     */
+    int lastPlayPositionX;
 
 
     /**
@@ -443,6 +451,8 @@ private:
      * @return the Y coordinate
      */
     int noteToY(int note);
+
+    void repaintNotes();
 };
 
 

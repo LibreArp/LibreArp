@@ -116,3 +116,7 @@ int PatternEditorView::getRenderHeight() {
 
     return dist * state.pixelsPerNote;
 }
+
+void PatternEditorView::audioUpdate() {
+    editor.audioUpdate();
+}

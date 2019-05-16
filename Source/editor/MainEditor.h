@@ -24,11 +24,12 @@
 #include "pattern/PatternEditorView.h"
 #include "about/AboutBox.h"
 #include "LArpLookAndFeel.h"
+#include "../AudioUpdatable.h"
 
 /**
  * Main LibreArp editor component.
  */
-class MainEditor : public AudioProcessorEditor {
+class MainEditor : public AudioProcessorEditor, public AudioUpdatable {
 public:
 
     explicit MainEditor(LibreArp &, EditorState &);
@@ -39,6 +40,8 @@ public:
     void paint(Graphics &) override;
 
     void resized() override;
+
+    void audioUpdate() override;
 
 private:
     LibreArp &processor;
