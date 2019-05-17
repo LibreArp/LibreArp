@@ -182,6 +182,30 @@ public:
     int getTimeSigDenominator();
 
 
+    /**
+     * @return <code>true</code> if debug playback is enabled, otherwise <code>false</code>
+     */
+    bool isDebugPlaybackEnabled();
+
+    /**
+     * Enables or disables debug playback and resets the debug playhead.
+     *
+     * @param enabled whether debug playback is enabled
+     */
+    void setDebugPlaybackEnabled(bool enabled);
+
+    /**
+     * Resets the debug playback.
+     */
+    void resetDebugPlayback();
+
+    /**
+     * Fills in current debug playback position information.
+     *
+     * @param cpi the position information to fill
+     */
+    void fillCurrentDebugPositionInfo(AudioPlayHead::CurrentPositionInfo &cpi);
+
 
     /**
      * Gets the MIDI channel output notes are sent into.
@@ -310,6 +334,16 @@ private:
     int timeSigDenominator;
 
 
+    /**
+     * Whether debug playback is enabled.
+     */
+    bool debugPlaybackEnabled;
+
+    /**
+     * The timestamp of the last debug playback reset.
+     */
+    unsigned long debugPlaybackResetTime;
+
 
     /**
      * The MIDI channel output notes are sent to.
@@ -336,6 +370,11 @@ private:
      * @param midi the midi messages
      */
     void stopAll(MidiBuffer &midi);
+
+    /**
+     * Sends an update to the editor.
+     */
+    void updateEditor();
 
 
 

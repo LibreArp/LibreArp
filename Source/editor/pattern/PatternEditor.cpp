@@ -77,11 +77,13 @@ void PatternEditor::paint(Graphics &g) {
     g.fillRect(getLocalBounds());
 
     // Draw bars
-    auto beat = (pixelsPerBeat * 4) / processor.getTimeSigDenominator();
-    auto bar = beat * processor.getTimeSigNumerator();
-    g.setColour(BAR_SHADE_COLOUR);
-    for (int i = 0; i < getWidth(); i += bar * 2) {
-        g.fillRect(i + bar, 0, bar, getHeight());
+    if (processor.getTimeSigDenominator() > 0 && processor.getTimeSigDenominator() <= 32) {
+        auto beat = (pixelsPerBeat * 4) / processor.getTimeSigDenominator();
+        auto bar = beat * processor.getTimeSigNumerator();
+        g.setColour(BAR_SHADE_COLOUR);
+        for (int i = 0; i < getWidth(); i += bar * 2) {
+            g.fillRect(i + bar, 0, bar, getHeight());
+        }
     }
 
     // Draw octave 0
@@ -678,7 +680,7 @@ int64 PatternEditor::xToPulse(int x, bool snap, bool floor) {
     auto pulse = static_cast<int64>(
             std::round((x / pixelsPerBeat) * timebase));
 
-    return (snap) ? snapPulse(pulse, floor) : pulse;
+    return jmax(static_cast<int64>(0), (snap) ? snapPulse(pulse, floor) : pulse);
 }
 
 int PatternEditor::yToNote(int y) {
@@ -690,7 +692,7 @@ int PatternEditor::pulseToX(int64 pulse) {
     auto &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
 
-    return roundToInt((pulse / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1;
+    return jmax(0, roundToInt((pulse / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1);
 }
 
 int PatternEditor::noteToY(int note) {

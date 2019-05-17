@@ -31,12 +31,12 @@ const Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = Identifier("inputMidiChan
 LibreArp::LibreArp()
 #ifndef JucePlugin_PreferredChannelConfigurations
         : AudioProcessor(BusesProperties()
-#if !JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
-.withInput  ("Input",  AudioChannelSet::stereo(), true)
-#endif
+//#if !JucePlugin_IsMidiEffect
+//#if ! JucePlugin_IsSynth
+//.withInput  ("Input",  AudioChannelSet::stereo(), true)
+//#endif
 .withOutput ("Output", AudioChannelSet::stereo(), true)
-#endif
+//#endif
 )
 #endif
 {
@@ -48,6 +48,10 @@ LibreArp::LibreArp()
     this->numInputNotes = 0;
     this->outputMidiChannel = 1;
     this->inputMidiChannel = 0;
+    this->timeSigNumerator = 4;
+    this->timeSigDenominator = 4;
+    this->debugPlaybackEnabled = false;
+    resetDebugPlayback();
 
     addParameter(octaves = new AudioParameterBool(
             "octaves",
@@ -125,24 +129,8 @@ void LibreArp::releaseResources() {
 #ifndef JucePlugin_PreferredChannelConfigurations
 
 bool LibreArp::isBusesLayoutSupported(const BusesLayout &layouts) const {
-#if JucePlugin_IsMidiEffect
     ignoreUnused(layouts);
     return true;
-#else
-    // This is the place where you check if the layout is supported.
-    // In this template code we only support mono or stereo.
-    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
-        return false;
-
-    // This checks if the input layout matches the output layout
-#if ! JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-        return false;
-#endif
-
-    return true;
-#endif
 }
 
 #endif
@@ -168,7 +156,13 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     processInputMidi(midi);
 
     AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
-    getPlayHead()->getCurrentPosition(cpi);
+    if (isDebugPlaybackEnabled() || JUCEApplicationBase::isStandaloneApp()) {
+        fillCurrentDebugPositionInfo(cpi);
+    } else {
+        if (getPlayHead() != nullptr) {
+            getPlayHead()->getCurrentPosition(cpi);
+        }
+    }
 
     this->timeSigNumerator = cpi.timeSigNumerator;
     this->timeSigDenominator = cpi.timeSigDenominator;
@@ -243,17 +237,13 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
             }
         }
 
-        if (getActiveEditor() != nullptr && getActiveEditor()->isVisible()) {
-            ((MainEditor *) getActiveEditor())->audioUpdate();
-        }
+        updateEditor();
 
         this->lastPosition = position;
         this->wasPlaying = true;
     } else {
         if (this->wasPlaying) {
-            if (getActiveEditor() != nullptr && getActiveEditor()->isVisible()) {
-                ((MainEditor *) getActiveEditor())->audioUpdate();
-            }
+            updateEditor();
 
             this->stopAll(midi);
         }
@@ -400,6 +390,49 @@ int LibreArp::getTimeSigDenominator() {
 }
 
 
+bool LibreArp::isDebugPlaybackEnabled() {
+    return this->debugPlaybackEnabled || JUCEApplicationBase::isStandaloneApp();
+}
+
+void LibreArp::setDebugPlaybackEnabled(bool enabled) {
+    this->debugPlaybackEnabled = enabled;
+    resetDebugPlayback();
+}
+
+void LibreArp::resetDebugPlayback() {
+    this->debugPlaybackResetTime = Time::currentTimeMillis();
+
+    this->inputNotes.clear();
+    if (this->isDebugPlaybackEnabled()) {
+        inputNotes.add(1);
+        inputNotes.add(2);
+        inputNotes.add(3);
+    }
+}
+
+void LibreArp::fillCurrentDebugPositionInfo(AudioPlayHead::CurrentPositionInfo &cpi) {
+    // Dummy data
+    cpi.isLooping = false;
+    cpi.isRecording = false;
+    cpi.editOriginTime = 0.0;
+    cpi.frameRate = AudioPlayHead::FrameRateType::fps24;
+    cpi.ppqLoopStart = 0.0;
+    cpi.ppqLoopEnd = 0.0;
+    cpi.ppqPositionOfLastBarStart = 0.0; // TODO
+
+    // Metadata
+    cpi.bpm = 128.0;
+    cpi.timeSigNumerator = 3;
+    cpi.timeSigDenominator = 4;
+    cpi.isPlaying = true;
+
+    // Time data
+    auto positionMillis = Time::currentTimeMillis() - debugPlaybackResetTime;
+    cpi.timeInSeconds = positionMillis * 0.001;
+    cpi.timeInSamples = static_cast<int64>(cpi.timeInSeconds * getSampleRate());
+    cpi.ppqPosition = cpi.timeInSeconds * (cpi.bpm / 60);
+}
+
 
 int LibreArp::getOutputMidiChannel() {
     return this->outputMidiChannel;
@@ -457,11 +490,19 @@ void LibreArp::stopAll(MidiBuffer &midi) {
     }
     playingNotes.clear();
     playingPatternIndices.clear();
-//    inputNotes.clear();
 
     for (auto &data : events.data) {
         data.lastNote = -1;
     }
+}
+
+void LibreArp::updateEditor() {
+    auto editor = (MainEditor *) getActiveEditor();
+    MessageManager::callAsync([editor] {
+        if (editor != nullptr && editor->isVisible()) {
+            editor->audioUpdate();
+        }
+    });
 }
 
 
@@ -487,8 +528,6 @@ int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 position, int64 las
     return result;
 }
 
-//==============================================================================
-// This creates new instances of the plugin..
 AudioProcessor *JUCE_CALLTYPE createPluginFilter() {
     return new LibreArp();
 }

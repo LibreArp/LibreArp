@@ -4,16 +4,18 @@
               version="1.1" buildVST3="1" buildAUv3="0" buildAU="0" buildVST="1"
               pluginName="LibreArp" pluginDesc="A free (as in free speech) arpeggio sequencer."
               pluginManufacturer="The LibreArp contributors" companyName="The LibreArp contributors"
-              pluginWantsMidiIn="1" pluginProducesMidiOut="1" pluginIsMidiEffectPlugin="1"
+              pluginWantsMidiIn="1" pluginProducesMidiOut="1" pluginIsMidiEffectPlugin="0"
               bundleIdentifier="io.gitlab.librearp.LibreArp" cppLanguageStandard="17"
               pluginAUExportPrefix="LibreArpAU" aaxIdentifier="org.librearp.LibreArp"
               pluginManufacturerCode="LArp" pluginCode="LArp" binaryDataNamespace="LArpBin"
-              id="B2JXLb" pluginFormats="buildVST,buildVST3" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn,pluginProducesMidiOut,pluginIsMidiEffectPlugin,pluginEditorRequiresKeys"
+              id="B2JXLb" pluginFormats="buildStandalone,buildVST,buildVST3"
+              pluginCharacteristicsValue="pluginEditorRequiresKeys,pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
               pluginVSTCategory="kPlugCategUnknown" pluginVST3Category="Fx,Instrument,Tools"
               reportAppUsage="0" displaySplashScreen="0" includeBinaryInAppConfig="0"
               pluginIsSynth="1" pluginEditorRequiresKeys="1" pluginRTASDisableBypass="0"
               pluginRTASDisableMultiMono="0" pluginAAXDisableBypass="0" pluginAAXDisableMultiMono="0"
-              pluginAUMainType="'aumi'" projectLineFeed="&#10;">
+              pluginAUMainType="'aumi'" projectLineFeed="&#10;" buildRTAS="0"
+              buildAAX="0" buildStandalone="1" enableIAA="0">
   <MAINGROUP id="FtyPbS" name="LibreArp">
     <GROUP id="{9258CAB9-5F61-DBAD-E552-78EB541BE77E}" name="Fonts">
       <FILE id="GF8QbK" name="overpass-regular.otf" compile="0" resource="1"
@@ -90,6 +92,9 @@
         <MODULEPATH id="juce_audio_basics" path="Vendor/juce/modules"/>
         <MODULEPATH id="juce_audio_plugin_client" path="Vendor/juce/modules"/>
         <MODULEPATH id="juce_audio_processors" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="Vendor/juce/modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
     <CLION targetFolder="Builds/CLion" clionMakefileEnabled="1" clionCodeBlocksEnabled="1">
@@ -103,6 +108,9 @@
         <MODULEPATH id="juce_audio_basics" path="Vendor/juce/modules"/>
         <MODULEPATH id="juce_audio_plugin_client" path="Vendor/juce/modules"/>
         <MODULEPATH id="juce_audio_processors" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="Vendor/juce/modules"/>
       </MODULEPATHS>
     </CLION>
     <VS2017 targetFolder="Builds/VisualStudio2017" vst3Folder="Vendor/vst3sdk">
@@ -123,14 +131,20 @@
         <MODULEPATH id="juce_audio_processors" path="Vendor/juce/modules"/>
         <MODULEPATH id="juce_audio_plugin_client" path="Vendor/juce/modules"/>
         <MODULEPATH id="juce_audio_basics" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="Vendor/juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="Vendor/juce/modules"/>
       </MODULEPATHS>
     </VS2017>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
             useGlobalPath="0"/>
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
