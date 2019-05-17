@@ -216,7 +216,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                         for (auto i : event.ons) {
                             auto &data = events.data[i];
                             auto index = data.noteNumber % inputNotes.size();
-                            if (index < 0) {
+                            while (index < 0) {
                                 index += inputNotes.size();
                             }
 
@@ -457,6 +457,7 @@ void LibreArp::stopAll(MidiBuffer &midi) {
     }
     playingNotes.clear();
     playingPatternIndices.clear();
+//    inputNotes.clear();
 
     for (auto &data : events.data) {
         data.lastNote = -1;
