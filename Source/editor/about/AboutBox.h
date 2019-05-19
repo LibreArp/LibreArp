@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <list>
+#include <memory>
 #include "JuceHeader.h"
 
 
@@ -35,10 +37,15 @@ private:
     Label gplLabel;
     Viewport gplViewport;
 
+    std::list<std::shared_ptr<HyperlinkButton>> bottomLinks;
+
     HyperlinkButton websiteButton;
     HyperlinkButton sourceButton;
     HyperlinkButton juceButton;
     HyperlinkButton gplButton;
+
+    void addBottomLink(String text, URL url);
+    void addBottomLinkSeparator();
 
 };
 
