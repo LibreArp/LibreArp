@@ -223,7 +223,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                                 note += octave * 12;
                             }
 
-                            if (data.lastNote != note) {
+                            if (isPositiveAndBelow(note, 128) && data.lastNote != note) {
                                 data.lastNote = note;
                                 midi.addEvent(
                                         MidiMessage::noteOn(
