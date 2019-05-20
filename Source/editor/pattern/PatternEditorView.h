@@ -38,7 +38,7 @@ public:
     int getRenderWidth();
     int getRenderHeight();
 
-    void audioUpdate() override;
+    void audioUpdate(uint32 type) override;
 
 private:
 

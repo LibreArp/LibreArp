@@ -23,24 +23,18 @@ const Colour RED = Colour(255, 0, 0);
 XmlEditor::XmlEditor(LibreArp &p) : processor(p) {
     xmlEditor.setMultiLine(true, false);
     xmlEditor.setReturnKeyStartsNewLine(true);
-    xmlEditor.setText(processor.getPatternXml(), false);
-
-    applyXmlButton.setButtonText("Apply");
-
-    applyXmlButton.onClick = [this] {
-        try {
-            processor.parsePattern(xmlEditor.getText());
-            xmlEditor.removeColour(TextEditor::outlineColourId);
-        } catch (ArpIntegrityException &e) {
-            xmlEditor.setColour(TextEditor::outlineColourId, RED);
-        }
-    };
+    xmlEditor.setEnabled(false);
+    audioUpdate(AudioUpdatable::PATTERN_UPDATE);
 
     addAndMakeVisible(xmlEditor);
-    addAndMakeVisible(applyXmlButton);
 }
 
 void XmlEditor::resized() {
-    xmlEditor.setBounds(0, 0, getWidth(), getHeight() - 30);
-    applyXmlButton.setBounds(0, getHeight() - 30, getWidth(), 30);
+    xmlEditor.setBounds(getLocalBounds());
+}
+
+void XmlEditor::audioUpdate(uint32 type) {
+    if (type == AudioUpdatable::PATTERN_UPDATE) {
+        xmlEditor.setText(processor.getStateXml(), false);
+    }
 }

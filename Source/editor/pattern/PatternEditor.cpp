@@ -601,7 +601,7 @@ void PatternEditor::select(const MouseEvent &event, PatternEditor::SelectionDrag
 }
 
 
-void PatternEditor::audioUpdate() {
+void PatternEditor::audioUpdate(uint32 type) {
     auto position = processor.getLastPosition();
     if (position > 0) {
         if (processor.getLoopReset() > 0.0) {

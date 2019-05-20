@@ -21,6 +21,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ArpPattern.h"
 #include "editor/EditorState.h"
+#include "AudioUpdatable.h"
 
 /**
  * The LibreArp audio processor.
@@ -81,6 +82,13 @@ public:
     void changeProgramName(int index, const String &newName) override;
 
 
+    /**
+     * Serializes this processor into a ValueTree.
+     *
+     * @return the value tree representing this pattern
+     */
+    ValueTree toValueTree();
+
     void getStateInformation(MemoryBlock &destData) override;
 
     void setStateInformation(const void *data, int sizeInBytes) override;
@@ -126,7 +134,7 @@ public:
      *
      * @return the current pattern's XML
      */
-    String &getPatternXml();
+    String getStateXml();
 
 
 
@@ -374,7 +382,7 @@ private:
     /**
      * Sends an update to the editor.
      */
-    void updateEditor();
+    void updateEditor(uint32 type = AudioUpdatable::GENERAL_UPDATE);
 
 
 

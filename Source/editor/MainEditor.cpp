@@ -46,8 +46,10 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
     tabs.setOutline(0);
     tabs.addTab("Pattern Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
     tabs.addTab("Behaviour", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &placeholderLabel, false);
-    tabs.addTab("MIDI", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &placeholderLabel, false);
-//    tabs.addTab("XML Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
+    tabs.addTab("Global settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &placeholderLabel, false);
+#if JUCE_DEBUG
+    tabs.addTab("XML viewer", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
+#endif
     tabs.addTab("About", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
 
     addAndMakeVisible(tabs);
@@ -70,6 +72,7 @@ void MainEditor::resized() {
     resizer.setBounds(getWidth() - RESIZER_SIZE, getHeight() - RESIZER_SIZE, RESIZER_SIZE, RESIZER_SIZE);
 }
 
-void MainEditor::audioUpdate() {
-    patternEditor.audioUpdate();
+void MainEditor::audioUpdate(uint32 type) {
+    patternEditor.audioUpdate(type);
+    xmlEditor.audioUpdate(type);
 }

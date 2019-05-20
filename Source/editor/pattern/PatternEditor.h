@@ -218,7 +218,7 @@ public:
 
     bool keyPressed(const KeyPress &key) override;
 
-    void audioUpdate() override;
+    void audioUpdate(uint32 type) override;
 
     /**
      * Gets the pointer to the parent editor view.

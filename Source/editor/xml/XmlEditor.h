@@ -19,19 +19,21 @@
 
 #include "../../LibreArp.h"
 #include "JuceHeader.h"
+#include "../../AudioUpdatable.h"
 
-class XmlEditor : public Component {
+class XmlEditor : public Component, public AudioUpdatable {
 public:
 
     explicit XmlEditor(LibreArp &p);
 
     void resized() override;
 
+    void audioUpdate(uint32 type) override;
+
 private:
     LibreArp &processor;
 
     TextEditor xmlEditor;
-    TextButton applyXmlButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor);
 };

@@ -150,6 +150,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
     if (buildScheduled) {
         this->stopAll();
         events = pattern.buildEvents();
+        updateEditor(AudioUpdatable::PATTERN_UPDATE);
         buildScheduled = false;
     }
 
@@ -262,8 +263,7 @@ AudioProcessorEditor *LibreArp::createEditor() {
     return new MainEditor(*this, editorState);
 }
 
-//==============================================================================
-void LibreArp::getStateInformation(MemoryBlock &destData) {
+ValueTree LibreArp::toValueTree() {
     ValueTree tree = ValueTree(TREEID_LIBREARP);
     tree.appendChild(this->pattern.toValueTree(), nullptr);
     tree.appendChild(this->editorState.toValueTree(), nullptr);
@@ -273,9 +273,12 @@ void LibreArp::getStateInformation(MemoryBlock &destData) {
     tree.setProperty(TREEID_NUM_INPUT_NOTES, this->numInputNotes, nullptr);
     tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
     tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
+    return tree;
+}
 
+void LibreArp::getStateInformation(MemoryBlock &destData) {
     destData.reset();
-    MemoryOutputStream(destData, true).writeString(tree.toXmlString());
+    MemoryOutputStream(destData, true).writeString(toValueTree().toXmlString());
 }
 
 void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
@@ -350,8 +353,8 @@ ArpPattern &LibreArp::getPattern() {
     return this->pattern;
 }
 
-String &LibreArp::getPatternXml() {
-    return this->patternXml;
+String LibreArp::getStateXml() {
+    return this->toValueTree().toXmlString();
 }
 
 
@@ -496,11 +499,11 @@ void LibreArp::stopAll(MidiBuffer &midi) {
     }
 }
 
-void LibreArp::updateEditor() {
+void LibreArp::updateEditor(uint32 type) {
     auto editor = (MainEditor *) getActiveEditor();
-    MessageManager::callAsync([editor] {
+    MessageManager::callAsync([editor, type] {
         if (editor != nullptr && editor->isVisible()) {
-            editor->audioUpdate();
+            editor->audioUpdate(type);
         }
     });
 }

@@ -41,7 +41,7 @@ public:
 
     void resized() override;
 
-    void audioUpdate() override;
+    void audioUpdate(uint32 type) override;
 
 private:
     LibreArp &processor;
