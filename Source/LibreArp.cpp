@@ -517,7 +517,6 @@ int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 position, int64 las
         auto loopResetLength = static_cast<int64>(std::ceil(events.timebase * loopReset));
         auto resetPosition = position % loopResetLength;
         auto intermediateResult = resetPosition - (resetPosition % events.loopLength) + event.time;
-        intermediateResult %= loopResetLength;
 
         result = position - (position % loopResetLength) + intermediateResult;
     } else {
