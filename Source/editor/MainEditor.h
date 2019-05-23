@@ -25,6 +25,7 @@
 #include "about/AboutBox.h"
 #include "LArpLookAndFeel.h"
 #include "../AudioUpdatable.h"
+#include "behaviour/BehaviourSettingsEditor.h"
 
 /**
  * Main LibreArp editor component.
@@ -47,6 +48,8 @@ private:
     LibreArp &processor;
     EditorState &state;
 
+    TooltipWindow tooltipWindow;
+
     ResizableCornerComponent resizer;
     ComponentBoundsConstrainer boundsConstrainer;
     TabbedComponent tabs;
@@ -54,6 +57,7 @@ private:
     Label placeholderLabel;
 
     PatternEditorView patternEditor;
+    BehaviourSettingsEditor behaviourSettingsEditor;
     XmlEditor xmlEditor;
     AboutBox aboutBox;
 

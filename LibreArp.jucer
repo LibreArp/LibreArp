@@ -9,7 +9,7 @@
               pluginAUExportPrefix="LibreArpAU" aaxIdentifier="org.librearp.LibreArp"
               pluginManufacturerCode="LArp" pluginCode="LArp" binaryDataNamespace="LArpBin"
               id="B2JXLb" pluginFormats="buildStandalone,buildVST,buildVST3"
-              pluginCharacteristicsValue="pluginEditorRequiresKeys,pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn,pluginProducesMidiOut,pluginEditorRequiresKeys"
               pluginVSTCategory="kPlugCategUnknown" pluginVST3Category="Fx,Instrument,Tools"
               reportAppUsage="0" displaySplashScreen="0" includeBinaryInAppConfig="0"
               pluginIsSynth="1" pluginEditorRequiresKeys="1" pluginRTASDisableBypass="0"
@@ -23,6 +23,12 @@
     </GROUP>
     <GROUP id="{4D6501CE-D613-8A3D-7ABE-D57B9896DB0F}" name="Source">
       <GROUP id="{916A40E5-BC88-61B9-D0D5-8A490632E866}" name="editor">
+        <GROUP id="{6A14D140-0A20-3D9F-2032-09A78C23D061}" name="behaviour">
+          <FILE id="wqPubr" name="BehaviourSettingsEditor.cpp" compile="1" resource="0"
+                file="Source/editor/behaviour/BehaviourSettingsEditor.cpp"/>
+          <FILE id="cUIJvY" name="BehaviourSettingsEditor.h" compile="0" resource="0"
+                file="Source/editor/behaviour/BehaviourSettingsEditor.h"/>
+        </GROUP>
         <GROUP id="{638A0178-D6A6-FB82-B670-D86059D7A146}" name="about">
           <FILE id="EaPbwm" name="AboutBox.cpp" compile="1" resource="0" file="Source/editor/about/AboutBox.cpp"/>
           <FILE id="uariA5" name="AboutBox.h" compile="0" resource="0" file="Source/editor/about/AboutBox.h"/>

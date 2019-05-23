@@ -37,6 +37,7 @@ LArpLookAndFeel::LArpLookAndFeel() {
     setColour(TabbedComponent::outlineColourId, HIGHLIGHT_BACKGROUND_COLOUR);
 
     setColour(Label::textColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(ToggleButton::textColourId, MAIN_FOREGROUND_COLOUR);
 
     setColour(TextButton::textColourOnId, MAIN_FOREGROUND_COLOUR);
     setColour(TextButton::textColourOffId, MAIN_FOREGROUND_COLOUR);

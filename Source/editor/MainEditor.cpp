@@ -30,6 +30,7 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
           resizer(this, &boundsConstrainer),
           tabs(TabbedButtonBar::Orientation::TabsAtTop),
           patternEditor(p, e),
+          behaviourSettingsEditor(p),
           xmlEditor(p) {
 
     LookAndFeel::setDefaultLookAndFeel(&LArpLookAndFeel::getInstance());
@@ -44,13 +45,18 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
     placeholderLabel.setColour(Label::textColourId, Colour(255, 0, 0));
 
     tabs.setOutline(0);
-    tabs.addTab("Pattern Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
-    tabs.addTab("Behaviour", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &placeholderLabel, false);
-    tabs.addTab("Global settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &placeholderLabel, false);
+    tabs.addTab("Pattern Editor",
+            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
+    tabs.addTab("Behaviour",
+            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &behaviourSettingsEditor, false);
+    tabs.addTab("Global settings",
+            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &placeholderLabel, false);
 #if JUCE_DEBUG
-    tabs.addTab("XML viewer", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
+    tabs.addTab("XML viewer",
+            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
 #endif
-    tabs.addTab("About", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
+    tabs.addTab("About",
+            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
 
     addAndMakeVisible(tabs);
     addAndMakeVisible(resizer, 9999);

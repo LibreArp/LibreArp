@@ -28,6 +28,18 @@ class ArpBuiltEvents {
 public:
 
     /**
+     * Data class containing information about a playing note and its channel number.
+     */
+    class PlayingNote {
+    public:
+
+        explicit PlayingNote(int noteNumber, int outChannel);
+
+        int noteNumber;
+        int outChannel;
+    };
+
+    /**
      * Data class of a single event in time. Contains the time the event fires (in the set timebase) and indices of
      * on-data and off-data.
      */
@@ -78,7 +90,7 @@ public:
         /**
          * The last played MIDI note number.
          */
-        int lastNote = -1;
+        PlayingNote lastNote = PlayingNote(-1, -1);
 
         /**
          * The index of the note in the pattern from which the events were built.
@@ -121,4 +133,8 @@ public:
     int64 loopLength;
 };
 
-
+bool operator> (ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);
+bool operator< (ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);
+bool operator>=(ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);
+bool operator<=(ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);
+bool operator==(ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);

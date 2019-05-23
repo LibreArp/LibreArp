@@ -27,7 +27,7 @@ const Identifier LibreArp::TREEID_NUM_INPUT_NOTES = Identifier("numInputNotes");
 const Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = Identifier("outputMidiChannel"); // NOLINT
 const Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = Identifier("inputMidiChannel"); // NOLINT
 
-//==============================================================================
+
 LibreArp::LibreArp()
 #ifndef JucePlugin_PreferredChannelConfigurations
         : AudioProcessor(BusesProperties()
@@ -199,11 +199,11 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                 if (offset >= 0) {
                     for (auto i : event.offs) {
                         auto &data = events.data[i];
-                        if (data.lastNote >= 0) {
-                            midi.addEvent(MidiMessage::noteOff(outputMidiChannel, data.lastNote), offset);
+                        if (data.lastNote.noteNumber >= 0) {
+                            midi.addEvent(MidiMessage::noteOff(data.lastNote.outChannel, data.lastNote.noteNumber), offset);
                             playingNotes.removeValue(data.lastNote);
                             playingPatternIndices.removeValue(data.noteIndex);
-                            data.lastNote = -1;
+                            data.lastNote = ArpBuiltEvents::PlayingNote(-1, -1);
                         }
                     }
 
@@ -224,12 +224,12 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                                 note += octave * 12;
                             }
 
-                            if (isPositiveAndBelow(note, 128) && data.lastNote != note) {
-                                data.lastNote = note;
+                            if (isPositiveAndBelow(note, 128) && data.lastNote.noteNumber != note) {
+                                data.lastNote = ArpBuiltEvents::PlayingNote(note, outputMidiChannel);
                                 midi.addEvent(
                                         MidiMessage::noteOn(
-                                                outputMidiChannel, note, static_cast<float>(data.velocity)), offset);
-                                playingNotes.add(note);
+                                                data.lastNote.outChannel, data.lastNote.noteNumber, static_cast<float>(data.velocity)), offset);
+                                playingNotes.add(data.lastNote);
                                 playingPatternIndices.add(data.noteIndex);
                             }
                         }
@@ -379,6 +379,14 @@ SortedSet<unsigned long>& LibreArp::getPlayingPatternIndices() {
 }
 
 
+bool LibreArp::isTransposingOctaves() {
+    return this->octaves->get();
+}
+
+void LibreArp::setTransposingOctaves(bool value) {
+    this->octaves->setValueNotifyingHost(value ? 1.0f : 0.0f);
+}
+
 
 int LibreArp::getNumInputNotes() {
     return this->numInputNotes;
@@ -444,6 +452,7 @@ int LibreArp::getOutputMidiChannel() {
 void LibreArp::setOutputMidiChannel(int channel) {
     jassert(channel >= 1 && channel <= 16);
     this->outputMidiChannel = channel;
+    this->stopAll();
 }
 
 
@@ -455,6 +464,8 @@ int LibreArp::getInputMidiChannel() {
 void LibreArp::setInputMidiChannel(int channel) {
     jassert(channel >= 0 && channel <= 16);
     this->inputMidiChannel = channel;
+    this->stopAll();
+    this->inputNotes.clear();
 }
 
 
@@ -488,14 +499,14 @@ void LibreArp::stopAll() {
 }
 
 void LibreArp::stopAll(MidiBuffer &midi) {
-    for (auto noteNumber : playingNotes) {
-        midi.addEvent(MidiMessage::noteOff(outputMidiChannel, noteNumber), 0);
+    for (auto note : playingNotes) {
+        midi.addEvent(MidiMessage::noteOff(note.outChannel, note.noteNumber), 0);
     }
     playingNotes.clear();
     playingPatternIndices.clear();
 
     for (auto &data : events.data) {
-        data.lastNote = -1;
+        data.lastNote = ArpBuiltEvents::PlayingNote(-1, -1);
     }
 }
 

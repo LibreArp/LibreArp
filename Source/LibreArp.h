@@ -167,6 +167,10 @@ public:
     SortedSet<unsigned long> &getPlayingPatternIndices();
 
 
+    bool isTransposingOctaves();
+
+    void setTransposingOctaves(bool value);
+
 
     /**
      * Gets the last active number of input notes.
@@ -319,7 +323,7 @@ private:
     /**
      * The set of currently playing output notes.
      */
-    SortedSet<int> playingNotes;
+    SortedSet<ArpBuiltEvents::PlayingNote> playingNotes;
 
     /**
      * The set of currently playing pattern indices.
