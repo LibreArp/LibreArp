@@ -31,6 +31,15 @@ LArpLookAndFeel::LArpLookAndFeel() {
 
     setDefaultSansSerifTypeface(mainTypeface);
 
+    setColour(TooltipWindow::backgroundColourId, MAIN_BACKGROUND_COLOUR);
+    setColour(TooltipWindow::outlineColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(TooltipWindow::textColourId, MAIN_FOREGROUND_COLOUR);
+
+    setColour(TextEditor::backgroundColourId, HIGHLIGHT_BACKGROUND_COLOUR);
+    setColour(TextEditor::textColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(TextEditor::highlightColourId, HIGHLIGHT_FOREGROUND_COLOUR);
+    setColour(TextEditor::highlightedTextColourId, Colour(255, 255, 255));
+
     setColour(ResizableWindow::backgroundColourId, HIGHLIGHT_BACKGROUND_COLOUR);
 
     setColour(TabbedComponent::backgroundColourId, MAIN_BACKGROUND_COLOUR);
