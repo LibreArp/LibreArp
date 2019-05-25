@@ -66,6 +66,7 @@ void PatternEditor::paint(Graphics &g) {
     ArpPattern &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
     auto pixelsPerNote = state.pixelsPerNote;
+    auto drawRegion = g.getClipBounds();
 
     // Set size
     setSize(
@@ -74,14 +75,14 @@ void PatternEditor::paint(Graphics &g) {
 
     // Draw background
     g.setColour(BACKGROUND_COLOUR);
-    g.fillRect(getLocalBounds());
+    g.fillRect(drawRegion);
 
     // Draw bars
     if (processor.getTimeSigDenominator() > 0 && processor.getTimeSigDenominator() <= 32) {
         auto beat = (pixelsPerBeat * 4) / processor.getTimeSigDenominator();
         auto bar = beat * processor.getTimeSigNumerator();
         g.setColour(BAR_SHADE_COLOUR);
-        for (int i = 0; i < getWidth(); i += bar * 2) {
+        for (int i = (drawRegion.getX() / bar) * bar; i < drawRegion.getWidth(); i += bar * 2) {
             g.fillRect(i + bar, 0, bar, getHeight());
         }
     }
@@ -92,10 +93,17 @@ void PatternEditor::paint(Graphics &g) {
     if (numInputNotes > 0) {
         g.setColour(ZERO_OCTAVE_COLOUR);
         auto height = numInputNotes * pixelsPerNote;
-        g.fillRect(0, noteZeroY - height + pixelsPerNote, getWidth(), height);
+        auto rect = Rectangle<int>(
+                drawRegion.getX(), noteZeroY - height + pixelsPerNote, drawRegion.getWidth(), height);
+        if (rect.intersects(drawRegion)) {
+            g.fillRect(rect);
+        }
     } else {
         g.setColour(ZERO_LINE_COLOUR);
-        g.fillRect(0, noteZeroY, getWidth(), pixelsPerNote);
+        auto rect = Rectangle<int>(drawRegion.getX(), noteZeroY, drawRegion.getWidth(), pixelsPerNote);
+        if (rect.intersects(drawRegion)) {
+            g.fillRect(rect);
+        }
     }
 
     // Draw gridlines
@@ -123,7 +131,7 @@ void PatternEditor::paint(Graphics &g) {
 
         int i = (getHeight() / 2) % pixelsPerOctave - pixelsPerNote / 2 + pixelsPerNote;
         for (/* above */; i < getHeight(); i += pixelsPerOctave) {
-            g.fillRect(0, i, getWidth(), 1);
+            g.fillRect(drawRegion.getX(), i, drawRegion.getWidth(), 1);
         }
     }
 
@@ -133,16 +141,18 @@ void PatternEditor::paint(Graphics &g) {
         auto &note = notes[i];
         Rectangle<int> noteRect = getRectangleForNote(note);
 
-        auto isPlaying = processor.getPlayingPatternIndices().contains(i);
+        if (noteRect.intersects(drawRegion)) {
+            auto isPlaying = processor.getPlayingPatternIndices().contains(i);
 
-        if (selectedNotes.find(i) == selectedNotes.end()) {
-            g.setColour(isPlaying ? NOTE_ACTIVE_FILL_COLOUR : NOTE_FILL_COLOUR);
-        } else {
-            g.setColour(isPlaying ? NOTE_SELECTED_ACTIVE_FILL_COLOUR : NOTE_SELECTED_FILL_COLOUR);
+            if (selectedNotes.find(i) == selectedNotes.end()) {
+                g.setColour(isPlaying ? NOTE_ACTIVE_FILL_COLOUR : NOTE_FILL_COLOUR);
+            } else {
+                g.setColour(isPlaying ? NOTE_SELECTED_ACTIVE_FILL_COLOUR : NOTE_SELECTED_FILL_COLOUR);
+            }
+            g.fillRect(noteRect);
+            g.setColour(NOTE_BORDER_COLOUR);
+            g.drawRect(noteRect, 2);
         }
-        g.fillRect(noteRect);
-        g.setColour(NOTE_BORDER_COLOUR);
-        g.drawRect(noteRect, 2);
     }
 
     // Draw cursor indicator
@@ -153,25 +163,36 @@ void PatternEditor::paint(Graphics &g) {
     // Draw loop line
     g.setColour(LOOP_LINE_COLOUR);
     auto loopLine = pulseToX(pattern.loopLength);
-    g.fillRect(loopLine, 0, 4, getHeight());
+    auto loopLineRect = Rectangle<int>(loopLine, drawRegion.getY(), 4, drawRegion.getHeight());
+    if (loopLineRect.intersects(drawRegion)){
+        g.fillRect(loopLineRect);
+    }
 
     // Draw position indicator
     if (lastPlayPositionX > 0) {
-        g.setColour(POSITION_INDICATOR_COLOUR);
-        auto positionRect = Rectangle<int>(lastPlayPositionX, 0, 1, getHeight());
-        g.fillRect(positionRect);
-        repaint(positionRect);
+        auto positionRect = Rectangle<int>(lastPlayPositionX, drawRegion.getY(), 1, drawRegion.getHeight());
+        if (positionRect.intersects(drawRegion)) {
+            g.setColour(POSITION_INDICATOR_COLOUR);
+            g.fillRect(positionRect);
+            repaint(positionRect);
+        }
     }
 
     // Draw selection
     if (selection.getWidth() != 0 && selection.getHeight() != 0) {
-        g.setColour(SELECTION_BORDER_COLOUR);
-        g.drawRect(selection, 3);
+        if (selection.intersects(drawRegion)) {
+            g.setColour(SELECTION_BORDER_COLOUR);
+            g.drawRect(selection, 3);
+        }
     }
 
-    g.setColour(CURSOR_NOTE_COLOUR);
+
     auto cursorNoteY = noteToY(cursorNote);
-    g.fillRect(0, cursorNoteY, getWidth(), pixelsPerNote);
+    auto cursorNoteRect = Rectangle<int>(drawRegion.getX(), cursorNoteY, drawRegion.getWidth(), pixelsPerNote);
+    if (cursorNoteRect.intersects(drawRegion)) {
+        g.setColour(CURSOR_NOTE_COLOUR);
+        g.fillRect(cursorNoteRect);
+    }
 }
 
 
