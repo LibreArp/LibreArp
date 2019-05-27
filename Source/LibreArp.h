@@ -22,6 +22,7 @@
 #include "ArpPattern.h"
 #include "editor/EditorState.h"
 #include "AudioUpdatable.h"
+#include "Globals.h"
 
 /**
  * The LibreArp audio processor.
@@ -254,6 +255,11 @@ public:
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
+
+    /**
+     * Global data of the plugin.
+     */
+    Globals globals;
 
     /**
      * The persistent state of the editor.

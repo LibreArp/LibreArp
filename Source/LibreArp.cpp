@@ -31,12 +31,12 @@ const Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = Identifier("inputMidiChan
 LibreArp::LibreArp()
 #ifndef JucePlugin_PreferredChannelConfigurations
         : AudioProcessor(BusesProperties()
-//#if !JucePlugin_IsMidiEffect
-//#if ! JucePlugin_IsSynth
-//.withInput  ("Input",  AudioChannelSet::stereo(), true)
-//#endif
+#if !JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+.withInput  ("Input",  AudioChannelSet::stereo(), true)
+#endif
 .withOutput ("Output", AudioChannelSet::stereo(), true)
-//#endif
+#endif
 )
 #endif
 {
@@ -52,6 +52,8 @@ LibreArp::LibreArp()
     this->timeSigDenominator = 4;
     this->debugPlaybackEnabled = false;
     resetDebugPlayback();
+
+    globals.markChanged();
 
     addParameter(octaves = new AudioParameterBool(
             "octaves",

@@ -73,6 +73,8 @@
       <FILE id="TpttHS" name="ArpNote.h" compile="0" resource="0" file="Source/ArpNote.h"/>
       <FILE id="jfnte9" name="ArpPattern.cpp" compile="1" resource="0" file="Source/ArpPattern.cpp"/>
       <FILE id="pYhY9N" name="ArpPattern.h" compile="0" resource="0" file="Source/ArpPattern.h"/>
+      <FILE id="Ia0bIz" name="Globals.cpp" compile="1" resource="0" file="Source/Globals.cpp"/>
+      <FILE id="heegX1" name="Globals.h" compile="0" resource="0" file="Source/Globals.h"/>
       <FILE id="dQOFVc" name="LibreArp.cpp" compile="1" resource="0" file="Source/LibreArp.cpp"/>
       <FILE id="zq56Bs" name="LibreArp.h" compile="0" resource="0" file="Source/LibreArp.h"/>
       <FILE id="nwBdhE" name="NoteData.cpp" compile="1" resource="0" file="Source/NoteData.cpp"/>
