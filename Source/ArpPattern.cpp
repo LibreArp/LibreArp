@@ -98,18 +98,23 @@ ValueTree ArpPattern::toValueTree() {
     return result;
 }
 
+void ArpPattern::toFile(const File &file) {
+    auto tree = toValueTree();
+    file.replaceWithText(tree.toXmlString());
+}
+
 
 ArpPattern ArpPattern::fromValueTree(ValueTree &tree) {
-    if (!tree.isValid() || !tree.hasType(TREEID_PATTERN)) {
-        throw std::invalid_argument("Input tree must be valid and of the correct type!");
-    }
-
     int timebase = DEFAULT_TIMEBASE;
     if (tree.hasProperty(TREEID_TIMEBASE)) {
         timebase = tree.getProperty(TREEID_TIMEBASE);
     }
 
     ArpPattern result = ArpPattern(timebase);
+
+    if (!tree.isValid() || !tree.hasType(TREEID_PATTERN)) {
+        return result;
+    }
 
     if (tree.hasProperty(TREEID_LOOP_LENGTH)) {
         result.loopLength = tree.getProperty(TREEID_LOOP_LENGTH);
@@ -125,6 +130,13 @@ ArpPattern ArpPattern::fromValueTree(ValueTree &tree) {
 
     return result;
 }
+
+ArpPattern ArpPattern::fromFile(const File &file) {
+    auto xmlDoc = XmlDocument::parse(file);
+    auto tree = ValueTree::fromXml(*xmlDoc);
+    return fromValueTree(tree);
+}
+
 
 std::recursive_mutex &ArpPattern::getMutex() {
     return mutex;

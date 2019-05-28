@@ -18,6 +18,7 @@
 #pragma once
 
 #include <sstream>
+#include <mutex>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ArpPattern.h"
 #include "editor/EditorState.h"
@@ -106,17 +107,17 @@ public:
     /**
      * Sets the pattern to play.
      *
-     * @param pattern the pattern to play
-     * @param updateXml whether the XML representation should be updated
+     * @param newPattern the pattern to play
      */
-    void setPattern(ArpPattern &pattern, bool updateXml = true);
+    void setPattern(const ArpPattern &newPattern);
 
     /**
-     * Parses the pattern to play from the given XML data.
+     * Loads a pattern from the specified file.
      *
-     * @param xmlPattern the XML data
+     * @param file the file to load
      */
-    void parsePattern(const String &xmlPattern);
+    void loadPatternFromFile(const File &file);
+
 
     /**
      * Builds the current pattern.
@@ -251,6 +252,8 @@ public:
      */
     void setInputMidiChannel(int channel);
 
+    Globals &getGlobals();
+
 
 
 private:
@@ -372,6 +375,11 @@ private:
      * The MIDI channel input notes are read from. Notes from all channels are read if zero.
      */
     int inputMidiChannel;
+
+    /**
+     * The audio processor mutex.
+     */
+    std::recursive_mutex mutex;
 
 
 

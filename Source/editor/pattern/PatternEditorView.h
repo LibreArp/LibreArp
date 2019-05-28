@@ -45,6 +45,11 @@ private:
     LibreArp &processor;
     EditorState &state;
 
+    FileChooser presetChooser;
+
+    TextButton saveButton;
+    TextButton loadButton;
+
     Slider snapSlider;
     Label snapSliderLabel;
 

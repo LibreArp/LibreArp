@@ -76,6 +76,22 @@ public:
      */
     void parseValueTree(const ValueTree &tree);
 
+
+    /**
+     * @return the directory where global data is stored
+     */
+    File getGlobalsDir();
+
+    /**
+     * @return the global settings file
+     */
+    File getSettingsFile();
+
+    /**
+     * @return the directory where pattern presets are stored
+     */
+    File getPatternPresetsDir();
+
 private:
 
     /**
@@ -92,6 +108,11 @@ private:
      * Global settings file.
      */
     File settingsFile;
+
+    /**
+     * Default presets directory.
+     */
+    File patternPresetsDir;
 
     /**
      * Mutex for the globals.

@@ -30,6 +30,15 @@ Globals::Globals() : changed(false) {
 #endif
 
     settingsFile = globalsDir.getChildFile("settings.xml");
+    patternPresetsDir = globalsDir.getChildFile("presets");
+
+    // TODO - add better checks (e.g. what if the globalsDir is a file and not a directory for whatever reason?)
+    if (!globalsDir.isDirectory()) {
+        globalsDir.createDirectory();
+    }
+    if (!patternPresetsDir.isDirectory()) {
+        patternPresetsDir.createDirectory();
+    }
 
     load();
 }
@@ -55,10 +64,6 @@ bool Globals::save() {
 
 void Globals::forceSave() {
     std::scoped_lock lock(mutex);
-
-    if (!globalsDir.isDirectory()) {
-        globalsDir.createDirectory();
-    }
 
     char const *lineEnding;
 #if JUCE_WINDOWS
@@ -98,4 +103,17 @@ void Globals::parseValueTree(const ValueTree &tree) {
     std::scoped_lock lock(mutex);
     reset();
     // TODO - add actual settings
+}
+
+
+File Globals::getGlobalsDir() {
+    return this->globalsDir;
+}
+
+File Globals::getSettingsFile() {
+    return this->settingsFile;
+}
+
+File Globals::getPatternPresetsDir() {
+    return this->patternPresetsDir;
 }

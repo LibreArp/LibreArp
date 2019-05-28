@@ -43,7 +43,6 @@ public:
     int64 loopLength;
 
 
-
     /**
      * Constructs a new pattern with the specified timebase.
      *
@@ -61,7 +60,6 @@ public:
     ArpPattern& operator=(const ArpPattern &p) noexcept;
 
 
-
     /**
      * Gets the timebase of the pattern.
      *
@@ -77,7 +75,6 @@ public:
     std::vector<ArpNote> &getNotes();
 
 
-
     /**
      * Builds events from this pattern.
      *
@@ -85,6 +82,13 @@ public:
      */
     ArpBuiltEvents buildEvents();
 
+
+    /**
+     * Gets this pattern's mutex.
+     *
+     * @return this pattern's mutex
+     */
+    std::recursive_mutex &getMutex();
 
 
     /**
@@ -95,19 +99,27 @@ public:
     ValueTree toValueTree();
 
     /**
+     * Serializes this pattern and saves it to the specified file.
+     *
+     * @param file the file where the pattern is to be saved
+     */
+    void toFile(const File &file);
+
+    /**
      * Deserializes the specified ValueTree into the pattern it represents.
      *
      * @param tree the tree to deserialize
-     * @return the pattern represented by the ValueTree
+     * @return the pattern represented by the ValueTree (empty if failed)
      */
     static ArpPattern fromValueTree(ValueTree &tree);
 
     /**
-     * Gets this pattern's mutex.
+     * Loads the specified file and deserializes it into the pattern it represents.
      *
-     * @return this pattern's mutex
+     * @param file the file to load
+     * @return the pattern represented by the file (empty if failed)
      */
-    std::recursive_mutex &getMutex();
+    static ArpPattern fromFile(const File &file);
 
 private:
 

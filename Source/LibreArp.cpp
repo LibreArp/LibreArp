@@ -138,6 +138,8 @@ bool LibreArp::isBusesLayoutSupported(const BusesLayout &layouts) const {
 #endif
 
 void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
+    std::scoped_lock lock(mutex);
+
     ScopedNoDenormals noDenormals;
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -266,6 +268,7 @@ AudioProcessorEditor *LibreArp::createEditor() {
 }
 
 ValueTree LibreArp::toValueTree() {
+    std::scoped_lock lock(mutex);
     ValueTree tree = ValueTree(TREEID_LIBREARP);
     tree.appendChild(this->pattern.toValueTree(), nullptr);
     tree.appendChild(this->editorState.toValueTree(), nullptr);
@@ -284,6 +287,8 @@ void LibreArp::getStateInformation(MemoryBlock &destData) {
 }
 
 void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
+    std::scoped_lock lock(mutex);
+
     if (sizeInBytes > 0) {
         String xml = MemoryInputStream(data, static_cast<size_t>(sizeInBytes), false).readString();
         std::unique_ptr<XmlElement> doc = XmlDocument::parse(xml);
@@ -318,33 +323,20 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
                 this->inputMidiChannel = tree.getProperty(TREEID_INPUT_MIDI_CHANNEL);
             }
 
-            if (tree.hasProperty(TREEID_PATTERN_XML)) {
-                this->patternXml = tree.getProperty(TREEID_PATTERN_XML);
-                setPattern(pattern, false);
-            } else {
-                setPattern(pattern, true);
-            }
+            setPattern(pattern);
         }
     }
 }
 
-void LibreArp::setPattern(ArpPattern &pattern, bool updateXml) {
-    this->pattern = pattern;
-    if (updateXml) {
-        this->patternXml = pattern.toValueTree().toXmlString();
-    }
+void LibreArp::setPattern(const ArpPattern &newPattern) {
+    std::scoped_lock lock(mutex);
+
+    this->pattern = newPattern;
     buildPattern();
 }
 
-void LibreArp::parsePattern(const String &xmlPattern) {
-    std::unique_ptr<XmlElement> doc = XmlDocument::parse(xmlPattern);
-    if (doc == nullptr) {
-        throw ArpIntegrityException("Malformed XML!");
-    }
-    ValueTree tree = ValueTree::fromXml(*doc);
-    ArpPattern pattern = ArpPattern::fromValueTree(tree);
-    setPattern(pattern, false);
-    this->patternXml = xmlPattern;
+void LibreArp::loadPatternFromFile(const File &file) {
+    setPattern(ArpPattern::fromFile(file));
 }
 
 void LibreArp::buildPattern() {
@@ -356,17 +348,20 @@ ArpPattern &LibreArp::getPattern() {
 }
 
 String LibreArp::getStateXml() {
+    std::scoped_lock lock(mutex);
     return this->toValueTree().toXmlString();
 }
 
 
 int64 LibreArp::getLastPosition() {
+    std::scoped_lock lock(mutex);
     return this->lastPosition;
 }
 
 
 
 void LibreArp::setLoopReset(double loopReset) {
+    std::scoped_lock lock(mutex);
     this->loopReset = jmax(0.0, loopReset);
 }
 
@@ -377,6 +372,7 @@ double LibreArp::getLoopReset() {
 
 
 SortedSet<unsigned long>& LibreArp::getPlayingPatternIndices() {
+    std::scoped_lock lock(mutex);
     return this->playingPatternIndices;
 }
 
@@ -470,6 +466,10 @@ void LibreArp::setInputMidiChannel(int channel) {
     this->inputNotes.clear();
 }
 
+
+Globals &LibreArp::getGlobals() {
+    return this->globals;
+}
 
 
 void LibreArp::processInputMidi(MidiBuffer &inMidi) {
