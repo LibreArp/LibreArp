@@ -210,6 +210,7 @@ void PatternEditor::mouseWheelMove(const MouseEvent &event, const MouseWheelDeta
 
 void PatternEditor::mouseMove(const MouseEvent &event) {
     auto &pattern = processor.getPattern();
+    std::scoped_lock lock(pattern.getMutex());
 
     mouseAnyMove(event);
 
@@ -409,6 +410,8 @@ bool PatternEditor::keyPressed(const KeyPress &key) {
 
 
 void PatternEditor::loopResize(const MouseEvent &event) {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
     int64 lastNoteEnd = 0;
     for (auto &note : processor.getPattern().getNotes()) {
         if (note.endPoint > lastNoteEnd) {
@@ -424,6 +427,8 @@ void PatternEditor::loopResize(const MouseEvent &event) {
 
 
 void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dragAction) {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
     auto timebase = processor.getPattern().getTimebase();
     auto &notes = processor.getPattern().getNotes();
 
@@ -442,6 +447,8 @@ void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dra
 }
 
 void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragAction) {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
     auto timebase = processor.getPattern().getTimebase();
     auto &notes = processor.getPattern().getNotes();
 
@@ -462,6 +469,8 @@ void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragA
 }
 
 void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAction *dragAction) {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
     repaintNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto &noteOffset : dragAction->noteOffsets) {
@@ -488,6 +497,8 @@ void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAct
 }
 
 void PatternEditor::noteDuplicate(PatternEditor::NoteDragAction *dragAction) {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
     auto &notes = processor.getPattern().getNotes();
     for (auto &noteOffset : dragAction->noteOffsets) {
         processor.getPattern().getNotes().push_back(notes[noteOffset.noteIndex]);
@@ -496,6 +507,8 @@ void PatternEditor::noteDuplicate(PatternEditor::NoteDragAction *dragAction) {
 }
 
 void PatternEditor::noteCreate(const MouseEvent &event) {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
     auto &pattern = processor.getPattern();
     auto &notes = pattern.getNotes();
     auto pulse = xToPulse(event.x, true, true);
@@ -522,6 +535,8 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
 }
 
 void PatternEditor::noteDelete(const MouseEvent &event) {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
     auto &pattern = processor.getPattern();
     auto &notes = pattern.getNotes();
     bool erased = false;
@@ -573,6 +588,8 @@ void PatternEditor::deleteSelected() {
 }
 
 void PatternEditor::moveSelectedUp(bool octave) {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
     repaintNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto index : selectedNotes) {
@@ -587,6 +604,8 @@ void PatternEditor::moveSelectedUp(bool octave) {
 }
 
 void PatternEditor::moveSelectedDown(bool octave) {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
     repaintNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto index : selectedNotes) {

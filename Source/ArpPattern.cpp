@@ -24,25 +24,31 @@ const Identifier ArpPattern::TREEID_TIMEBASE = Identifier("timebase"); // NOLINT
 const Identifier ArpPattern::TREEID_LOOP_LENGTH = Identifier("loopLength"); // NOLINT
 const Identifier ArpPattern::TREEID_NOTES = Identifier("notes"); // NOLINT
 
-ArpPattern::ArpPattern(int timebase) {
-    this->timebase = timebase;
-    this->loopLength = timebase;
-    this->notes = std::vector<ArpNote>();
+ArpPattern::ArpPattern(int timebase) : timebase(timebase), loopLength(timebase) {}
+
+ArpPattern::ArpPattern(ArpPattern &pattern) {
+    std::scoped_lock lock(pattern.mutex);
+    this->timebase = pattern.timebase;
+    this->loopLength = pattern.loopLength;
+    this->notes = pattern.notes;
 }
 
 ArpPattern::~ArpPattern() = default;
 
 
 int ArpPattern::getTimebase() {
+    std::scoped_lock lock(mutex);
     return this->timebase;
 }
 
 std::vector<ArpNote> &ArpPattern::getNotes() {
+    std::scoped_lock lock(mutex);
     return this->notes;
 }
 
 
 ArpBuiltEvents ArpPattern::buildEvents() {
+    std::scoped_lock lock(mutex);
     std::map<int64, ArpBuiltEvents::Event> eventMap;
     ArpBuiltEvents result;
 
@@ -78,6 +84,7 @@ ArpBuiltEvents ArpPattern::buildEvents() {
 }
 
 ValueTree ArpPattern::toValueTree() {
+    std::scoped_lock lock(mutex);
     ValueTree result = ValueTree(TREEID_PATTERN);
 
     result.setProperty(TREEID_TIMEBASE, this->timebase, nullptr);
@@ -117,4 +124,15 @@ ArpPattern ArpPattern::fromValueTree(ValueTree &tree) {
     }
 
     return result;
+}
+
+std::recursive_mutex &ArpPattern::getMutex() {
+    return mutex;
+}
+
+ArpPattern& ArpPattern::operator=(const ArpPattern &pattern) noexcept {
+    this->timebase = pattern.timebase;
+    this->loopLength = pattern.loopLength;
+    this->notes = pattern.notes;
+    return *this;
 }

@@ -36,7 +36,7 @@ BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec)
 }
 
 void BeatBar::paint(Graphics &g) {
-    auto pattern = processor.getPattern();
+    auto &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
 
     setSize(jmax(editorComponent->getRenderWidth(), getParentWidth()), getParentHeight());

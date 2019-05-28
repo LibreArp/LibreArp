@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <mutex>
+
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ArpNote.h"
 #include "ArpBuiltEvents.h"
@@ -50,9 +52,13 @@ public:
     explicit ArpPattern(int timebase = DEFAULT_TIMEBASE);
 
     /**
-     * Destructs this pattern.
+     * Copy constructor.
      */
+    ArpPattern(ArpPattern &pattern);
+
     ~ArpPattern();
+
+    ArpPattern& operator=(const ArpPattern &p) noexcept;
 
 
 
@@ -64,9 +70,9 @@ public:
     int getTimebase();
 
     /**
-     * Gets a pointer to the vector of notes in this pattern.
+     * Gets the vector of notes in this pattern.
      *
-     * @return
+     * @return the vector of notes in this pattern.
      */
     std::vector<ArpNote> &getNotes();
 
@@ -96,6 +102,13 @@ public:
      */
     static ArpPattern fromValueTree(ValueTree &tree);
 
+    /**
+     * Gets this pattern's mutex.
+     *
+     * @return this pattern's mutex
+     */
+    std::recursive_mutex &getMutex();
+
 private:
 
     /**
@@ -108,4 +121,9 @@ private:
      * The notes in the pattern.
      */
     std::vector<ArpNote> notes;
+
+    /**
+     * The pattern's mutex.
+     */
+    std::recursive_mutex mutex;
 };
