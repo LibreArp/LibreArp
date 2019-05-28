@@ -62,8 +62,18 @@ public:
      */
     void markChanged();
 
+    /**
+     * Converts this Globals object into a value tree.
+     *
+     * @return a value tree representing this object
+     */
     ValueTree toValueTree();
 
+    /**
+     * Resets this Globals object and repopulates it according to the specified value tree.
+     *
+     * @param tree the tree to use for repopulation
+     */
     void parseValueTree(const ValueTree &tree);
 
 private:
@@ -79,7 +89,7 @@ private:
     File globalsDir;
 
     /**
-     * JUCE File of the global settings.
+     * Global settings file.
      */
     File settingsFile;
 
