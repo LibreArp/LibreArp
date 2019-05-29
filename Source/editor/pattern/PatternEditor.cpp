@@ -382,30 +382,30 @@ void PatternEditor::mouseUp(const MouseEvent &event) {
 bool PatternEditor::keyPressed(const KeyPress &key) {
     if (key == KeyPress::deleteKey || key == KeyPress::numberPadDelete) {
         deleteSelected();
-        return false;
+        return true;
     }
 
     if (key.isKeyCode(KeyPress::upKey)) {
         moveSelectedUp(key.getModifiers().isCtrlDown());
-        return false;
+        return true;
     }
 
     if (key.isKeyCode(KeyPress::downKey)) {
         moveSelectedDown(key.getModifiers().isCtrlDown());
-        return false;
+        return true;
     }
 
     if (key == KeyPress::createFromDescription("CTRL+A")) {
         selectAll();
-        return false;
+        return true;
     }
 
     if (key == KeyPress::createFromDescription("CTRL+D")) {
         deselectAll();
-        return false;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 
