@@ -36,6 +36,7 @@ const Colour NOTE_ACTIVE_FILL_COLOUR = Colour(228, 255, 122);
 const Colour NOTE_SELECTED_FILL_COLOUR = Colour(245, 255, 209);
 const Colour NOTE_SELECTED_ACTIVE_FILL_COLOUR = Colour(255, 255, 255);
 const Colour NOTE_BORDER_COLOUR = Colour((uint8) 0, 0, 0, 0.7f);
+const Colour NOTE_VELOCITY_COLOUR = Colour((uint8) 0, 0, 0, 0.2f);
 
 const Colour CURSOR_TIME_COLOUR = Colour((uint8) 255, 255, 255, 0.7f);
 const Colour CURSOR_NOTE_COLOUR = Colour((uint8) 255, 255, 255, 0.05f);
@@ -150,6 +151,10 @@ void PatternEditor::paint(Graphics &g) {
                 g.setColour(isPlaying ? NOTE_SELECTED_ACTIVE_FILL_COLOUR : NOTE_SELECTED_FILL_COLOUR);
             }
             g.fillRect(noteRect);
+
+            g.setColour(NOTE_VELOCITY_COLOUR);
+            g.fillRect(noteRect.withTrimmedBottom(static_cast<int>(pixelsPerNote * note.data.velocity)));
+
             g.setColour(NOTE_BORDER_COLOUR);
             g.drawRect(noteRect, 2);
         }
@@ -204,7 +209,19 @@ void PatternEditor::mouseWheelMove(const MouseEvent &event, const MouseWheelDeta
             view->zoomPattern(wheel.deltaY, 0);
         }
     } else {
-        Component::mouseWheelMove(event, wheel);
+        if (event.mods.isAltDown()) {
+            if (this->dragAction != nullptr && (this->dragAction->type & DragAction::TYPE_MASK) == DragAction::TYPE_NOTE) {
+                auto *dragAction = (NoteDragAction *) this->dragAction;
+                std::scoped_lock lock(this->processor.getPattern().getMutex());
+                for (auto &noteOffset : dragAction->noteOffsets) {
+                    auto &note = this->processor.getPattern().getNotes()[noteOffset.noteIndex];
+                    note.data.velocity = jmax(0.0, jmin(note.data.velocity + wheel.deltaY * 0.1, 1.0));
+                }
+                processor.buildPattern();
+            }
+        } else {
+            Component::mouseWheelMove(event, wheel);
+        }
     }
 }
 
