@@ -30,10 +30,21 @@
  */
 class LibreArp : public AudioProcessor {
 public:
+
+    class InputNote {
+    public:
+
+        explicit InputNote(int note = -1, double velocity = 0.8);
+
+        int note;
+        double velocity;
+    };
+
     static const Identifier TREEID_LIBREARP;
     static const Identifier TREEID_LOOP_RESET;
     static const Identifier TREEID_PATTERN_XML;
     static const Identifier TREEID_OCTAVES;
+    static const Identifier TREEID_INPUT_VELOCITY;
     static const Identifier TREEID_NUM_INPUT_NOTES;
     static const Identifier TREEID_OUTPUT_MIDI_CHANNEL;
     static const Identifier TREEID_INPUT_MIDI_CHANNEL;
@@ -173,6 +184,10 @@ public:
 
     void setTransposingOctaves(bool value);
 
+    bool isUsingInputVelocity();
+
+    void setUsingInputVelocity(bool value);
+
 
     /**
      * Gets the last active number of input notes.
@@ -293,6 +308,11 @@ private:
      */
     AudioParameterBool *octaves;
 
+    /**
+     * Whether the plugin is using the velocity of input notes.
+     */
+    AudioParameterBool *usingInputVelocity;
+
 
 
     /**
@@ -327,7 +347,7 @@ private:
     /**
      * The set of currently fed input notes.
      */
-    SortedSet<int> inputNotes;
+    SortedSet<InputNote> inputNotes;
 
     /**
      * The set of currently playing output notes.
@@ -414,3 +434,9 @@ private:
      */
     int64 nextTime(ArpBuiltEvents::Event &event, int64 position, int64 lastPosition);
 };
+
+bool operator> (const LibreArp::InputNote &a, const LibreArp::InputNote &b);
+bool operator< (const LibreArp::InputNote &a, const LibreArp::InputNote &b);
+bool operator>=(const LibreArp::InputNote &a, const LibreArp::InputNote &b);
+bool operator<=(const LibreArp::InputNote &a, const LibreArp::InputNote &b);
+bool operator==(const LibreArp::InputNote &a, const LibreArp::InputNote &b);

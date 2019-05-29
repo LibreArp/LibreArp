@@ -34,6 +34,7 @@ private:
     LibreArp &processor;
 
     ToggleButton octavesToggle;
+    ToggleButton usingInputVelocityToggle;
 
     Slider midiInChannelSlider;
     Label midiInChannelLabel;

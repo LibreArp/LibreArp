@@ -23,9 +23,33 @@ const Identifier LibreArp::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NO
 const Identifier LibreArp::TREEID_LOOP_RESET = Identifier("loopReset"); // NOLINT
 const Identifier LibreArp::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
 const Identifier LibreArp::TREEID_OCTAVES = Identifier("octaves"); // NOLINT
+const Identifier LibreArp::TREEID_INPUT_VELOCITY = Identifier("usingInputVelocity"); // NOLINT
 const Identifier LibreArp::TREEID_NUM_INPUT_NOTES = Identifier("numInputNotes"); // NOLINT
 const Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = Identifier("outputMidiChannel"); // NOLINT
 const Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = Identifier("inputMidiChannel"); // NOLINT
+
+
+LibreArp::InputNote::InputNote(int note, double velocity) : note(note), velocity(velocity) {}
+
+bool operator>(const LibreArp::InputNote &a, const LibreArp::InputNote &b) {
+    return a.note > b.note;
+}
+
+bool operator<(const LibreArp::InputNote &a, const LibreArp::InputNote &b) {
+    return a.note < b.note;
+}
+
+bool operator>=(const LibreArp::InputNote &a, const LibreArp::InputNote &b) {
+    return a.note >= b.note;
+}
+
+bool operator<=(const LibreArp::InputNote &a, const LibreArp::InputNote &b) {
+    return a.note <= b.note;
+}
+
+bool operator==(const LibreArp::InputNote &a, const LibreArp::InputNote &b) {
+    return a.note == b.note;
+}
 
 
 LibreArp::LibreArp()
@@ -59,7 +83,13 @@ LibreArp::LibreArp()
             "octaves",
             "Octaves",
             true,
-            "Overflow octave transport"));
+            "Overflow octave transposition"));
+
+    addParameter(usingInputVelocity = new AudioParameterBool(
+            "usingInputVelocity",
+            "Input velocity",
+            true,
+            "Use input note velocity"));
 }
 
 LibreArp::~LibreArp() = default;
@@ -219,7 +249,10 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                                 index += inputNotes.size();
                             }
 
-                            auto note = inputNotes[index];
+                            auto note = inputNotes[index].note;
+                            auto velocity = (usingInputVelocity->get()) ?
+                                    inputNotes[index].velocity * data.velocity * 1.25 :
+                                    data.velocity;
                             if (octaves->get()) {
                                 auto octave = data.noteNumber / inputNotes.size();
                                 if (data.noteNumber < 0) {
@@ -232,7 +265,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                                 data.lastNote = ArpBuiltEvents::PlayingNote(note, outputMidiChannel);
                                 midi.addEvent(
                                         MidiMessage::noteOn(
-                                                data.lastNote.outChannel, data.lastNote.noteNumber, static_cast<float>(data.velocity)), offset);
+                                                data.lastNote.outChannel, data.lastNote.noteNumber, static_cast<float>(velocity)), offset);
                                 playingNotes.add(data.lastNote);
                                 playingPatternIndices.add(data.noteIndex);
                             }
@@ -275,6 +308,7 @@ ValueTree LibreArp::toValueTree() {
     tree.setProperty(TREEID_LOOP_RESET, this->loopReset, nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
     tree.setProperty(TREEID_OCTAVES, this->octaves->get(), nullptr);
+    tree.setProperty(TREEID_INPUT_VELOCITY, this->usingInputVelocity->get(), nullptr);
     tree.setProperty(TREEID_NUM_INPUT_NOTES, this->numInputNotes, nullptr);
     tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
     tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
@@ -309,6 +343,10 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
 
             if (tree.hasProperty(TREEID_OCTAVES)) {
                 *this->octaves = tree.getProperty(TREEID_OCTAVES);
+            }
+
+            if (tree.hasProperty(TREEID_INPUT_VELOCITY)) {
+                *this->usingInputVelocity = tree.getProperty(TREEID_INPUT_VELOCITY);
             }
 
             if (tree.hasProperty(TREEID_NUM_INPUT_NOTES)) {
@@ -382,7 +420,17 @@ bool LibreArp::isTransposingOctaves() {
 }
 
 void LibreArp::setTransposingOctaves(bool value) {
-    this->octaves->setValueNotifyingHost(value ? 1.0f : 0.0f);
+    std::scoped_lock lock(mutex);
+    *this->octaves = value;
+}
+
+bool LibreArp::isUsingInputVelocity() {
+    return this->usingInputVelocity->get();
+}
+
+void LibreArp::setUsingInputVelocity(bool value) {
+    std::scoped_lock lock(mutex);
+    *this->usingInputVelocity = value;
 }
 
 
@@ -413,9 +461,9 @@ void LibreArp::resetDebugPlayback() {
 
     this->inputNotes.clear();
     if (this->isDebugPlaybackEnabled()) {
-        inputNotes.add(1);
-        inputNotes.add(2);
-        inputNotes.add(3);
+        inputNotes.add(InputNote(1));
+        inputNotes.add(InputNote(2));
+        inputNotes.add(InputNote(254));
     }
 }
 
@@ -480,9 +528,9 @@ void LibreArp::processInputMidi(MidiBuffer &inMidi) {
     for (MidiBuffer::Iterator i(inMidi); i.getNextEvent(message, sample);) {
         if (inputMidiChannel == 0 || message.getChannel() == inputMidiChannel) {
             if (message.isNoteOn()) {
-                inputNotes.add(message.getNoteNumber());
+                inputNotes.add(InputNote(message.getNoteNumber(), message.getVelocity() / 127.0));
             } else if (message.isNoteOff()) {
-                inputNotes.removeValue(message.getNoteNumber());
+                inputNotes.removeValue(InputNote(message.getNoteNumber()));
             } else {
                 outMidi.addEvent(message, sample);
             }

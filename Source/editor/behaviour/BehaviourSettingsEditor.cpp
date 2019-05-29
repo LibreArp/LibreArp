@@ -43,11 +43,18 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
         processor.setTransposingOctaves(octavesToggle.getToggleState());
     };
 
+    usingInputVelocityToggle.setButtonText("Use input note velocity");
+    usingInputVelocityToggle.setTooltip("Enables using the velocity of input notes to calculate output velocity.");
+    usingInputVelocityToggle.onStateChange = [this] {
+        processor.setUsingInputVelocity(usingInputVelocityToggle.getToggleState());
+    };
+
     addAndMakeVisible(midiInChannelLabel);
     addAndMakeVisible(midiInChannelSlider);
     addAndMakeVisible(midiOutChannelLabel);
     addAndMakeVisible(midiOutChannelSlider);
     addAndMakeVisible(octavesToggle);
+    addAndMakeVisible(usingInputVelocityToggle);
 }
 
 void BehaviourSettingsEditor::resized() {
@@ -71,6 +78,9 @@ void BehaviourSettingsEditor::resized() {
 
     octavesToggle.setToggleState(processor.isTransposingOctaves(), NotificationType::dontSendNotification);
     octavesToggle.setBounds(area.removeFromTop(24));
+
+    usingInputVelocityToggle.setToggleState(processor.isUsingInputVelocity(), NotificationType::dontSendNotification);
+    usingInputVelocityToggle.setBounds(area.removeFromTop(24));
 
 }
 
