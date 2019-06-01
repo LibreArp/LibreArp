@@ -561,8 +561,8 @@ void LibreArp::stopAll(MidiBuffer &midi) {
 }
 
 void LibreArp::updateEditor(uint32 type) {
-    auto editor = (MainEditor *) getActiveEditor();
-    MessageManager::callAsync([editor, type] {
+    MessageManager::callAsync([this, type] {
+        auto editor = (MainEditor *) getActiveEditor();
         if (editor != nullptr && editor->isVisible()) {
             editor->audioUpdate(type);
         }
