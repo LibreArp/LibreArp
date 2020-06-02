@@ -3,7 +3,7 @@
 	url = https://github.com/steinbergmedia/vst3sdk.git
 [submodule "Vendor/juce"]
 	path = Vendor/juce
-	url = https://github.com/WeAreROLI/JUCE.git
+	url = https://gitlab.com/LibreArp/JUCE.git
 [submodule "Vendor/fst"]
 	path = Vendor/fst
 	url = https://git.iem.at/zmoelnig/FST.git
