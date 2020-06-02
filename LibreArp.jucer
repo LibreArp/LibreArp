@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT name="LibreArp" projectType="audioplug" jucerVersion="5.4.3"
+<JUCERPROJECT name="LibreArp" projectType="audioplug" jucerVersion="5.4.7"
               version="1.1" buildVST3="1" buildAUv3="0" buildAU="0" buildVST="1"
               pluginName="LibreArp" pluginDesc="A free (as in free speech) arpeggio sequencer."
               pluginManufacturer="The LibreArp contributors" companyName="The LibreArp contributors"
@@ -23,6 +23,12 @@
     </GROUP>
     <GROUP id="{4D6501CE-D613-8A3D-7ABE-D57B9896DB0F}" name="Source">
       <GROUP id="{916A40E5-BC88-61B9-D0D5-8A490632E866}" name="editor">
+        <GROUP id="{65B3C56F-7A7E-9657-3931-92910AD6FF15}" name="settings">
+          <FILE id="Cm4aMw" name="SettingsEditor.cpp" compile="1" resource="0"
+                file="Source/editor/settings/SettingsEditor.cpp"/>
+          <FILE id="wSf3RO" name="SettingsEditor.h" compile="0" resource="0"
+                file="Source/editor/settings/SettingsEditor.h"/>
+        </GROUP>
         <GROUP id="{6A14D140-0A20-3D9F-2032-09A78C23D061}" name="behaviour">
           <FILE id="wqPubr" name="BehaviourSettingsEditor.cpp" compile="1" resource="0"
                 file="Source/editor/behaviour/BehaviourSettingsEditor.cpp"/>
@@ -73,12 +79,16 @@
       <FILE id="TpttHS" name="ArpNote.h" compile="0" resource="0" file="Source/ArpNote.h"/>
       <FILE id="jfnte9" name="ArpPattern.cpp" compile="1" resource="0" file="Source/ArpPattern.cpp"/>
       <FILE id="pYhY9N" name="ArpPattern.h" compile="0" resource="0" file="Source/ArpPattern.h"/>
+      <FILE id="s9aiCt" name="BuildConfig.cpp" compile="1" resource="0" file="Source/BuildConfig.cpp"/>
+      <FILE id="UFRtzU" name="BuildConfig.h" compile="0" resource="0" file="Source/BuildConfig.h"/>
       <FILE id="Ia0bIz" name="Globals.cpp" compile="1" resource="0" file="Source/Globals.cpp"/>
       <FILE id="heegX1" name="Globals.h" compile="0" resource="0" file="Source/Globals.h"/>
       <FILE id="dQOFVc" name="LibreArp.cpp" compile="1" resource="0" file="Source/LibreArp.cpp"/>
       <FILE id="zq56Bs" name="LibreArp.h" compile="0" resource="0" file="Source/LibreArp.h"/>
       <FILE id="nwBdhE" name="NoteData.cpp" compile="1" resource="0" file="Source/NoteData.cpp"/>
       <FILE id="Axf1jl" name="NoteData.h" compile="0" resource="0" file="Source/NoteData.h"/>
+      <FILE id="U5FiRk" name="Updater.cpp" compile="1" resource="0" file="Source/Updater.cpp"/>
+      <FILE id="PJ3Pzh" name="Updater.h" compile="0" resource="0" file="Source/Updater.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

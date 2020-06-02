@@ -29,6 +29,11 @@ class Globals {
 public:
 
     static const Identifier TREEID_SETTINGS;
+    static const Identifier TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT;
+    static const Identifier TREEID_UPDATE_CHECK;
+    static const Identifier TREEID_FOUND_UPDATE_ON_LAST_CHECK;
+    static const Identifier TREEID_MIN_SECS_BEFORE_UPDATE_CHECK;
+    static const Identifier TREEID_LAST_UPDATE_CHECK_TIME;
 
 
     explicit Globals();
@@ -92,6 +97,26 @@ public:
      */
     File getPatternPresetsDir();
 
+    bool isCheckForUpdatesEnabled() const;
+
+    void setCheckForUpdatesEnabled(bool checkForUpdates);
+
+    bool isAskedForUpdateCheckConsent() const;
+
+    void setAskedForUpdateCheckConsent(bool askedForUpdateCheckConsent);
+
+    bool isFoundUpdateOnLastCheck() const;
+
+    void setFoundUpdateOnLastCheck(bool foundUpdateOnLastCheck);
+
+    int64 getMinSecsBeforeUpdateCheck() const;
+
+    void setMinSecsBeforeUpdateCheck(int64 minSecsBeforeUpdateCheck);
+
+    int64 getLastUpdateCheckTime() const;
+
+    void setLastUpdateCheckTime(int64 lastUpdateCheckTime);
+
 private:
 
     /**
@@ -115,9 +140,34 @@ private:
     File patternPresetsDir;
 
     /**
+     * Whether the GUI of the plugin has already asked the user for consent about automatic update checks.
+     */
+    bool askedForUpdateCheckConsent;
+
+    /**
+     * Whether the plugin should check for updates automatically.
+     */
+    bool checkForUpdatesEnabled;
+
+    /**
+     * Whether the last update check yielded a positive result.
+     */
+    bool foundUpdateOnLastCheck;
+
+    /**
+     * The minimum amount of seconds that need to elapse before another check for updates is performed.
+     */
+    int64 minSecsBeforeUpdateCheck;
+
+    /**
+     * The timestamp (in milliseconds) of the last update check.
+     */
+    int64 lastUpdateCheckTime;
+
+    /**
      * Mutex for the globals.
      */
-    std::recursive_mutex mutex;
+    mutable std::recursive_mutex mutex;
 
 };
 

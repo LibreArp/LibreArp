@@ -22,6 +22,7 @@
 #include "xml/XmlEditor.h"
 #include "pattern/PatternEditor.h"
 #include "pattern/PatternEditorView.h"
+#include "settings/SettingsEditor.h"
 #include "about/AboutBox.h"
 #include "LArpLookAndFeel.h"
 #include "../AudioUpdatable.h"
@@ -39,10 +40,9 @@ public:
 
 
     void paint(Graphics &) override;
-
     void resized() override;
-
     void audioUpdate(uint32 type) override;
+    void visibilityChanged() override;
 
 private:
     LibreArp &processor;
@@ -58,8 +58,14 @@ private:
 
     PatternEditorView patternEditor;
     BehaviourSettingsEditor behaviourSettingsEditor;
+    SettingsEditor settingsEditor;
     XmlEditor xmlEditor;
     AboutBox aboutBox;
+
+    HyperlinkButton updateButton;
+
+    void handleUpdateCheck();
+    void updateUpdateButton();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainEditor);
 };

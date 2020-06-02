@@ -16,10 +16,23 @@
 //
 
 #include "Globals.h"
+#include "BuildConfig.h"
 
 const Identifier Globals::TREEID_SETTINGS = "globalSettings";
+const Identifier Globals::TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT = "askedForUpdateCheckConsent";
+const Identifier Globals::TREEID_UPDATE_CHECK = "checkForUpdates";
+const Identifier Globals::TREEID_FOUND_UPDATE_ON_LAST_CHECK = "foundUpdateOnLastCheck";
+const Identifier Globals::TREEID_MIN_SECS_BEFORE_UPDATE_CHECK = "minSecsBeforeUpdateCheck";
+const Identifier Globals::TREEID_LAST_UPDATE_CHECK_TIME = "lastUpdateCheckTime";
 
-Globals::Globals() : changed(false) {
+Globals::Globals() :
+        changed(false),
+        askedForUpdateCheckConsent(false),
+        checkForUpdatesEnabled(BuildConfig::DEFAULT_CHECK_FOR_UPDATES_ENABLED),
+        minSecsBeforeUpdateCheck(BuildConfig::DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK),
+        foundUpdateOnLastCheck(false),
+        lastUpdateCheckTime(0L)
+{
 #if JUCE_OSX
     globalsDir = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
             .getChildFile("Application Support")
@@ -49,7 +62,11 @@ Globals::~Globals() {
 
 void Globals::reset() {
     std::scoped_lock lock(mutex);
-    // TODO - add actual settings
+    askedForUpdateCheckConsent = false;
+    checkForUpdatesEnabled = BuildConfig::DEFAULT_CHECK_FOR_UPDATES_ENABLED;
+    minSecsBeforeUpdateCheck = BuildConfig::DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK;
+    foundUpdateOnLastCheck = false;
+    lastUpdateCheckTime = 0L;
 }
 
 bool Globals::save() {
@@ -96,13 +113,39 @@ void Globals::markChanged() {
 ValueTree Globals::toValueTree() {
     std::scoped_lock lock(mutex);
     auto tree = ValueTree(TREEID_SETTINGS);
+
+    tree.setProperty(TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT, this->askedForUpdateCheckConsent, nullptr);
+    tree.setProperty(TREEID_UPDATE_CHECK, this->checkForUpdatesEnabled, nullptr);
+    tree.setProperty(TREEID_FOUND_UPDATE_ON_LAST_CHECK, this->foundUpdateOnLastCheck, nullptr);
+    tree.setProperty(TREEID_MIN_SECS_BEFORE_UPDATE_CHECK, this->minSecsBeforeUpdateCheck, nullptr);
+    tree.setProperty(TREEID_LAST_UPDATE_CHECK_TIME, this->lastUpdateCheckTime, nullptr);
+
     return tree;
 }
 
 void Globals::parseValueTree(const ValueTree &tree) {
     std::scoped_lock lock(mutex);
     reset();
-    // TODO - add actual settings
+    if (!tree.hasType(TREEID_SETTINGS)) {
+        Logger::writeToLog("Invalid settings tag! Skipping load.");
+        return;
+    }
+
+    if (tree.hasProperty(TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT)) {
+        this->askedForUpdateCheckConsent = tree.getProperty(TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT);
+    }
+    if (tree.hasProperty(TREEID_UPDATE_CHECK)) {
+        this->checkForUpdatesEnabled = tree.getProperty(TREEID_UPDATE_CHECK);
+    }
+    if (tree.hasProperty(TREEID_FOUND_UPDATE_ON_LAST_CHECK)) {
+        this->foundUpdateOnLastCheck = tree.getProperty(TREEID_FOUND_UPDATE_ON_LAST_CHECK);
+    }
+    if (tree.hasProperty(TREEID_MIN_SECS_BEFORE_UPDATE_CHECK)) {
+        this->minSecsBeforeUpdateCheck = tree.getProperty(TREEID_MIN_SECS_BEFORE_UPDATE_CHECK);
+    }
+    if (tree.hasProperty(TREEID_LAST_UPDATE_CHECK_TIME)) {
+        this->lastUpdateCheckTime = tree.getProperty(TREEID_LAST_UPDATE_CHECK_TIME);
+    }
 }
 
 
@@ -116,4 +159,59 @@ File Globals::getSettingsFile() {
 
 File Globals::getPatternPresetsDir() {
     return this->patternPresetsDir;
+}
+
+bool Globals::isCheckForUpdatesEnabled() const {
+    std::scoped_lock lock(mutex);
+    return checkForUpdatesEnabled;
+}
+
+void Globals::setCheckForUpdatesEnabled(bool checkForUpdates) {
+    std::scoped_lock lock(mutex);
+    this->checkForUpdatesEnabled = checkForUpdates;
+    this->changed = true;
+}
+
+bool Globals::isAskedForUpdateCheckConsent() const {
+    std::scoped_lock lock(mutex);
+    return askedForUpdateCheckConsent;
+}
+
+void Globals::setAskedForUpdateCheckConsent(bool askedForUpdateCheckConsent) {
+    std::scoped_lock lock(mutex);
+    this->askedForUpdateCheckConsent = askedForUpdateCheckConsent;
+    this->changed = true;
+}
+
+int64 Globals::getMinSecsBeforeUpdateCheck() const {
+    std::scoped_lock lock(mutex);
+    return minSecsBeforeUpdateCheck;
+}
+
+void Globals::setMinSecsBeforeUpdateCheck(int64 minSecsBeforeUpdateCheck) {
+    std::scoped_lock lock(mutex);
+    Globals::minSecsBeforeUpdateCheck = minSecsBeforeUpdateCheck;
+    this->changed = true;
+}
+
+int64 Globals::getLastUpdateCheckTime() const {
+    std::scoped_lock lock(mutex);
+    return lastUpdateCheckTime;
+}
+
+void Globals::setLastUpdateCheckTime(int64 lastUpdateCheckTime) {
+    std::scoped_lock lock(mutex);
+    Globals::lastUpdateCheckTime = lastUpdateCheckTime;
+    this->changed = true;
+}
+
+bool Globals::isFoundUpdateOnLastCheck() const {
+    std::scoped_lock lock(mutex);
+    return foundUpdateOnLastCheck;
+}
+
+void Globals::setFoundUpdateOnLastCheck(bool foundUpdateOnLastCheck) {
+    std::scoped_lock lock(mutex);
+    Globals::foundUpdateOnLastCheck = foundUpdateOnLastCheck;
+    this->changed = true;
 }

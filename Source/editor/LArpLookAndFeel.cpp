@@ -35,6 +35,10 @@ LArpLookAndFeel::LArpLookAndFeel() {
     setColour(TooltipWindow::outlineColourId, MAIN_FOREGROUND_COLOUR);
     setColour(TooltipWindow::textColourId, MAIN_FOREGROUND_COLOUR);
 
+    setColour(AlertWindow::outlineColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(AlertWindow::backgroundColourId, MAIN_BACKGROUND_COLOUR);
+    setColour(AlertWindow::textColourId, MAIN_FOREGROUND_COLOUR);
+
     setColour(TextEditor::backgroundColourId, HIGHLIGHT_BACKGROUND_COLOUR);
     setColour(TextEditor::textColourId, MAIN_FOREGROUND_COLOUR);
     setColour(TextEditor::highlightColourId, HIGHLIGHT_FOREGROUND_COLOUR);

@@ -24,6 +24,7 @@
 #include "editor/EditorState.h"
 #include "AudioUpdatable.h"
 #include "Globals.h"
+#include "Updater.h"
 
 /**
  * The LibreArp audio processor.
@@ -269,6 +270,10 @@ public:
 
     Globals &getGlobals();
 
+    void setLastUpdateInfo(Updater::UpdateInfo &info);
+
+    Updater::UpdateInfo &getLastUpdateInfo();
+
 
 
 private:
@@ -278,6 +283,16 @@ private:
      * Global data of the plugin.
      */
     Globals globals;
+
+    /**
+     * The mutex for last update info.
+     */
+    std::recursive_mutex lastUpdateInfoMutex;
+
+    /**
+     * Last retrieved update info.
+     */
+    Updater::UpdateInfo lastUpdateInfo;
 
     /**
      * The persistent state of the editor.

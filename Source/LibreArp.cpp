@@ -519,6 +519,16 @@ Globals &LibreArp::getGlobals() {
     return this->globals;
 }
 
+void LibreArp::setLastUpdateInfo(Updater::UpdateInfo& info) {
+    std::scoped_lock lock(lastUpdateInfoMutex);
+    lastUpdateInfo = info;
+}
+
+Updater::UpdateInfo& LibreArp::getLastUpdateInfo() {
+    std::scoped_lock lock(lastUpdateInfoMutex);
+    return lastUpdateInfo;
+}
+
 
 void LibreArp::processInputMidi(MidiBuffer &inMidi) {
     int sample;
