@@ -1,0 +1,174 @@
+//
+// This file is part of LibreArp
+//
+// LibreArp is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// LibreArp is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see https://librearp.gitlab.io/license/.
+//
+
+#pragma once
+
+#include <mutex>
+
+#include "JuceHeader.h"
+
+
+/**
+ * A class managing global data (like global settings) of the plugin.
+ */
+class Globals {
+public:
+
+    static const Identifier TREEID_SETTINGS;
+    static const Identifier TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT;
+    static const Identifier TREEID_UPDATE_CHECK;
+    static const Identifier TREEID_FOUND_UPDATE_ON_LAST_CHECK;
+    static const Identifier TREEID_MIN_SECS_BEFORE_UPDATE_CHECK;
+    static const Identifier TREEID_LAST_UPDATE_CHECK_TIME;
+
+
+    explicit Globals();
+    ~Globals();
+
+
+    /**
+     * Resets global settings to default values.
+     */
+    void reset();
+
+    /**
+     * Saves global settings if changed.
+     *
+     * @return <code>true</code> if needed, otherwise <code>false</code>
+     */
+    bool save();
+
+    /**
+     * Saves global settings (regardless of whether the settings have been changed).
+     */
+    void forceSave();
+
+    /**
+     * Loads/reloads global settings. Unsaved settings will be lost.
+     */
+    void load();
+
+    /**
+     * Marks the globals as changed. The next save() call will actually do the save.
+     */
+    void markChanged();
+
+    /**
+     * Converts this Globals object into a value tree.
+     *
+     * @return a value tree representing this object
+     */
+    ValueTree toValueTree();
+
+    /**
+     * Resets this Globals object and repopulates it according to the specified value tree.
+     *
+     * @param tree the tree to use for repopulation
+     */
+    void parseValueTree(const ValueTree &tree);
+
+
+    /**
+     * @return the directory where global data is stored
+     */
+    File getGlobalsDir();
+
+    /**
+     * @return the global settings file
+     */
+    File getSettingsFile();
+
+    /**
+     * @return the directory where pattern presets are stored
+     */
+    File getPatternPresetsDir();
+
+    bool isCheckForUpdatesEnabled() const;
+
+    void setCheckForUpdatesEnabled(bool checkForUpdates);
+
+    bool isAskedForUpdateCheckConsent() const;
+
+    void setAskedForUpdateCheckConsent(bool askedForUpdateCheckConsent);
+
+    bool isFoundUpdateOnLastCheck() const;
+
+    void setFoundUpdateOnLastCheck(bool foundUpdateOnLastCheck);
+
+    int64 getMinSecsBeforeUpdateCheck() const;
+
+    void setMinSecsBeforeUpdateCheck(int64 minSecsBeforeUpdateCheck);
+
+    int64 getLastUpdateCheckTime() const;
+
+    void setLastUpdateCheckTime(int64 lastUpdateCheckTime);
+
+private:
+
+    /**
+     * This flag is <code>true</code> if the global settings have changed since the last save/load.
+     */
+    bool changed;
+
+    /**
+     * Directory of the global data.
+     */
+    File globalsDir;
+
+    /**
+     * Global settings file.
+     */
+    File settingsFile;
+
+    /**
+     * Default presets directory.
+     */
+    File patternPresetsDir;
+
+    /**
+     * Whether the GUI of the plugin has already asked the user for consent about automatic update checks.
+     */
+    bool askedForUpdateCheckConsent;
+
+    /**
+     * Whether the plugin should check for updates automatically.
+     */
+    bool checkForUpdatesEnabled;
+
+    /**
+     * Whether the last update check yielded a positive result.
+     */
+    bool foundUpdateOnLastCheck;
+
+    /**
+     * The minimum amount of seconds that need to elapse before another check for updates is performed.
+     */
+    int64 minSecsBeforeUpdateCheck;
+
+    /**
+     * The timestamp (in milliseconds) of the last update check.
+     */
+    int64 lastUpdateCheckTime;
+
+    /**
+     * Mutex for the globals.
+     */
+    mutable std::recursive_mutex mutex;
+
+};
+
+

@@ -17,25 +17,32 @@
 
 #pragma once
 
-#include "../../LibreArp.h"
 #include "JuceHeader.h"
-#include "../../AudioUpdatable.h"
+#include "../../LibreArp.h"
 
-class XmlEditor : public Component, public AudioUpdatable {
+/**
+ * A component for editing global settings of the plugin.
+ */
+class SettingsEditor : public Component {
 public:
 
-    explicit XmlEditor(LibreArp &p);
+    /**
+     * Constructs the settings editor.
+     *
+     * @param p the processor
+     */
+    explicit SettingsEditor(LibreArp &p);
 
     void resized() override;
 
-    void audioUpdate(uint32 type) override;
+    void visibilityChanged() override;
 
 private:
+
+    void updateSettingsValues();
+
+    ToggleButton updateCheckToggle;
     LibreArp &processor;
-
-    TextEditor xmlEditor;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor);
 };
 
 

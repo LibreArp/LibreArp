@@ -17,25 +17,31 @@
 
 #pragma once
 
-#include "../../LibreArp.h"
-#include "JuceHeader.h"
-#include "../../AudioUpdatable.h"
+#include <string>
 
-class XmlEditor : public Component, public AudioUpdatable {
+/**
+ * A class for handling update checks.
+ */
+class Updater {
 public:
 
-    explicit XmlEditor(LibreArp &p);
+    /**
+     * Data structure containing information about an available update.
+     */
+    struct UpdateInfo {
+        bool hasUpdate = false;
+        int code = 0;
+        std::string name = "";
+        std::string websiteUrl = "";
+    };
 
-    void resized() override;
+    /**
+     * Retrieves info about LibreArp versions and returns information about a new version if found.
+     *
+     * @return information about an update
+     */
+    static UpdateInfo checkForUpdates();
 
-    void audioUpdate(uint32 type) override;
-
-private:
-    LibreArp &processor;
-
-    TextEditor xmlEditor;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor);
 };
 
 

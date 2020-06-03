@@ -17,25 +17,12 @@
 
 #pragma once
 
-#include "../../LibreArp.h"
 #include "JuceHeader.h"
-#include "../../AudioUpdatable.h"
 
-class XmlEditor : public Component, public AudioUpdatable {
+class BuildConfig {
 public:
 
-    explicit XmlEditor(LibreArp &p);
-
-    void resized() override;
-
-    void audioUpdate(uint32 type) override;
-
-private:
-    LibreArp &processor;
-
-    TextEditor xmlEditor;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor);
+    static const std::string UPDATE_CHECK_URL;
+    static const bool DEFAULT_CHECK_FOR_UPDATES_ENABLED;
+    static const int64 DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK;
 };
-
-

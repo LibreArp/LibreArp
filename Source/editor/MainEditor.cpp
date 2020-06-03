@@ -17,8 +17,9 @@
 
 #include <sstream>
 #include "../LibreArp.h"
+#include "../Updater.h"
 #include "MainEditor.h"
-#include "../exception/ArpIntegrityException.h"
+
 
 const int RESIZER_SIZE = 18;
 
@@ -29,31 +30,131 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
           resizer(this, &boundsConstrainer),
           tabs(TabbedButtonBar::Orientation::TabsAtTop),
           patternEditor(p, e),
+          behaviourSettingsEditor(p),
+          settingsEditor(p),
           xmlEditor(p) {
+
+    LookAndFeel::setDefaultLookAndFeel(&LArpLookAndFeel::getInstance());
 
     setSize(state.width, state.height);
 
     boundsConstrainer.setMinimumSize(200, 200);
 
-    tabs.addTab("Pattern Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
-    tabs.addTab("About", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
-//    tabs.addTab("XML Editor", getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
+    placeholderLabel.setText("Unimplemented component", NotificationType::dontSendNotification);
+    placeholderLabel.setJustificationType(Justification::centred);
+    placeholderLabel.setFont(Font(32.0f));
+    placeholderLabel.setColour(Label::textColourId, Colour(255, 0, 0));
+
+    tabs.setOutline(0);
+    tabs.addTab("Pattern Editor",
+            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
+    tabs.addTab("Behaviour",
+            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &behaviourSettingsEditor, false);
+    tabs.addTab("Global settings",
+            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &settingsEditor, false);
+#if JUCE_DEBUG
+    tabs.addTab("XML viewer",
+            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
+#endif
+    tabs.addTab("About",
+            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
+
+    updateButton.setJustificationType(Justification::centredRight);
 
     addAndMakeVisible(tabs);
     addAndMakeVisible(resizer, 9999);
+    addChildComponent(updateButton, 9999);
 }
 
 MainEditor::~MainEditor() = default;
 
 //==============================================================================
 void MainEditor::paint(Graphics &g) {
-    g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+    g.setColour(LArpLookAndFeel::MAIN_BACKGROUND_COLOUR);
+    g.fillRect(getLocalBounds());
+}
+
+void MainEditor::visibilityChanged() {
+    Component::visibilityChanged();
+
+    if (!isVisible()) {
+        processor.getGlobals().save();
+        return;
+    }
+
+    processor.getGlobals().load();
+    handleUpdateCheck();
+    updateUpdateButton();
 }
 
 void MainEditor::resized() {
     state.width = getWidth();
     state.height = getHeight();
 
-    tabs.setBounds(getLocalBounds());
+    tabs.setBounds(getLocalBounds().reduced(8));
     resizer.setBounds(getWidth() - RESIZER_SIZE, getHeight() - RESIZER_SIZE, RESIZER_SIZE, RESIZER_SIZE);
+
+    updateUpdateButton();
+    auto updateButtonArea = getLocalBounds().reduced(8);
+    updateButton.setBounds(updateButtonArea
+            .removeFromTop(24)
+            .removeFromRight(256));
+}
+
+void MainEditor::audioUpdate(uint32 type) {
+    patternEditor.audioUpdate(type);
+    xmlEditor.audioUpdate(type);
+}
+
+void MainEditor::handleUpdateCheck() {
+    auto &globals = processor.getGlobals();
+
+    if (!globals.isAskedForUpdateCheckConsent()) {
+        globals.setAskedForUpdateCheckConsent(true);
+        auto result = NativeMessageBox::showYesNoBox(
+                AlertWindow::AlertIconType::QuestionIcon,
+                "Check for updates?",
+                "LibreArp is able to connect to its GitLab page to check for available updates. As some users "
+                "may not be comfortable with this happening automatically, or they may be using a package "
+                "manager to handle all updates for them, we are asking you for your consent.\n"
+                "\n"
+                "Do you wish to allow LibreArp to check for updates periodically?\n"
+                "(You may change this on the Global settings tab later)",
+                this);
+
+        globals.setCheckForUpdatesEnabled(result == 1);
+    }
+
+    if (globals.isCheckForUpdatesEnabled()) {
+        auto minMsBeforeUpdateCheck = globals.getMinSecsBeforeUpdateCheck() * 1000L;
+        auto lastUpdateCheckTime = globals.getLastUpdateCheckTime();
+        auto currentTime = Time::currentTimeMillis();
+
+        if ((currentTime - lastUpdateCheckTime) >= minMsBeforeUpdateCheck || globals.isFoundUpdateOnLastCheck()) {
+            globals.setLastUpdateCheckTime(currentTime);
+            auto info = Updater::checkForUpdates();
+
+            if (info.hasUpdate) {
+                globals.setFoundUpdateOnLastCheck(true);
+                processor.setLastUpdateInfo(info);
+            } else {
+                globals.setFoundUpdateOnLastCheck(false);
+            }
+        }
+    }
+}
+
+void MainEditor::updateUpdateButton() {
+    auto &info = processor.getLastUpdateInfo();
+
+    if (!info.hasUpdate) {
+        updateButton.setVisible(false);
+        return;
+    }
+
+    std::stringstream infostr;
+    infostr << "An update to " << info.name << " is available!";
+    updateButton.setButtonText(infostr.str());
+    updateButton.setURL(URL(info.websiteUrl));
+    updateButton.setVisible(true);
 }

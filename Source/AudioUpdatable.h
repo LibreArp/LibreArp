@@ -17,25 +17,23 @@
 
 #pragma once
 
-#include "../../LibreArp.h"
-#include "JuceHeader.h"
-#include "../../AudioUpdatable.h"
+#include "LibreArp.h"
 
-class XmlEditor : public Component, public AudioUpdatable {
+/**
+ * An interface for elements that are updatable by the LibreArp audio processor.
+ */
+class AudioUpdatable {
+
 public:
 
-    explicit XmlEditor(LibreArp &p);
+    static const uint32 GENERAL_UPDATE = 0x0000;
+    static const uint32 PATTERN_UPDATE = 0x0100;
 
-    void resized() override;
+    /**
+     * Gets called upon audio processor update.
+     */
+    virtual void audioUpdate(uint32 type = GENERAL_UPDATE) = 0;
 
-    void audioUpdate(uint32 type) override;
-
-private:
-    LibreArp &processor;
-
-    TextEditor xmlEditor;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor);
 };
 
 

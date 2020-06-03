@@ -24,7 +24,31 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
         : processor(p),
           state(e),
           beatBar(p, state, this),
-          editor(p, state, this) {
+          editor(p, state, this),
+          presetChooser(
+                  "Pattern preset",
+                  processor.getGlobals().getPatternPresetsDir(),
+                  "*.lapreset")
+{
+
+    loadButton.setButtonText("Load pattern...");
+    loadButton.onClick = [this] {
+        auto opened = presetChooser.browseForFileToOpen();
+        if (opened) {
+            processor.loadPatternFromFile(presetChooser.getResult());
+            repaint();
+        }
+    };
+    addAndMakeVisible(loadButton);
+
+    saveButton.setButtonText("Save pattern...");
+    saveButton.onClick = [this] {
+        auto saved = presetChooser.browseForFileToSave(true);
+        if (saved) {
+            processor.getPattern().toFile(presetChooser.getResult());
+        }
+    };
+    addAndMakeVisible(saveButton);
 
     editorViewport.setViewedComponent(&editor);
     addAndMakeVisible(editorViewport);
@@ -45,7 +69,7 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     addAndMakeVisible(loopResetSlider);
 
     loopResetSliderLabel.setText("Reset every (beats):", NotificationType::dontSendNotification);
-    loopResetSliderLabel.setJustificationType(Justification::centredRight);
+    loopResetSliderLabel.setJustificationType(Justification::centredLeft);
     addAndMakeVisible(loopResetSliderLabel);
 
     snapSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
@@ -68,18 +92,24 @@ void PatternEditorView::paint(Graphics &g) {
 }
 
 void PatternEditorView::resized() {
-    auto area = getLocalBounds();
+    auto area = getLocalBounds().reduced(8);
 
-    auto toolBarArea = area.removeFromTop(32);
-    toolBarArea.removeFromBottom(4);
-    toolBarArea.removeFromTop(4);
+    auto toolBarArea = area.removeFromTop(24);
     loopResetSliderLabel.setBounds(
-            toolBarArea.removeFromLeft(loopResetSliderLabel.getFont().getStringWidth(loopResetSliderLabel.getText())));
-    loopResetSlider.setBounds(toolBarArea.removeFromLeft(128));
+            toolBarArea.removeFromLeft(8 + loopResetSliderLabel.getFont().getStringWidth(loopResetSliderLabel.getText())));
+    loopResetSlider.setBounds(toolBarArea.removeFromLeft(96));
     snapSlider.setBounds(toolBarArea.removeFromRight(96));
     snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
 
-    beatBarViewport.setBounds(area.removeFromTop(16));
+    area.removeFromTop(8);
+
+    auto presetButtonArea = area.removeFromBottom(24);
+    loadButton.setBounds(presetButtonArea.removeFromLeft(100));
+    saveButton.setBounds(presetButtonArea.removeFromLeft(100));
+
+    area.removeFromBottom(8);
+
+    beatBarViewport.setBounds(area.removeFromTop(20));
     editorViewport.setBounds(area);
 }
 
@@ -116,4 +146,8 @@ int PatternEditorView::getRenderHeight() {
     dist = 1 + (dist + 3) * 2;
 
     return dist * state.pixelsPerNote;
+}
+
+void PatternEditorView::audioUpdate(uint32 type) {
+    editor.audioUpdate(type);
 }

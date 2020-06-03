@@ -17,25 +17,31 @@
 
 #pragma once
 
-#include "../../LibreArp.h"
 #include "JuceHeader.h"
-#include "../../AudioUpdatable.h"
+#include "../../LibreArp.h"
 
-class XmlEditor : public Component, public AudioUpdatable {
+class BehaviourSettingsEditor : public Component {
 public:
 
-    explicit XmlEditor(LibreArp &p);
+    explicit BehaviourSettingsEditor(LibreArp &p);
+
+    ~BehaviourSettingsEditor();
 
     void resized() override;
 
-    void audioUpdate(uint32 type) override;
-
 private:
+
     LibreArp &processor;
 
-    TextEditor xmlEditor;
+    ToggleButton octavesToggle;
+    ToggleButton usingInputVelocityToggle;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor);
+    Slider midiInChannelSlider;
+    Label midiInChannelLabel;
+
+    Slider midiOutChannelSlider;
+    Label midiOutChannelLabel;
+
 };
 
 

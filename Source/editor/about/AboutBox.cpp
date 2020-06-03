@@ -18,6 +18,8 @@
 #include "AboutBox.h"
 #include "AboutBoxConfig.h"
 
+const int LICENSE_NOTICE_HEIGHT_ADDITION = 32;
+
 AboutBox::AboutBox() {
 
 #if JUCE_DEBUG == 1
@@ -26,30 +28,31 @@ AboutBox::AboutBox() {
     nameAndVersionLabel.setText(JucePlugin_Name " " JucePlugin_VersionString, NotificationType::dontSendNotification);
 #endif
 
-    nameAndVersionLabel.setFont(Font(32));
+    nameAndVersionLabel.setFont(Font(40));
     nameAndVersionLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(nameAndVersionLabel);
 
-    auto gplFont = gplLabel.getFont();
-    gplLabel.setText(LICENSE_NOTICE, NotificationType::dontSendNotification);
+    auto gplFont = Font(16);
+    licenseNotice.setText(LICENSE_NOTICE);
+    licenseNotice.setFont(gplFont);
+
+    gplLabel.setFont(gplFont);
+    gplLabel.setText(licenseNotice.getText(), NotificationType::dontSendNotification);
     gplLabel.setJustificationType(Justification::topLeft);
-    addAndMakeVisible(gplLabel);
+    gplViewport.setViewedComponent(&gplLabel, false);
+    gplViewport.setScrollBarsShown(true, false);
+    addAndMakeVisible(gplViewport);
 
-    websiteButton.setButtonText("Official website");
-    websiteButton.setURL(URL(WEBSITE_URL));
-    addAndMakeVisible(websiteButton);
-
-    sourceButton.setButtonText("Source code repository");
-    sourceButton.setURL(URL(SOURCE_URL));
-    addAndMakeVisible(sourceButton);
-
-    juceButton.setButtonText("JUCE 5 website");
-    juceButton.setURL(URL(JUCE_WEBSITE_URL));
-    addAndMakeVisible(juceButton);
-
-    gplButton.setButtonText(LICENSE_NAME);
-    gplButton.setURL(URL(LICENSE_URL));
-    addAndMakeVisible(gplButton);
+    addBottomLink(JucePlugin_Name " website", URL(WEBSITE_URL));
+    addBottomLink(JucePlugin_Name " source repository", URL(SOURCE_URL));
+    addBottomLinkSeparator();
+    addBottomLink("JUCE 5 website", URL(JUCE_WEBSITE_URL));
+    addBottomLink("VST3 SDK source repository", URL(VST3_SOURCE_URL));
+    addBottomLink("FST source repository", URL(FST_SOURCE_URL));
+    addBottomLink("Overpass font website", URL(FONT_WEBSITE_URL));
+    addBottomLinkSeparator();
+    addBottomLink("GNU General Public License v3", URL(GPL_URL));
+    addBottomLink("SIL Open Font License v1.1", URL(FONT_LICENSE_URL));
 }
 
 void AboutBox::resized() {
@@ -57,10 +60,28 @@ void AboutBox::resized() {
 
     nameAndVersionLabel.setBounds(area.removeFromTop(64));
 
-    juceButton.setBounds(area.removeFromBottom(18));
-    sourceButton.setBounds(area.removeFromBottom(18));
-    websiteButton.setBounds(area.removeFromBottom(18));
-    gplButton.setBounds(area.removeFromBottom(18));
+    for (auto &link : bottomLinks) {
+        if (link == nullptr) {
+            area.removeFromBottom(10);
+        } else {
+            link->setBounds(area.removeFromBottom(22));
+        }
+    }
 
-    gplLabel.setBounds(area);
+    gplViewport.setBounds(area);
+    TextLayout layout;
+    layout.createLayout(licenseNotice, gplLabel.getParentWidth());
+    gplLabel.setSize(
+            static_cast<int>(std::ceil(layout.getWidth())),
+            static_cast<int>(std::ceil(layout.getHeight()) + LICENSE_NOTICE_HEIGHT_ADDITION));
+}
+
+void AboutBox::addBottomLink(String text, URL url) {
+    std::shared_ptr<HyperlinkButton> button(new HyperlinkButton(text, url));
+    addAndMakeVisible(*button);
+    bottomLinks.push_front(button);
+}
+
+void AboutBox::addBottomLinkSeparator() {
+    bottomLinks.push_front(std::shared_ptr<HyperlinkButton>(nullptr));
 }

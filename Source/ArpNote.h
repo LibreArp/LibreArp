@@ -21,20 +21,52 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "NoteData.h"
 
+/**
+ * Data of a single note, with a start and end point in the pattern.
+ */
 class ArpNote {
 public:
     static const Identifier TREEID_NOTE;
     static const Identifier TREEID_START_POINT;
     static const Identifier TREEID_END_POINT;
 
+    /**
+     * Constructs a note with the specified data, or empty data if unspecified.
+     *
+     * @param data the note data
+     */
     explicit ArpNote(NoteData data = NoteData());
 
+    /**
+     * The note data.
+     */
     NoteData data;
+
+    /**
+     * The start point of the note in the pattern.
+     */
     int64 startPoint;
+
+    /**
+     * The end point of the note in the pattern.
+     */
     int64 endPoint;
 
+
+
+    /**
+     * Serializes this note into a ValueTree.
+     *
+     * @return a ValueTree representing this note
+     */
     ValueTree toValueTree();
 
+    /**
+     * Deserializes the specified ValueTree into a note it represents.
+     *
+     * @param tree the tree to deserialize
+     * @return the note represented by the ValueTree
+     */
     static ArpNote fromValueTree(ValueTree &tree);
 };
 

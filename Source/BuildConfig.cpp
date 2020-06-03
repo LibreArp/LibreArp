@@ -15,27 +15,12 @@
 // along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
-#pragma once
+#include <string>
+#include "BuildConfig.h"
 
-#include "../../LibreArp.h"
-#include "JuceHeader.h"
-#include "../../AudioUpdatable.h"
+// Update check configuration
+const std::string BuildConfig::UPDATE_CHECK_URL = "http://librearp.gitlab.io/assets/librearp-updates.json";
 
-class XmlEditor : public Component, public AudioUpdatable {
-public:
-
-    explicit XmlEditor(LibreArp &p);
-
-    void resized() override;
-
-    void audioUpdate(uint32 type) override;
-
-private:
-    LibreArp &processor;
-
-    TextEditor xmlEditor;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor);
-};
-
-
+// Default global settings values
+const bool BuildConfig::DEFAULT_CHECK_FOR_UPDATES_ENABLED = false;
+const int64 BuildConfig::DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK = 86400;

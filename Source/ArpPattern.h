@@ -17,10 +17,15 @@
 
 #pragma once
 
+#include <mutex>
+
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ArpNote.h"
 #include "ArpBuiltEvents.h"
 
+/**
+ * A data class of a pattern, editable by the user.
+ */
 class ArpPattern {
 public:
 
@@ -32,7 +37,11 @@ public:
     static constexpr int DEFAULT_TIMEBASE = 96;
 
 
+    /**
+     * The length of the loop.
+     */
     int64 loopLength;
+
 
     /**
      * Constructs a new pattern with the specified timebase.
@@ -41,7 +50,14 @@ public:
      */
     explicit ArpPattern(int timebase = DEFAULT_TIMEBASE);
 
+    /**
+     * Copy constructor.
+     */
+    ArpPattern(ArpPattern &pattern);
+
     ~ArpPattern();
+
+    ArpPattern& operator=(const ArpPattern &p) noexcept;
 
 
     /**
@@ -52,9 +68,9 @@ public:
     int getTimebase();
 
     /**
-     * Gets a pointer to the vector of notes in this pattern.
+     * Gets the vector of notes in this pattern.
      *
-     * @return
+     * @return the vector of notes in this pattern.
      */
     std::vector<ArpNote> &getNotes();
 
@@ -66,17 +82,60 @@ public:
      */
     ArpBuiltEvents buildEvents();
 
+
     /**
-     * Gets the pattern as a ValueTree.
+     * Gets this pattern's mutex.
+     *
+     * @return this pattern's mutex
+     */
+    std::recursive_mutex &getMutex();
+
+
+    /**
+     * Serializes this pattern into a ValueTree.
      *
      * @return the value tree representing this pattern
      */
     ValueTree toValueTree();
 
+    /**
+     * Serializes this pattern and saves it to the specified file.
+     *
+     * @param file the file where the pattern is to be saved
+     */
+    void toFile(const File &file);
 
+    /**
+     * Deserializes the specified ValueTree into the pattern it represents.
+     *
+     * @param tree the tree to deserialize
+     * @return the pattern represented by the ValueTree (empty if failed)
+     */
     static ArpPattern fromValueTree(ValueTree &tree);
 
+    /**
+     * Loads the specified file and deserializes it into the pattern it represents.
+     *
+     * @param file the file to load
+     * @return the pattern represented by the file (empty if failed)
+     */
+    static ArpPattern fromFile(const File &file);
+
 private:
+
+    /**
+     * The timebase of the pattern.
+     * Defines the amount of pulses in one beat.
+     */
     int timebase;
+
+    /**
+     * The notes in the pattern.
+     */
     std::vector<ArpNote> notes;
+
+    /**
+     * The pattern's mutex.
+     */
+    std::recursive_mutex mutex;
 };
