@@ -109,22 +109,6 @@ void MainEditor::audioUpdate(uint32 type) {
 void MainEditor::handleUpdateCheck() {
     auto &globals = processor.getGlobals();
 
-    if (!globals.isAskedForUpdateCheckConsent()) {
-        globals.setAskedForUpdateCheckConsent(true);
-        auto result = NativeMessageBox::showYesNoBox(
-                AlertWindow::AlertIconType::QuestionIcon,
-                "Check for updates?",
-                "LibreArp is able to connect to its GitLab page to check for available updates. As some users "
-                "may not be comfortable with this happening automatically, or they may be using a package "
-                "manager to handle all updates for them, we are asking you for your consent.\n"
-                "\n"
-                "Do you wish to allow LibreArp to check for updates periodically?\n"
-                "(You may change this on the Global settings tab later)",
-                this);
-
-        globals.setCheckForUpdatesEnabled(result == 1);
-    }
-
     if (globals.isCheckForUpdatesEnabled()) {
         auto minMsBeforeUpdateCheck = globals.getMinSecsBeforeUpdateCheck() * 1000L;
         auto lastUpdateCheckTime = globals.getLastUpdateCheckTime();
