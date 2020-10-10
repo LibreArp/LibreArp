@@ -15,7 +15,7 @@
               pluginIsSynth="1" pluginEditorRequiresKeys="1" pluginRTASDisableBypass="0"
               pluginRTASDisableMultiMono="0" pluginAAXDisableBypass="0" pluginAAXDisableMultiMono="0"
               pluginAUMainType="'aumi'" projectLineFeed="&#10;" buildRTAS="0"
-              buildAAX="0" buildStandalone="1" enableIAA="0">
+              buildAAX="0" buildStandalone="1" enableIAA="0" headerPath="Vendor/fst">
   <MAINGROUP id="FtyPbS" name="LibreArp">
     <GROUP id="{9258CAB9-5F61-DBAD-E552-78EB541BE77E}" name="Fonts">
       <FILE id="GF8QbK" name="overpass-regular.otf" compile="0" resource="1"
