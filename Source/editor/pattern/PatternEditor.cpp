@@ -60,6 +60,9 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
     snapEnabled = true;
     selection = Rectangle<int>(0, 0, 0, 0);
 
+    cursorNote = 0;
+    lastPlayPositionX = 0;
+
     setWantsKeyboardFocus(true);
 }
 
