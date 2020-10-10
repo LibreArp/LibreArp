@@ -54,14 +54,7 @@ bool operator==(const LibreArp::InputNote &a, const LibreArp::InputNote &b) {
 
 LibreArp::LibreArp()
 #ifndef JucePlugin_PreferredChannelConfigurations
-        : AudioProcessor(BusesProperties()
-#if !JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
-.withInput  ("Input",  AudioChannelSet::stereo(), true)
-#endif
-.withOutput ("Output", AudioChannelSet::stereo(), true)
-#endif
-)
+        : AudioProcessor(BusesProperties())
 #endif
 {
     this->lastPosition = 0;
