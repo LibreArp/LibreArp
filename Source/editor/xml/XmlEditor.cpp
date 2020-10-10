@@ -16,7 +16,6 @@
 //
 
 #include "XmlEditor.h"
-#include "../../exception/ArpIntegrityException.h"
 
 const Colour RED = Colour(255, 0, 0);
 
