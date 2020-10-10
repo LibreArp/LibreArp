@@ -17,7 +17,6 @@
 
 #include "LibreArp.h"
 #include "editor/MainEditor.h"
-#include "exception/ArpIntegrityException.h"
 
 const Identifier LibreArp::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NOLINT
 const Identifier LibreArp::TREEID_LOOP_RESET = Identifier("loopReset"); // NOLINT
@@ -68,6 +67,7 @@ LibreArp::LibreArp()
     this->timeSigNumerator = 4;
     this->timeSigDenominator = 4;
     this->debugPlaybackEnabled = false;
+    this->debugPlaybackResetTime = Time::currentTimeMillis();
     resetDebugPlayback();
 
     globals.markChanged();
@@ -200,8 +200,8 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = getSampleRate() * pulseLength;
 
-        auto lastPosition = static_cast<int64>(std::floor(cpi.ppqPosition * timebase));
-        auto position = lastPosition + static_cast<int64>(std::ceil(numSamples / pulseSamples));
+        auto blockStartPosition = static_cast<int64>(std::floor(cpi.ppqPosition * timebase));
+        auto blockEndPosition = blockStartPosition + static_cast<int64>(std::ceil(numSamples / pulseSamples));
 
         if (stopScheduled) {
             this->stopAll(midi);
@@ -213,13 +213,13 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         }
 
         for(auto event : events.events) {
-            auto time = nextTime(event, position, lastPosition);
+            auto time = nextTime(event, blockEndPosition, blockStartPosition);
 
-            if (time < position) {
-                auto offsetBase = static_cast<int>(std::floor((time - this->lastPosition) * pulseSamples));
+            if (time < blockEndPosition) {
+                auto offsetBase = static_cast<int>(std::floor((double) (time - this->lastPosition) * pulseSamples));
                 int offset = jmin(offsetBase, numSamples - 1);
 
-                if (this->lastPosition > position && offset < 0) {
+                if (this->lastPosition > blockEndPosition && offset < 0) {
                     offset = 0;
                 }
 
@@ -270,7 +270,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
 
         updateEditor();
 
-        this->lastPosition = position;
+        this->lastPosition = blockEndPosition;
         this->wasPlaying = true;
     } else {
         if (this->wasPlaying) {
@@ -323,7 +323,7 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
 
         if (tree.isValid() && tree.hasType(TREEID_LIBREARP)) {
             ValueTree patternTree = tree.getChildWithName(ArpPattern::TREEID_PATTERN);
-            ArpPattern pattern = ArpPattern::fromValueTree(patternTree);
+            ArpPattern loadedPattern = ArpPattern::fromValueTree(patternTree);
 
             ValueTree editorTree = tree.getChildWithName(EditorState::TREEID_EDITOR_STATE);
             if (editorTree.isValid()) {
@@ -354,7 +354,7 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
                 this->inputMidiChannel = tree.getProperty(TREEID_INPUT_MIDI_CHANNEL);
             }
 
-            setPattern(pattern);
+            setPattern(loadedPattern);
         }
     }
 }
@@ -391,12 +391,12 @@ int64 LibreArp::getLastPosition() {
 
 
 
-void LibreArp::setLoopReset(double loopReset) {
+void LibreArp::setLoopReset(double beats) {
     std::scoped_lock lock(mutex);
-    this->loopReset = jmax(0.0, loopReset);
+    this->loopReset = jmax(0.0, beats);
 }
 
-double LibreArp::getLoopReset() {
+double LibreArp::getLoopReset() const {
     return this->loopReset;
 }
 
@@ -427,20 +427,20 @@ void LibreArp::setUsingInputVelocity(bool value) {
 }
 
 
-int LibreArp::getNumInputNotes() {
+int LibreArp::getNumInputNotes() const {
     return this->numInputNotes;
 }
 
-int LibreArp::getTimeSigNumerator() {
+int LibreArp::getTimeSigNumerator() const {
     return this->timeSigNumerator;
 }
 
-int LibreArp::getTimeSigDenominator() {
+int LibreArp::getTimeSigDenominator() const {
     return this->timeSigDenominator;
 }
 
 
-bool LibreArp::isDebugPlaybackEnabled() {
+bool LibreArp::isDebugPlaybackEnabled() const {
     return this->debugPlaybackEnabled || JUCEApplicationBase::isStandaloneApp();
 }
 
@@ -484,7 +484,7 @@ void LibreArp::fillCurrentDebugPositionInfo(AudioPlayHead::CurrentPositionInfo &
 }
 
 
-int LibreArp::getOutputMidiChannel() {
+int LibreArp::getOutputMidiChannel() const {
     return this->outputMidiChannel;
 }
 
@@ -496,7 +496,7 @@ void LibreArp::setOutputMidiChannel(int channel) {
 
 
 
-int LibreArp::getInputMidiChannel() {
+int LibreArp::getInputMidiChannel() const {
     return this->inputMidiChannel;
 }
 
@@ -574,20 +574,20 @@ void LibreArp::updateEditor(uint32 type) {
 
 
 
-int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 position, int64 lastPosition) {
+int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 blockStartPosition, int64 blockEndPosition) const {
     int64 result;
 
     if (loopReset > 0.0) {
         auto loopResetLength = static_cast<int64>(std::ceil(events.timebase * loopReset));
-        auto resetPosition = position % loopResetLength;
+        auto resetPosition = blockStartPosition % loopResetLength;
         auto intermediateResult = resetPosition - (resetPosition % events.loopLength) + event.time;
 
-        result = position - (position % loopResetLength) + intermediateResult;
+        result = blockStartPosition - (blockStartPosition % loopResetLength) + intermediateResult;
     } else {
-        result = position - (position % events.loopLength) + event.time;
+        result = blockStartPosition - (blockStartPosition % events.loopLength) + event.time;
     }
 
-    if (result < lastPosition) {
+    if (result < blockEndPosition) {
         result += events.loopLength;
     }
 

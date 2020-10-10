@@ -162,16 +162,16 @@ public:
     /**
      * Sets the amount of beats after which the loop should reset.
      *
-     * @param loopReset the amount of beats after which the loop should reset
+     * @param beats the amount of beats after which the loop should reset
      */
-    void setLoopReset(double loopReset);
+    void setLoopReset(double beats);
 
     /**
      * Gets the amount of beats after which the loop should reset.
      *
      * @return the amount of beats after which the loop should reset
      */
-    double getLoopReset();
+    double getLoopReset() const;
 
     /**
      * Gets the currently playing pattern indices.
@@ -195,27 +195,27 @@ public:
      *
      * @return the last active number of input notes
      */
-    int getNumInputNotes();
+    int getNumInputNotes() const;
 
     /**
      * Gets the time signature numerator.
      *
      * @return the time signature numerator
      */
-    int getTimeSigNumerator();
+    int getTimeSigNumerator() const;
 
     /**
      * Gets the time signature denominator.
      *
      * @return the time signature denominator
      */
-    int getTimeSigDenominator();
+    int getTimeSigDenominator() const;
 
 
     /**
      * @return <code>true</code> if debug playback is enabled, otherwise <code>false</code>
      */
-    bool isDebugPlaybackEnabled();
+    bool isDebugPlaybackEnabled() const;
 
     /**
      * Enables or disables debug playback and resets the debug playhead.
@@ -242,7 +242,7 @@ public:
      *
      * @return the MIDI channel output notes are sent into
      */
-    int getOutputMidiChannel();
+    int getOutputMidiChannel() const;
 
     /**
      * Sets the MIDI channel output notes are sent into.
@@ -258,7 +258,7 @@ public:
      *
      * @return the MIDI channel input notes are read from
      */
-    int getInputMidiChannel();
+    int getInputMidiChannel() const;
 
     /**
      * Sets the MIDI channel input notes are read from.
@@ -443,11 +443,11 @@ private:
      * Calculates the next time of the specified event.
      *
      * @param event the event of which the next time should be calculated
-     * @param position the current processed position
-     * @param lastPosition the last processed position
+     * @param blockStartPosition the current processed position
+     * @param blockEndPosition the last processed position
      * @return the next time of the event
      */
-    int64 nextTime(ArpBuiltEvents::Event &event, int64 position, int64 lastPosition);
+    int64 nextTime(ArpBuiltEvents::Event &event, int64 blockStartPosition, int64 blockEndPosition) const;
 };
 
 bool operator> (const LibreArp::InputNote &a, const LibreArp::InputNote &b);

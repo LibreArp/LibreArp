@@ -18,12 +18,12 @@
 #include "Globals.h"
 #include "BuildConfig.h"
 
-const Identifier Globals::TREEID_SETTINGS = "globalSettings";
-const Identifier Globals::TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT = "askedForUpdateCheckConsent";
-const Identifier Globals::TREEID_UPDATE_CHECK = "checkForUpdates";
-const Identifier Globals::TREEID_FOUND_UPDATE_ON_LAST_CHECK = "foundUpdateOnLastCheck";
-const Identifier Globals::TREEID_MIN_SECS_BEFORE_UPDATE_CHECK = "minSecsBeforeUpdateCheck";
-const Identifier Globals::TREEID_LAST_UPDATE_CHECK_TIME = "lastUpdateCheckTime";
+const Identifier Globals::TREEID_SETTINGS = "globalSettings"; // NOLINT
+const Identifier Globals::TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT = "askedForUpdateCheckConsent"; // NOLINT
+const Identifier Globals::TREEID_UPDATE_CHECK = "checkForUpdates"; // NOLINT
+const Identifier Globals::TREEID_FOUND_UPDATE_ON_LAST_CHECK = "foundUpdateOnLastCheck"; // NOLINT
+const Identifier Globals::TREEID_MIN_SECS_BEFORE_UPDATE_CHECK = "minSecsBeforeUpdateCheck"; // NOLINT
+const Identifier Globals::TREEID_LAST_UPDATE_CHECK_TIME = "lastUpdateCheckTime"; // NOLINT
 
 Globals::Globals() :
         changed(false),
@@ -177,9 +177,9 @@ bool Globals::isAskedForUpdateCheckConsent() const {
     return askedForUpdateCheckConsent;
 }
 
-void Globals::setAskedForUpdateCheckConsent(bool askedForUpdateCheckConsent) {
+void Globals::setAskedForUpdateCheckConsent(bool asked) {
     std::scoped_lock lock(mutex);
-    this->askedForUpdateCheckConsent = askedForUpdateCheckConsent;
+    this->askedForUpdateCheckConsent = asked;
     this->changed = true;
 }
 

@@ -19,7 +19,7 @@
 #include "BuildConfig.h"
 
 // Update check configuration
-const std::string BuildConfig::UPDATE_CHECK_URL = "http://librearp.gitlab.io/assets/librearp-updates.json";
+const std::string BuildConfig::UPDATE_CHECK_URL = "http://librearp.gitlab.io/assets/librearp-updates.json"; // NOLINT
 
 // Default global settings values
 const bool BuildConfig::DEFAULT_CHECK_FOR_UPDATES_ENABLED = false;

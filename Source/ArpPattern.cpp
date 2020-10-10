@@ -17,7 +17,6 @@
 
 #include <map>
 #include "ArpPattern.h"
-#include "exception/ArpIntegrityException.h"
 
 const Identifier ArpPattern::TREEID_PATTERN = Identifier("pattern"); // NOLINT
 const Identifier ArpPattern::TREEID_TIMEBASE = Identifier("timebase"); // NOLINT
@@ -76,7 +75,7 @@ ArpBuiltEvents ArpPattern::buildEvents() {
         totalOffEvent.offs.insert(dataIndex);
     }
 
-    for (std::pair<int64, ArpBuiltEvents::Event> pair : eventMap) {
+    for (const auto &pair : eventMap) {
         result.events.push_back(pair.second);
     }
 

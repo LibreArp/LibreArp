@@ -65,12 +65,6 @@
         <FILE id="xVzivl" name="MainEditor.cpp" compile="1" resource="0" file="Source/editor/MainEditor.cpp"/>
         <FILE id="nJdJiZ" name="MainEditor.h" compile="0" resource="0" file="Source/editor/MainEditor.h"/>
       </GROUP>
-      <GROUP id="{50F657DF-8B13-1330-0F07-913BC78A94FD}" name="exception">
-        <FILE id="AaDTLm" name="ArpIntegrityException.cpp" compile="1" resource="0"
-              file="Source/exception/ArpIntegrityException.cpp"/>
-        <FILE id="XynWej" name="ArpIntegrityException.h" compile="0" resource="0"
-              file="Source/exception/ArpIntegrityException.h"/>
-      </GROUP>
       <FILE id="FbDdGI" name="ArpBuiltEvents.cpp" compile="1" resource="0"
             file="Source/ArpBuiltEvents.cpp"/>
       <FILE id="EG63G7" name="ArpBuiltEvents.h" compile="0" resource="0"

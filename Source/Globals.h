@@ -103,7 +103,7 @@ public:
 
     bool isAskedForUpdateCheckConsent() const;
 
-    void setAskedForUpdateCheckConsent(bool askedForUpdateCheckConsent);
+    void setAskedForUpdateCheckConsent(bool asked);
 
     bool isFoundUpdateOnLastCheck() const;
 
