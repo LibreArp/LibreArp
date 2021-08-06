@@ -42,7 +42,7 @@
 "\n" \
 "\n" \
 "LibreArp is powered by:\n" \
-" - JUCE 6 framework by ROLI under the GNU General Public License, version 3\n" \
-" - VST3 SDK by Steinberg under the GNU General Public License, version 3\n" \
+" - JUCE 6 under the GNU General Public License, version 3\n" \
+" - VST3 SDK under the GNU General Public License, version 3\n" \
 "\n" \
-"LibreArp uses the Overpass font by Delve Fonts (sponsored by Red Hat) under the SIL Open Font License version 1.1")
+"LibreArp uses the Overpass font under the SIL Open Font License version 1.1")
