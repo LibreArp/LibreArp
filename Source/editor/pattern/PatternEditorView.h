@@ -29,11 +29,11 @@ public:
 
     explicit PatternEditorView(LibreArp &p, EditorState &editorState);
 
-    void paint(Graphics &g) override;
-
     void resized() override;
 
     void zoomPattern(float deltaX, float deltaY);
+    void scrollPattern(float deltaX, float deltaY);
+    void resetPatternOffset();
 
     int getRenderWidth();
     int getRenderHeight();
@@ -56,10 +56,7 @@ private:
     Slider loopResetSlider;
     Label loopResetSliderLabel;
 
-    Viewport editorViewport;
     PatternEditor editor;
-
-    Viewport beatBarViewport;
     BeatBar beatBar;
 };
 

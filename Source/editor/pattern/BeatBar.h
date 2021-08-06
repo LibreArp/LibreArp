@@ -31,11 +31,13 @@ public:
 
     void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) override;
 
+    void mouseDown(const MouseEvent& event) override;
+
 private:
 
     LibreArp &processor;
     EditorState &state;
-    PatternEditorView *editorComponent;
+    PatternEditorView *view;
 };
 
 

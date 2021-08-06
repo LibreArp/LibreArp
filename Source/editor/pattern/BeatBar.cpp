@@ -30,7 +30,7 @@ const String LOOP_TEXT = "loop"; // NOLINT
 const int TEXT_OFFSET = 6;
 
 BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec)
-        : processor(p), state(e), editorComponent(ec) {
+        : processor(p), state(e), view(ec) {
 
     setSize(1, 1);
 }
@@ -39,20 +39,18 @@ void BeatBar::paint(Graphics &g) {
     auto &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
 
-    setSize(jmax(editorComponent->getRenderWidth(), getParentWidth()), getParentHeight());
-
     // Draw background
     g.setColour(BACKGROUND_COLOUR);
     g.fillRect(getLocalBounds());
     g.setColour(BOTTOM_LINE_COLOUR);
     g.fillRect(0, getHeight() - 1, getWidth(), 1);
 
-    auto loopLine = static_cast<int>((pattern.loopLength / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1;
+    auto loopLine = static_cast<int>((pattern.loopLength / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1 - state.offsetX;
 
     // Draw beat lines
     g.setFont(20);
-    int n = 1;
-    for (float i = 1; i < getWidth(); i += pixelsPerBeat, n++) {
+    int n = 1 + state.offsetX / pixelsPerBeat;
+    for (float i = (1 - state.offsetX) % pixelsPerBeat; i < getWidth(); i += pixelsPerBeat, n++) {
         g.setColour(BEAT_LINE_COLOUR);
         g.fillRect(roundToInt(i), 0, 4, getHeight());
 
@@ -73,8 +71,17 @@ void BeatBar::paint(Graphics &g) {
 
 void BeatBar::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) {
     if (event.mods.isShiftDown()) {
-        editorComponent->zoomPattern(0, wheel.deltaY);
+        view->zoomPattern(0, wheel.deltaY);
     } else {
-        editorComponent->zoomPattern(wheel.deltaY, 0);
+        view->zoomPattern(wheel.deltaY, 0);
     }
+}
+
+void BeatBar::mouseDown(const MouseEvent& event) {
+    if (!event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && event.mods.isMiddleButtonDown()) {
+        view->resetPatternOffset();
+        return;
+    }
+
+    Component::mouseDown(event);
 }

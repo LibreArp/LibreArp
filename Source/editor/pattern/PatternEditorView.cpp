@@ -17,8 +17,10 @@
 
 #include "PatternEditorView.h"
 
-const int X_ZOOM_RATE = 80;
-const int Y_ZOOM_RATE = 30;
+static const int X_ZOOM_RATE = 80;
+static const int Y_ZOOM_RATE = 30;
+static const int X_SCROLL_RATE = 250;
+static const int Y_SCROLL_RATE = 250;
 
 PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
         : processor(p),
@@ -50,12 +52,8 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     };
     addAndMakeVisible(saveButton);
 
-    editorViewport.setViewedComponent(&editor);
-    addAndMakeVisible(editorViewport);
-
-    beatBarViewport.setViewedComponent(&beatBar);
-    beatBarViewport.setScrollBarsShown(false, false, false, false);
-    addAndMakeVisible(beatBarViewport);
+    addAndMakeVisible(beatBar);
+    addAndMakeVisible(editor);
 
     loopResetSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
     loopResetSlider.setRange(0, 65535, 1);
@@ -87,10 +85,6 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     addAndMakeVisible(snapSliderLabel);
 }
 
-void PatternEditorView::paint(Graphics &g) {
-    beatBarViewport.setViewPosition(editorViewport.getViewPositionX(), beatBarViewport.getViewPositionY());
-}
-
 void PatternEditorView::resized() {
     auto area = getLocalBounds().reduced(8);
 
@@ -103,25 +97,35 @@ void PatternEditorView::resized() {
 
     area.removeFromTop(8);
 
-    auto presetButtonArea = area.removeFromBottom(24);
-    loadButton.setBounds(presetButtonArea.removeFromLeft(100));
-    saveButton.setBounds(presetButtonArea.removeFromLeft(100));
+    auto bottomButtonArea = area.removeFromBottom(24);
+    loadButton.setBounds(bottomButtonArea.removeFromLeft(100));
+    saveButton.setBounds(bottomButtonArea.removeFromLeft(100));
 
     area.removeFromBottom(8);
 
-    beatBarViewport.setBounds(area.removeFromTop(20));
-    editorViewport.setBounds(area);
+    beatBar.setBounds(area.removeFromTop(20));
+    editor.setBounds(area);
 }
 
 void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
-    double xPercent = editorViewport.getViewPositionX() / static_cast<double>(editor.getWidth());
-    double yPercent = editorViewport.getViewPositionY() / static_cast<double>(editor.getHeight());
     state.pixelsPerBeat = jmax(32, state.pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
     state.pixelsPerNote = jmax(8, state.pixelsPerNote + static_cast<int>(deltaY * Y_ZOOM_RATE));
 
-    editorViewport.setViewPosition(
-            static_cast<int>(xPercent * getRenderWidth()),
-            static_cast<int>(yPercent * getRenderHeight()));
+    editor.repaint();
+    beatBar.repaint();
+}
+
+void PatternEditorView::scrollPattern(float deltaX, float deltaY) {
+    state.offsetX = jmax(0, state.offsetX - static_cast<int>(deltaX * X_SCROLL_RATE));
+    state.offsetY = state.offsetY - static_cast<int>(deltaY * Y_SCROLL_RATE);
+
+    editor.repaint();
+    beatBar.repaint();
+}
+
+void PatternEditorView::resetPatternOffset() {
+    state.offsetX = 0;
+    state.offsetY = 0;
 
     editor.repaint();
     beatBar.repaint();

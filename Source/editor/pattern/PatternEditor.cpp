@@ -70,24 +70,23 @@ void PatternEditor::paint(Graphics &g) {
     ArpPattern &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
     auto pixelsPerNote = state.pixelsPerNote;
-    auto drawRegion = g.getClipBounds();
 
-    // Set size
-    setSize(
-            jmax(view->getRenderWidth(), getParentWidth()),
-            jmax(view->getRenderHeight(), getParentHeight()));
+    auto unoffsDrawRegion = g.getClipBounds();
+    auto drawRegion = unoffsDrawRegion;
+    drawRegion.translate(-state.offsetX, -state.offsetY);
 
     // Draw background
     g.setColour(BACKGROUND_COLOUR);
-    g.fillRect(drawRegion);
+    g.fillRect(unoffsDrawRegion);
 
     // Draw bars
     if (processor.getTimeSigDenominator() > 0 && processor.getTimeSigDenominator() <= 32) {
         auto beat = (pixelsPerBeat * 4) / processor.getTimeSigDenominator();
         auto bar = beat * processor.getTimeSigNumerator();
         g.setColour(BAR_SHADE_COLOUR);
-        for (int i = (drawRegion.getX() / bar) * bar; i < drawRegion.getWidth(); i += bar * 2) {
-            g.fillRect(i + bar, 0, bar, getHeight());
+        int firstBarX = unoffsDrawRegion.getX() - unoffsDrawRegion.getX() % bar - state.offsetX % (bar * 2);
+        for (int i = firstBarX; i < unoffsDrawRegion.getWidth(); i += bar * 2) {
+            g.fillRect(i + bar, unoffsDrawRegion.getY(), bar, unoffsDrawRegion.getHeight());
         }
     }
 
@@ -98,29 +97,26 @@ void PatternEditor::paint(Graphics &g) {
         g.setColour(ZERO_OCTAVE_COLOUR);
         auto height = numInputNotes * pixelsPerNote;
         auto rect = Rectangle<int>(
-                drawRegion.getX(), noteZeroY - height + pixelsPerNote, drawRegion.getWidth(), height);
-        if (rect.intersects(drawRegion)) {
-            g.fillRect(rect);
-        }
+                unoffsDrawRegion.getX(), noteZeroY - height + pixelsPerNote, unoffsDrawRegion.getWidth(), height);
+        g.fillRect(rect);
     } else {
         g.setColour(ZERO_LINE_COLOUR);
-        auto rect = Rectangle<int>(drawRegion.getX(), noteZeroY, drawRegion.getWidth(), pixelsPerNote);
-        if (rect.intersects(drawRegion)) {
-            g.fillRect(rect);
-        }
+        auto rect = Rectangle<int>(unoffsDrawRegion.getX(), noteZeroY, unoffsDrawRegion.getWidth(), pixelsPerNote);
+        g.fillRect(rect);
     }
 
     // Draw gridlines
     // - Horizontal
     g.setColour(GRIDLINES_COLOUR);
-    for (int i = (getHeight() / 2) % pixelsPerNote - pixelsPerNote / 2; i < getHeight(); i += pixelsPerNote) {
+    int horizontalGridlineStart = (getHeight() / 2 - state.offsetY) % pixelsPerNote - pixelsPerNote / 2;
+    for (int i = horizontalGridlineStart; i < getHeight(); i += pixelsPerNote) {
         g.fillRect(0, i, getWidth(), 2);
     }
 
     // - Vertical
     float beatDiv = (pixelsPerBeat / static_cast<float>(state.divisor));
     int beatN = 0;
-    for (float i = 0; i < getWidth(); i += beatDiv, beatN++) {
+    for (auto i = static_cast<float>((-state.offsetX) % pixelsPerBeat); i < static_cast<float>(getWidth()); i += beatDiv, beatN++) {
         if (beatN % state.divisor == 0) {
             g.fillRect(roundToInt(i), 0, 4, getHeight());
         } else {
@@ -133,7 +129,7 @@ void PatternEditor::paint(Graphics &g) {
         g.setColour(OCTAVE_LINE_COLOUR);
         auto pixelsPerOctave = pixelsPerNote * numInputNotes;
 
-        int i = (getHeight() / 2) % pixelsPerOctave - pixelsPerNote / 2 + pixelsPerNote;
+        int i = (getHeight() / 2 - state.offsetY) % pixelsPerOctave - pixelsPerNote / 2 + pixelsPerNote;
         for (/* above */; i < getHeight(); i += pixelsPerOctave) {
             g.fillRect(drawRegion.getX(), i, drawRegion.getWidth(), 1);
         }
@@ -145,7 +141,7 @@ void PatternEditor::paint(Graphics &g) {
         auto &note = notes[i];
         Rectangle<int> noteRect = getRectangleForNote(note);
 
-        if (noteRect.intersects(drawRegion)) {
+        if (noteRect.intersects(unoffsDrawRegion)) {
             auto isPlaying = processor.getPlayingPatternIndices().contains(i);
 
             if (selectedNotes.find(i) == selectedNotes.end()) {
@@ -171,14 +167,14 @@ void PatternEditor::paint(Graphics &g) {
     // Draw loop line
     g.setColour(LOOP_LINE_COLOUR);
     auto loopLine = pulseToX(pattern.loopLength);
-    auto loopLineRect = Rectangle<int>(loopLine, drawRegion.getY(), 4, drawRegion.getHeight());
+    auto loopLineRect = Rectangle<int>(loopLine, 0, 4, getHeight());
     if (loopLineRect.intersects(drawRegion)){
         g.fillRect(loopLineRect);
     }
 
-    // Draw position indicator
+    // Draw playback position indicator
     if (lastPlayPositionX > 0) {
-        auto positionRect = Rectangle<int>(lastPlayPositionX, drawRegion.getY(), 1, drawRegion.getHeight());
+        auto positionRect = Rectangle<int>(lastPlayPositionX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
         if (positionRect.intersects(drawRegion)) {
             g.setColour(POSITION_INDICATOR_COLOUR);
             g.fillRect(positionRect);
@@ -196,8 +192,8 @@ void PatternEditor::paint(Graphics &g) {
 
 
     auto cursorNoteY = noteToY(cursorNote);
-    auto cursorNoteRect = Rectangle<int>(drawRegion.getX(), cursorNoteY, drawRegion.getWidth(), pixelsPerNote);
-    if (cursorNoteRect.intersects(drawRegion)) {
+    auto cursorNoteRect = Rectangle<int>(unoffsDrawRegion.getX(), cursorNoteY, unoffsDrawRegion.getWidth(), pixelsPerNote);
+    if (cursorNoteRect.intersects(unoffsDrawRegion)) {
         g.setColour(CURSOR_NOTE_COLOUR);
         g.fillRect(cursorNoteRect);
     }
@@ -206,24 +202,29 @@ void PatternEditor::paint(Graphics &g) {
 
 void PatternEditor::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) {
     if (event.mods.isCtrlDown()) {
+        // Zooming
         if (event.mods.isShiftDown()) {
             view->zoomPattern(0, wheel.deltaY);
         } else {
             view->zoomPattern(wheel.deltaY, 0);
         }
-    } else {
-        if (event.mods.isAltDown()) {
-            if (this->dragAction != nullptr && (this->dragAction->type & DragAction::TYPE_MASK) == DragAction::TYPE_NOTE) {
-                auto *dragAction = (NoteDragAction *) this->dragAction;
-                std::scoped_lock lock(this->processor.getPattern().getMutex());
-                for (auto &noteOffset : dragAction->noteOffsets) {
-                    auto &note = this->processor.getPattern().getNotes()[noteOffset.noteIndex];
-                    note.data.velocity = jmax(0.0, jmin(note.data.velocity + wheel.deltaY * 0.1, 1.0));
-                }
-                processor.buildPattern();
+    } else if (event.mods.isAltDown()) {
+        // Note velocity
+        if (this->dragAction != nullptr && (this->dragAction->type & DragAction::TYPE_MASK) == DragAction::TYPE_NOTE) {
+            auto *noteDragAction = (NoteDragAction *) this->dragAction;
+            std::scoped_lock lock(this->processor.getPattern().getMutex());
+            for (auto &noteOffset : noteDragAction->noteOffsets) {
+                auto &note = this->processor.getPattern().getNotes()[noteOffset.noteIndex];
+                note.data.velocity = jmax(0.0, jmin(note.data.velocity + wheel.deltaY * 0.1, 1.0));
             }
+            processor.buildPattern();
+        }
+    } else {
+        // Scrolling
+        if (event.mods.isShiftDown()) {
+            view->scrollPattern(wheel.deltaY, wheel.deltaX);
         } else {
-            Component::mouseWheelMove(event, wheel);
+            view->scrollPattern(wheel.deltaX, wheel.deltaY);
         }
     }
 }
@@ -380,9 +381,14 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
 
     if (!event.mods.isLeftButtonDown() && event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
         selectedNotes.clear();
-        noteDelete(event);
         repaintNotes();
+        noteDelete(event);
         Component::mouseDown(event);
+        return;
+    }
+
+    if (!event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && event.mods.isMiddleButtonDown()) {
+        view->resetPatternOffset();
         return;
     }
 
@@ -706,7 +712,7 @@ Rectangle<int> PatternEditor::getRectangleForNote(ArpNote &note) {
     return Rectangle<int>(
             pulseToX(note.startPoint),
             noteToY(note.data.noteNumber),
-            pulseToX(note.endPoint - note.startPoint),
+            pulseToAbsX(note.endPoint - note.startPoint),
             pixelsPerNote);
 }
 
@@ -738,17 +744,21 @@ int64 PatternEditor::xToPulse(int x, bool snap, bool floor) {
     double pixelsPerBeat = state.pixelsPerBeat;
 
     auto pulse = static_cast<int64>(
-            std::round((x / pixelsPerBeat) * timebase));
+            std::round(((x + state.offsetX) / pixelsPerBeat) * timebase));
 
     return jmax(static_cast<int64>(0), (snap) ? snapPulse(pulse, floor) : pulse);
 }
 
 int PatternEditor::yToNote(int y) {
     double pixelsPerNote = state.pixelsPerNote;
-    return static_cast<int>(std::ceil(((getHeight() / 2.0) - y) / pixelsPerNote - 0.5));
+    return static_cast<int>(std::ceil(((getHeight() / 2.0) - (y + state.offsetY)) / pixelsPerNote - 0.5));
 }
 
 int PatternEditor::pulseToX(int64 pulse) {
+    return pulseToAbsX(pulse) - state.offsetX;
+}
+
+int PatternEditor::pulseToAbsX(int64 pulse) {
     auto &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
 
@@ -756,6 +766,10 @@ int PatternEditor::pulseToX(int64 pulse) {
 }
 
 int PatternEditor::noteToY(int note) {
+    return noteToAbsY(note) - state.offsetY;
+}
+
+int PatternEditor::noteToAbsY(int note) {
     double pixelsPerNote = state.pixelsPerNote;
     return roundToInt(std::floor((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote)) + 1;
 }

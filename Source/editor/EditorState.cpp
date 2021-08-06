@@ -24,18 +24,11 @@ const Identifier EditorState::TREEID_DIVISOR = Identifier("divisor"); // NOLINT
 const Identifier EditorState::TREEID_LAST_NOTE_LENGTH = Identifier("lastNoteLength"); // NOLINT
 const Identifier EditorState::TREEID_PIXELS_PER_BEAT = Identifier("pixelsPerBeat"); // NOLINT
 const Identifier EditorState::TREEID_PIXELS_PER_NOTE = Identifier("pixelsPerNote"); // NOLINT
-
-EditorState::EditorState() {
-    this->width = 640;
-    this->height = 480;
-    this->divisor = 4;
-    this->lastNoteLength = -1;
-    this->pixelsPerBeat = 100;
-    this->pixelsPerNote = 12;
-}
+const Identifier EditorState::TREEID_OFFSET_X = Identifier("editorOffsetX"); // NOLINT
+const Identifier EditorState::TREEID_OFFSET_Y = Identifier("editorOffsetY"); // NOLINT
 
 
-ValueTree EditorState::toValueTree() {
+ValueTree EditorState::toValueTree() const {
     ValueTree tree = ValueTree(TREEID_EDITOR_STATE);
     tree.setProperty(TREEID_WIDTH, this->width, nullptr);
     tree.setProperty(TREEID_HEIGHT, this->height, nullptr);
@@ -43,6 +36,8 @@ ValueTree EditorState::toValueTree() {
     tree.setProperty(TREEID_LAST_NOTE_LENGTH, this->lastNoteLength, nullptr);
     tree.setProperty(TREEID_PIXELS_PER_BEAT, this->pixelsPerBeat, nullptr);
     tree.setProperty(TREEID_PIXELS_PER_NOTE, this->pixelsPerNote, nullptr);
+    tree.setProperty(TREEID_OFFSET_X, this->offsetX, nullptr);
+    tree.setProperty(TREEID_OFFSET_Y, this->offsetY, nullptr);
     return tree;
 }
 
@@ -69,6 +64,12 @@ EditorState EditorState::fromValueTree(ValueTree &tree) {
     }
     if (tree.hasProperty(TREEID_PIXELS_PER_NOTE)) {
         result.pixelsPerNote = tree.getProperty(TREEID_PIXELS_PER_NOTE);
+    }
+    if (tree.hasProperty(TREEID_OFFSET_X)) {
+        result.offsetX = tree.getProperty(TREEID_OFFSET_X);
+    }
+    if (tree.hasProperty(TREEID_OFFSET_Y)) {
+        result.offsetY = tree.getProperty(TREEID_OFFSET_Y);
     }
     return result;
 }

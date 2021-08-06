@@ -30,20 +30,22 @@ public:
     static const Identifier TREEID_LAST_NOTE_LENGTH;
     static const Identifier TREEID_PIXELS_PER_BEAT;
     static const Identifier TREEID_PIXELS_PER_NOTE;
-
-    EditorState();
+    static const Identifier TREEID_OFFSET_X;
+    static const Identifier TREEID_OFFSET_Y;
 
     // Main
-    int width;
-    int height;
+    int width = 640;
+    int height = 480;
 
     // Pattern editor
-    int divisor;
-    int64 lastNoteLength;
-    int pixelsPerBeat;
-    int pixelsPerNote;
+    int divisor = 4;
+    int64 lastNoteLength = -1;
+    int pixelsPerBeat = 100;
+    int pixelsPerNote = 12;
+    int offsetX = 0;
+    int offsetY = 0;
 
-    ValueTree toValueTree();
+    [[nodiscard]] ValueTree toValueTree() const;
     static EditorState fromValueTree(ValueTree &tree);
 
 };

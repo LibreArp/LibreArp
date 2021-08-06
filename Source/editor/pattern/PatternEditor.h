@@ -415,9 +415,9 @@ private:
     int64 snapPulse(int64 pulse, bool floor = false);
 
     /**
-     * Converts an X coordinate to a pulse position.
+     * Converts a view-space X coordinate to a pulse position.
      *
-     * @param x the X coordinate
+     * @param x the view-space X coordinate
      * @param snap whether snap should be used
      * @param floor whether floor should be used instad of round for snapping
      *
@@ -426,31 +426,29 @@ private:
     int64 xToPulse(int x, bool snap = true, bool floor = false);
 
     /**
-     * Converts a Y coordinate to a note number.
-     *
-     * @param y the Y coordinate
-     *
-     * @return the note number
+     * Converts a view-space Y coordinate to a note number.
      */
     int yToNote(int y);
 
     /**
-     * Converts a pulse position to an X coordinate.
-     *
-     * @param pulse the pulse position
-     *
-     * @return the X coordinate
+     * Converts a pulse position to a view-space X coordinate.
      */
     int pulseToX(int64 pulse);
 
     /**
-     * Converts a note number to a Y coordinate.
-     *
-     * @param note the note number
-     *
-     * @return the Y coordinate
+     * Converts a pulse position to absolute X coordinate (not offset by view offsets).
+     */
+    int pulseToAbsX(int64 pulse);
+
+    /**
+     * Converts a note number to a view-space Y coordinate.
      */
     int noteToY(int note);
+
+    /**
+     * Converts a note number to absolute Y coordinate (not offset by view offsets).
+     */
+    int noteToAbsY(int note);
 
     void repaintNotes();
 };
