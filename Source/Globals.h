@@ -119,11 +119,6 @@ public:
 private:
 
     /**
-     * This flag is <code>true</code> if the global settings have changed since the last save/load.
-     */
-    bool changed;
-
-    /**
      * Directory of the global data.
      */
     juce::File globalsDir;
@@ -137,6 +132,11 @@ private:
      * Default presets directory.
      */
     juce::File patternPresetsDir;
+
+    /**
+     * This flag is <code>true</code> if the global settings have changed since the last save/load.
+     */
+    bool changed;
 
     /**
      * Whether the GUI of the plugin has already asked the user for consent about automatic update checks.

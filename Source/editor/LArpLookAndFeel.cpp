@@ -122,7 +122,9 @@ void LArpLookAndFeel::drawTabButton(juce::TabBarButton &button, juce::Graphics &
 
 
 
-void LArpLookAndFeel::drawTabAreaBehindFrontButton(juce::TabbedButtonBar &bar, juce::Graphics &g, int w, int h) {}
+void LArpLookAndFeel::drawTabAreaBehindFrontButton(juce::TabbedButtonBar &bar, juce::Graphics &g, int w, int h) {
+    juce::ignoreUnused(bar, g, w, h);
+}
 
 void LArpLookAndFeel::drawButtonBackground(juce::Graphics &g, juce::Button &button, const juce::Colour &backgroundColour,
                                            bool isMouseOverButton, bool isButtonDown) {
@@ -192,6 +194,8 @@ int LArpLookAndFeel::getTabButtonBestWidth(juce::TabBarButton &button, int tabDe
 void LArpLookAndFeel::drawScrollbar(juce::Graphics &g, juce::ScrollBar &bar, int x, int y, int width, int height,
                                     bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool isMouseOver,
                                     bool isMouseDown) {
+    juce::ignoreUnused(isMouseDown);
+
     g.setColour(findColour(juce::ScrollBar::trackColourId));
     g.fillRect(bar.getLocalBounds());
 

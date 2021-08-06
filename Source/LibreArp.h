@@ -65,6 +65,7 @@ public:
     bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
 
     void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
+    void processBlock(juce::AudioBuffer<double> &, juce::MidiBuffer &) override;
 
 
     juce::AudioProcessorEditor *createEditor() override;
@@ -275,7 +276,7 @@ public:
 
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibreArp)
 
     /**
      * Global data of the plugin.
@@ -414,7 +415,10 @@ private:
      */
     std::recursive_mutex mutex;
 
-
+    /**
+     * Main LibreArp processing method.
+     */
+    void processMidi(int numSamples, juce::MidiBuffer &midi);
 
     /**
      * Processes input MIDI messages.

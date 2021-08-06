@@ -587,7 +587,7 @@ void PatternEditor::noteDelete(const juce::MouseEvent &event) {
 
 void PatternEditor::selectAll() {
     auto &notes = processor.getPattern().getNotes();
-    for (int i = 0; i < notes.size(); i++) {
+    for (size_t i = 0; i < notes.size(); i++) {
         selectedNotes.insert(i);
     }
     repaintNotes();
@@ -656,7 +656,7 @@ void PatternEditor::select(const juce::MouseEvent &event, PatternEditor::Selecti
     }
 
     auto &notes = processor.getPattern().getNotes();
-    for(int i = 0; i < notes.size(); i++) {
+    for(size_t i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
         auto noteRect = getRectangleForNote(note);
         if (selection.intersects(noteRect)) {
@@ -667,6 +667,8 @@ void PatternEditor::select(const juce::MouseEvent &event, PatternEditor::Selecti
 
 
 void PatternEditor::audioUpdate(uint32_t type) {
+    juce::ignoreUnused(type);
+
     auto position = processor.getLastPosition();
     if (position > 0) {
         if (processor.getLoopReset() > 0.0) {
@@ -686,7 +688,7 @@ void PatternEditor::repaintNotes() {
     bool willRepaint = false;
     auto notesRect = juce::Rectangle<int>::leftTopRightBottom(INT32_MAX, INT32_MAX, 0, 0);
     auto &notes = processor.getPattern().getNotes();
-    for(int i = 0; i < notes.size(); i++) {
+    for(size_t i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
         auto noteRect = getRectangleForNote(note);
         notesRect.setLeft(juce::jmin(notesRect.getX(), noteRect.getX()));
@@ -705,9 +707,7 @@ PatternEditorView* PatternEditor::getView() {
     return view;
 }
 
-
 juce::Rectangle<int> PatternEditor::getRectangleForNote(ArpNote &note) {
-    ArpPattern &pattern = processor.getPattern();
     auto pixelsPerNote = state.pixelsPerNote;
 
     return juce::Rectangle<int>(

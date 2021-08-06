@@ -66,5 +66,5 @@ private:
     void handleUpdateCheck();
     void updateUpdateButton();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainEditor);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainEditor)
 };

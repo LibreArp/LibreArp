@@ -23,7 +23,7 @@ const juce::Identifier ArpPattern::TREEID_TIMEBASE = juce::Identifier("timebase"
 const juce::Identifier ArpPattern::TREEID_LOOP_LENGTH = juce::Identifier("loopLength"); // NOLINT
 const juce::Identifier ArpPattern::TREEID_NOTES = juce::Identifier("notes"); // NOLINT
 
-ArpPattern::ArpPattern(int timebase) : timebase(timebase), loopLength(timebase) {}
+ArpPattern::ArpPattern(int timebase) : loopLength(timebase), timebase(timebase) {}
 
 ArpPattern::ArpPattern(ArpPattern &pattern) {
     std::scoped_lock lock(pattern.mutex);

@@ -125,13 +125,12 @@ const juce::String LibreArp::getProgramName(int index) {
 }
 
 void LibreArp::changeProgramName(int index, const juce::String &newName) {
-    juce::ignoreUnused(index);
+    juce::ignoreUnused(index, newName);
 }
 
 //==============================================================================
 void LibreArp::prepareToPlay(double sampleRate, int samplesPerBlock) {
-    juce::ignoreUnused(samplesPerBlock);
-    juce::ignoreUnused(sampleRate);
+    juce::ignoreUnused(samplesPerBlock, sampleRate);
 }
 
 void LibreArp::releaseResources() {
@@ -156,6 +155,26 @@ void LibreArp::processBlock(juce::AudioBuffer<float> &audio, juce::MidiBuffer &m
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         audio.clear(i, 0, numSamples);
 
+    processMidi(numSamples, midi);
+}
+
+void LibreArp::processBlock(juce::AudioBuffer<double> &audio, juce::MidiBuffer &midi) {
+    std::scoped_lock lock(mutex);
+    juce::ScopedNoDenormals noDenormals;
+
+    auto totalNumInputChannels = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    auto numSamples = audio.getNumSamples();
+
+    // Clear output channels
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        audio.clear(i, 0, numSamples);
+
+    processMidi(numSamples, midi);
+}
+
+void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
     // Build events if scheduled
     if (buildScheduled) {
         this->stopAll();

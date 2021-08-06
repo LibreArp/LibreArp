@@ -25,12 +25,12 @@ static const int Y_SCROLL_RATE = 250;
 PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
         : processor(p),
           state(e),
-          beatBar(p, state, this),
-          editor(p, state, this),
           presetChooser(
                   "Pattern preset",
                   processor.getGlobals().getPatternPresetsDir(),
-                  "*.lapreset")
+                  "*.lapreset"),
+          editor(p, state, this),
+          beatBar(p, state, this)
 {
 
     loadButton.setButtonText("Load pattern...");

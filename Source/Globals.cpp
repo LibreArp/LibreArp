@@ -29,8 +29,8 @@ Globals::Globals() :
         changed(false),
         askedForUpdateCheckConsent(false),
         checkForUpdatesEnabled(BuildConfig::DEFAULT_CHECK_FOR_UPDATES_ENABLED),
-        minSecsBeforeUpdateCheck(BuildConfig::DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK),
         foundUpdateOnLastCheck(false),
+        minSecsBeforeUpdateCheck(BuildConfig::DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK),
         lastUpdateCheckTime(0L)
 {
 #if JUCE_OSX
