@@ -27,7 +27,6 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
         : AudioProcessorEditor(&p),
           processor(p),
           state(e),
-          resizer(this, &boundsConstrainer),
           tabs(juce::TabbedButtonBar::Orientation::TabsAtTop),
           patternEditor(p, e),
           behaviourSettingsEditor(p),
@@ -37,9 +36,7 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
     juce::LookAndFeel::setDefaultLookAndFeel(&LArpLookAndFeel::getInstance());
 
     setSize(state.width, state.height);
-    setResizable(true, true);
-
-    boundsConstrainer.setMinimumSize(200, 200);
+    setResizable(true, false);
 
     placeholderLabel.setText("Unimplemented component", juce::NotificationType::dontSendNotification);
     placeholderLabel.setJustificationType(juce::Justification::centred);
@@ -63,7 +60,6 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
     updateButton.setJustificationType(juce::Justification::centredRight);
 
     addAndMakeVisible(tabs);
-//    addAndMakeVisible(resizer, 9999);
     addChildComponent(updateButton, 9999);
 }
 
@@ -93,7 +89,6 @@ void MainEditor::resized() {
     state.height = getHeight();
 
     tabs.setBounds(getLocalBounds().reduced(8));
-    resizer.setBounds(getWidth() - RESIZER_SIZE, getHeight() - RESIZER_SIZE, RESIZER_SIZE, RESIZER_SIZE);
 
     updateUpdateButton();
     auto updateButtonArea = getLocalBounds().reduced(8);

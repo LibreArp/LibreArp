@@ -51,8 +51,6 @@ private:
 
     juce::TooltipWindow tooltipWindow;
 
-    juce::ResizableCornerComponent resizer;
-    juce::ComponentBoundsConstrainer boundsConstrainer;
     juce::TabbedComponent tabs;
 
     juce::Label placeholderLabel;
