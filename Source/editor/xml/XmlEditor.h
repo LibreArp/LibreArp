@@ -17,23 +17,24 @@
 
 #pragma once
 
+#include <juce_gui_basics/juce_gui_basics.h>
+
 #include "../../LibreArp.h"
-#include "JuceHeader.h"
 #include "../../AudioUpdatable.h"
 
-class XmlEditor : public Component, public AudioUpdatable {
+class XmlEditor : public juce::Component, public AudioUpdatable {
 public:
 
     explicit XmlEditor(LibreArp &p);
 
     void resized() override;
 
-    void audioUpdate(uint32 type) override;
+    void audioUpdate(uint32_t type) override;
 
 private:
     LibreArp &processor;
 
-    TextEditor xmlEditor;
+    juce::TextEditor xmlEditor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor);
 };

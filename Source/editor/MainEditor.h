@@ -17,7 +17,8 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_gui_basics/juce_gui_basics.h>
+
 #include "../LibreArp.h"
 #include "xml/XmlEditor.h"
 #include "pattern/PatternEditor.h"
@@ -31,7 +32,7 @@
 /**
  * Main LibreArp editor component.
  */
-class MainEditor : public AudioProcessorEditor, public AudioUpdatable {
+class MainEditor : public juce::AudioProcessorEditor, public AudioUpdatable {
 public:
 
     explicit MainEditor(LibreArp &, EditorState &);
@@ -39,22 +40,22 @@ public:
     ~MainEditor() override;
 
 
-    void paint(Graphics &) override;
+    void paint(juce::Graphics &) override;
     void resized() override;
-    void audioUpdate(uint32 type) override;
+    void audioUpdate(uint32_t type) override;
     void visibilityChanged() override;
 
 private:
     LibreArp &processor;
     EditorState &state;
 
-    TooltipWindow tooltipWindow;
+    juce::TooltipWindow tooltipWindow;
 
-    ResizableCornerComponent resizer;
-    ComponentBoundsConstrainer boundsConstrainer;
-    TabbedComponent tabs;
+    juce::ResizableCornerComponent resizer;
+    juce::ComponentBoundsConstrainer boundsConstrainer;
+    juce::TabbedComponent tabs;
 
-    Label placeholderLabel;
+    juce::Label placeholderLabel;
 
     PatternEditorView patternEditor;
     BehaviourSettingsEditor behaviourSettingsEditor;
@@ -62,7 +63,7 @@ private:
     XmlEditor xmlEditor;
     AboutBox aboutBox;
 
-    HyperlinkButton updateButton;
+    juce::HyperlinkButton updateButton;
 
     void handleUpdateCheck();
     void updateUpdateButton();

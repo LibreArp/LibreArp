@@ -17,8 +17,6 @@
 
 #include "XmlEditor.h"
 
-const Colour RED = Colour(255, 0, 0);
-
 XmlEditor::XmlEditor(LibreArp &p) : processor(p) {
     xmlEditor.setMultiLine(true, false);
     xmlEditor.setReturnKeyStartsNewLine(true);
@@ -32,7 +30,7 @@ void XmlEditor::resized() {
     xmlEditor.setBounds(getLocalBounds());
 }
 
-void XmlEditor::audioUpdate(uint32 type) {
+void XmlEditor::audioUpdate(uint32_t type) {
     if (type == AudioUpdatable::PATTERN_UPDATE) {
         xmlEditor.setText(processor.getStateXml(), false);
     }

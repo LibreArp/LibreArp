@@ -17,9 +17,9 @@
 
 #include "ArpNote.h"
 
-const Identifier ArpNote::TREEID_NOTE = Identifier("note"); // NOLINT
-const Identifier ArpNote::TREEID_START_POINT = Identifier("start"); // NOLINT
-const Identifier ArpNote::TREEID_END_POINT = Identifier("end"); // NOLINT
+const juce::Identifier ArpNote::TREEID_NOTE = juce::Identifier("note"); // NOLINT
+const juce::Identifier ArpNote::TREEID_START_POINT = juce::Identifier("start"); // NOLINT
+const juce::Identifier ArpNote::TREEID_END_POINT = juce::Identifier("end"); // NOLINT
 
 
 ArpNote::ArpNote(NoteData data) {
@@ -29,33 +29,33 @@ ArpNote::ArpNote(NoteData data) {
 }
 
 
-ValueTree ArpNote::toValueTree() {
-    ValueTree result = ValueTree(TREEID_NOTE);
+juce::ValueTree ArpNote::toValueTree() {
+    juce::ValueTree result = juce::ValueTree(TREEID_NOTE);
     result.appendChild(this->data.toValueTree(), nullptr);
-    result.setProperty(TREEID_START_POINT, this->startPoint, nullptr);
-    result.setProperty(TREEID_END_POINT, this->endPoint, nullptr);
+    result.setProperty(TREEID_START_POINT, juce::int64(this->startPoint), nullptr);
+    result.setProperty(TREEID_END_POINT, juce::int64(this->endPoint), nullptr);
     return result;
 }
 
 
-ArpNote ArpNote::fromValueTree(ValueTree &tree) {
+ArpNote ArpNote::fromValueTree(juce::ValueTree &tree) {
     if (!tree.isValid() || !tree.hasType(TREEID_NOTE)) {
         throw std::invalid_argument("Input tree must be valid and of the correct type!");
     }
 
     ArpNote result = ArpNote();
 
-    ValueTree dataTree = tree.getChildWithName(NoteData::TREEID_NOTE_DATA);
+    juce::ValueTree dataTree = tree.getChildWithName(NoteData::TREEID_NOTE_DATA);
     if (dataTree.isValid()) {
         result.data = NoteData::fromValueTree(dataTree);
     }
 
     if (tree.hasProperty(TREEID_START_POINT)) {
-        result.startPoint = tree.getProperty(TREEID_START_POINT);
+        result.startPoint = juce::int64(tree.getProperty(TREEID_START_POINT));
     }
 
     if (tree.hasProperty(TREEID_END_POINT)) {
-        result.endPoint = tree.getProperty(TREEID_END_POINT);
+        result.endPoint = juce::int64(tree.getProperty(TREEID_END_POINT));
     }
 
     return result;

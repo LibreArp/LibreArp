@@ -17,10 +17,10 @@
 
 #include "NoteData.h"
 
-const Identifier NoteData::TREEID_NOTE_DATA = Identifier("noteData"); // NOLINT
-const Identifier NoteData::TREEID_NOTE_NUMBER = Identifier("noteNumber"); // NOLINT
-const Identifier NoteData::TREEID_VELOCITY = Identifier("velocity"); // NOLINT
-const Identifier NoteData::TREEID_PAN = Identifier("pan"); // NOLINT
+const juce::Identifier NoteData::TREEID_NOTE_DATA = "noteData"; // NOLINT
+const juce::Identifier NoteData::TREEID_NOTE_NUMBER = "noteNumber"; // NOLINT
+const juce::Identifier NoteData::TREEID_VELOCITY = "velocity"; // NOLINT
+const juce::Identifier NoteData::TREEID_PAN = "pan"; // NOLINT
 
 NoteData::NoteData() {
     noteNumber = 0;
@@ -29,8 +29,8 @@ NoteData::NoteData() {
 }
 
 
-ValueTree NoteData::toValueTree() {
-    ValueTree result = ValueTree(TREEID_NOTE_DATA);
+juce::ValueTree NoteData::toValueTree() {
+    juce::ValueTree result = juce::ValueTree(TREEID_NOTE_DATA);
     result.setProperty(TREEID_NOTE_NUMBER, this->noteNumber, nullptr);
     result.setProperty(TREEID_VELOCITY, this->velocity, nullptr);
     result.setProperty(TREEID_PAN, this->pan, nullptr);
@@ -38,7 +38,7 @@ ValueTree NoteData::toValueTree() {
 }
 
 
-NoteData NoteData::fromValueTree(ValueTree &tree) {
+NoteData NoteData::fromValueTree(juce::ValueTree &tree) {
     if (!tree.isValid() || !tree.hasType(TREEID_NOTE_DATA)) {
         throw std::invalid_argument("Input tree must be valid and of the correct type!");
     }

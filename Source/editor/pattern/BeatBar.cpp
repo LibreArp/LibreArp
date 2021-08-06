@@ -18,14 +18,14 @@
 #include "BeatBar.h"
 #include "PatternEditorView.h"
 
-const Colour BACKGROUND_COLOUR = Colour(42, 40, 34);
-const Colour BOTTOM_LINE_COLOUR = Colour(0, 0, 0);
-const Colour BEAT_LINE_COLOUR = Colour(107, 104, 94);
-const Colour BEAT_NUMBER_COLOUR = Colour(107, 104, 94);
-const Colour LOOP_LINE_COLOUR = Colour(155, 36, 36);
-const Colour LOOP_TEXT_COLOUR = Colour((uint8) 155, 36, 36);
+const juce::Colour BACKGROUND_COLOUR = juce::Colour(42, 40, 34);
+const juce::Colour BOTTOM_LINE_COLOUR = juce::Colour(0, 0, 0);
+const juce::Colour BEAT_LINE_COLOUR = juce::Colour(107, 104, 94);
+const juce::Colour BEAT_NUMBER_COLOUR = juce::Colour(107, 104, 94);
+const juce::Colour LOOP_LINE_COLOUR = juce::Colour(155, 36, 36);
+const juce::Colour LOOP_TEXT_COLOUR = juce::Colour((uint8_t) 155, 36, 36);
 
-const String LOOP_TEXT = "loop"; // NOLINT
+const juce::String LOOP_TEXT = "loop"; // NOLINT
 
 const int TEXT_OFFSET = 6;
 
@@ -35,7 +35,7 @@ BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec)
     setSize(1, 1);
 }
 
-void BeatBar::paint(Graphics &g) {
+void BeatBar::paint(juce::Graphics &g) {
     auto &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
 
@@ -52,10 +52,10 @@ void BeatBar::paint(Graphics &g) {
     int n = 1 + state.offsetX / pixelsPerBeat;
     for (float i = (1 - state.offsetX) % pixelsPerBeat; i < getWidth(); i += pixelsPerBeat, n++) {
         g.setColour(BEAT_LINE_COLOUR);
-        g.fillRect(roundToInt(i), 0, 4, getHeight());
+        g.fillRect(juce::roundToInt(i), 0, 4, getHeight());
 
         g.setColour((i == loopLine) ? LOOP_TEXT_COLOUR : BEAT_NUMBER_COLOUR);
-        g.drawText(String(n), static_cast<int>(i) + TEXT_OFFSET, 0, 32, getHeight(), Justification::centredLeft);
+        g.drawText(juce::String(n), static_cast<int>(i) + TEXT_OFFSET, 0, 32, getHeight(), juce::Justification::centredLeft);
     }
 
     // Draw loop line
@@ -66,10 +66,10 @@ void BeatBar::paint(Graphics &g) {
     g.setColour(LOOP_TEXT_COLOUR);
     auto loopTextWidth = g.getCurrentFont().getStringWidth(LOOP_TEXT);
     auto loopLineWithOffset = loopLine - loopTextWidth - TEXT_OFFSET;
-    g.drawText(LOOP_TEXT, loopLineWithOffset, 0, loopTextWidth, getHeight(), Justification::centredRight);
+    g.drawText(LOOP_TEXT, loopLineWithOffset, 0, loopTextWidth, getHeight(), juce::Justification::centredRight);
 }
 
-void BeatBar::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) {
+void BeatBar::mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) {
     if (event.mods.isShiftDown()) {
         view->zoomPattern(0, wheel.deltaY);
     } else {
@@ -77,7 +77,7 @@ void BeatBar::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &w
     }
 }
 
-void BeatBar::mouseDown(const MouseEvent& event) {
+void BeatBar::mouseDown(const juce::MouseEvent& event) {
     if (!event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && event.mods.isMiddleButtonDown()) {
         view->resetPatternOffset();
         return;

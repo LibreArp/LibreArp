@@ -17,21 +17,22 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_data_structures/juce_data_structures.h>
 
 
 class EditorState {
 public:
 
-    static const Identifier TREEID_EDITOR_STATE;
-    static const Identifier TREEID_WIDTH;
-    static const Identifier TREEID_HEIGHT;
-    static const Identifier TREEID_DIVISOR;
-    static const Identifier TREEID_LAST_NOTE_LENGTH;
-    static const Identifier TREEID_PIXELS_PER_BEAT;
-    static const Identifier TREEID_PIXELS_PER_NOTE;
-    static const Identifier TREEID_OFFSET_X;
-    static const Identifier TREEID_OFFSET_Y;
+    static const juce::Identifier TREEID_EDITOR_STATE;
+    static const juce::Identifier TREEID_WIDTH;
+    static const juce::Identifier TREEID_HEIGHT;
+    static const juce::Identifier TREEID_DIVISOR;
+    static const juce::Identifier TREEID_LAST_NOTE_LENGTH;
+    static const juce::Identifier TREEID_PIXELS_PER_BEAT;
+    static const juce::Identifier TREEID_PIXELS_PER_NOTE;
+    static const juce::Identifier TREEID_OFFSET_X;
+    static const juce::Identifier TREEID_OFFSET_Y;
 
     // Main
     int width = 640;
@@ -39,14 +40,14 @@ public:
 
     // Pattern editor
     int divisor = 4;
-    int64 lastNoteLength = -1;
+    int64_t lastNoteLength = -1;
     int pixelsPerBeat = 100;
     int pixelsPerNote = 12;
     int offsetX = 0;
     int offsetY = 0;
 
-    [[nodiscard]] ValueTree toValueTree() const;
-    static EditorState fromValueTree(ValueTree &tree);
+    [[nodiscard]] juce::ValueTree toValueTree() const;
+    static EditorState fromValueTree(juce::ValueTree &tree);
 
 };
 

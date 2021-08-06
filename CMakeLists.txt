@@ -1,0 +1,95 @@
+#
+# This file is part of LibreArp
+#
+# LibreArp is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# LibreArp is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see https://librearp.gitlab.io/license/.
+#
+
+cmake_minimum_required(VERSION 3.16)
+project(LibreArp VERSION 2.0)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
+
+add_subdirectory(Vendor/juce)
+
+juce_add_binary_data(LibreArpBinaries
+        HEADER_NAME LibreArpBinaryData.h
+        NAMESPACE LibreArpBin
+        SOURCES Fonts/overpass-regular.otf)
+
+juce_add_plugin(LibreArp
+        COMPANY_NAME "The LibreArp contributors"
+        IS_SYNTH TRUE
+        NEEDS_MIDI_INPUT TRUE
+        NEEDS_MIDI_OUTPUT TRUE
+        IS_MIDI_EFFECT TRUE
+        VST_NUM_MIDI_INS 1
+        VST_NUM_MIDI_OUTS 1
+        VST3_CATEGORIES "Fx Instrument Tools"
+        AU_MAIN_TYPE "kAudioUnitType_MIDIProcessor"
+        EDITOR_WANTS_KEYBOARD_FOCUS TRUE
+        COPY_PLUGIN_AFTER_BUILD FALSE
+        PLUGIN_MANUFACTURER_CODE Larx
+        PLUGIN_CODE Larx
+        FORMATS AU VST3 Standalone
+        PRODUCT_NAME "LibreArp")
+
+target_sources(LibreArp
+        PRIVATE
+
+        Source/editor/about/AboutBox.cpp Source/editor/about/AboutBox.h Source/editor/about/AboutBoxConfig.h
+
+        Source/editor/behaviour/BehaviourSettingsEditor.cpp Source/editor/behaviour/BehaviourSettingsEditor.h
+
+        Source/editor/pattern/BeatBar.cpp Source/editor/pattern/BeatBar.h
+        Source/editor/pattern/PatternEditor.cpp Source/editor/pattern/PatternEditor.h
+        Source/editor/pattern/PatternEditorView.cpp Source/editor/pattern/PatternEditorView.h
+
+        Source/editor/settings/SettingsEditor.cpp Source/editor/settings/SettingsEditor.h
+
+        Source/editor/xml/XmlEditor.cpp Source/editor/xml/XmlEditor.h
+
+        Source/editor/EditorState.cpp Source/editor/EditorState.h
+        Source/editor/LArpLookAndFeel.cpp Source/editor/LArpLookAndFeel.h
+        Source/editor/MainEditor.cpp Source/editor/MainEditor.h
+
+        Source/ArpBuiltEvents.cpp Source/ArpBuiltEvents.h
+        Source/ArpNote.cpp Source/ArpNote.h
+        Source/ArpPattern.cpp Source/ArpPattern.h
+        Source/AudioUpdatable.h
+        Source/BuildConfig.cpp Source/BuildConfig.h
+        Source/Globals.cpp Source/Globals.h
+        Source/LibreArp.cpp Source/LibreArp.h
+        Source/NoteData.cpp Source/NoteData.h
+        Source/Updater.cpp Source/Updater.h
+        )
+
+target_compile_definitions(LibreArp
+        PUBLIC
+        JUCE_WEB_BROWSER=0
+        JUCE_USE_CURL=0
+        JUCE_VST3_CAN_REPLACE_VST2=0
+        JUCE_DISPLAY_SPLASH_SCREEN=0 # we are GPL so we are allowed
+        )
+
+target_link_libraries(LibreArp
+        PRIVATE
+        LibreArpBinaries
+        juce::juce_audio_utils
+        juce::juce_audio_plugin_client
+        PUBLIC
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_lto_flags
+        juce::juce_recommended_warning_flags)
+

@@ -18,7 +18,8 @@
 #pragma once
 
 #include <set>
-#include "JuceHeader.h"
+#include <juce_gui_basics/juce_gui_basics.h>
+
 #include "../../LibreArp.h"
 #include "../../AudioUpdatable.h"
 
@@ -27,34 +28,34 @@ class PatternEditorView;
 /**
  * The pattern editor component class.
  */
-class PatternEditor : public Component, public AudioUpdatable {
+class PatternEditor : public juce::Component, public AudioUpdatable {
 
     /**
      * The data class of a dragging action.
      */
     class DragAction {
     public:
-        static const uint8 TYPE_MASK = 0xF0;
+        static const uint8_t TYPE_MASK = 0xF0;
 
-        static const uint8 TYPE_NONE = 0x00;
+        static const uint8_t TYPE_NONE = 0x00;
 
-        static const uint8 TYPE_LOOP = 0x10;
-        static const uint8 TYPE_LOOP_RESIZE = 0x10;
+        static const uint8_t TYPE_LOOP = 0x10;
+        static const uint8_t TYPE_LOOP_RESIZE = 0x10;
 
-        static const uint8 TYPE_NOTE = 0x20;
-        static const uint8 TYPE_NOTE_MOVE = 0x20;
-        static const uint8 TYPE_NOTE_START_RESIZE = 0x21;
-        static const uint8 TYPE_NOTE_END_RESIZE = 0x22;
+        static const uint8_t TYPE_NOTE = 0x20;
+        static const uint8_t TYPE_NOTE_MOVE = 0x20;
+        static const uint8_t TYPE_NOTE_START_RESIZE = 0x21;
+        static const uint8_t TYPE_NOTE_END_RESIZE = 0x22;
 
-        static const uint8 TYPE_SELECTION = 0x30;
-        static const uint8 TYPE_SELECTION_DRAG = 0x30;
+        static const uint8_t TYPE_SELECTION = 0x30;
+        static const uint8_t TYPE_SELECTION_DRAG = 0x30;
 
 
 
         /**
          * The type of the dragging action.
          */
-        uint8 type;
+        uint8_t type;
 
 
 
@@ -63,7 +64,7 @@ class PatternEditor : public Component, public AudioUpdatable {
          *
          * @param type the type of the drag action
          */
-        explicit DragAction(uint8 type = TYPE_NONE);
+        explicit DragAction(uint8_t type = TYPE_NONE);
     };
 
     /**
@@ -80,17 +81,17 @@ class PatternEditor : public Component, public AudioUpdatable {
             /**
              * Index of the note in the pattern.
              */
-            uint64 noteIndex;
+            uint64_t noteIndex;
 
             /**
              * The distance between the end of the note and the cursor.
              */
-            int64 endOffset;
+            int64_t endOffset;
 
             /**
              * The distance between the start of the note and the cursor.
              */
-            int64 startOffset;
+            int64_t startOffset;
 
             /**
              * The distance between the number of the note and the cursor.
@@ -104,7 +105,7 @@ class PatternEditor : public Component, public AudioUpdatable {
              *
              * @param i the index of the note
              */
-            explicit NoteOffset(uint64 i);
+            explicit NoteOffset(uint64_t i);
         };
 
 
@@ -121,10 +122,10 @@ class PatternEditor : public Component, public AudioUpdatable {
          */
         explicit NoteDragAction(
                 PatternEditor *editor,
-                uint8 type,
-                uint64 index,
+                uint8_t type,
+                uint64_t index,
                 std::vector<ArpNote> &allNotes,
-                const MouseEvent &event,
+                const juce::MouseEvent &event,
                 bool offset = true);
 
         /**
@@ -140,11 +141,11 @@ class PatternEditor : public Component, public AudioUpdatable {
          */
         explicit NoteDragAction(
                 PatternEditor *editor,
-                uint8 type,
-                uint64 initiatorIndex,
-                std::set<uint64> &indices,
+                uint8_t type,
+                uint64_t initiatorIndex,
+                std::set<uint64_t> &indices,
                 std::vector<ArpNote> &allNotes,
-                const MouseEvent &event,
+                const juce::MouseEvent &event,
                 bool offset = true);
 
         /**
@@ -155,7 +156,7 @@ class PatternEditor : public Component, public AudioUpdatable {
         /**
          * The index of the initiator note.
          */
-        uint64 initiatorIndex;
+        uint64_t initiatorIndex;
 
     private:
 
@@ -169,7 +170,7 @@ class PatternEditor : public Component, public AudioUpdatable {
          *
          * @return the calculated offset
          */
-        static NoteOffset createOffset(PatternEditor *editor, std::vector<ArpNote> &allNotes, uint64 noteIndex, const MouseEvent &event);
+        static NoteOffset createOffset(PatternEditor *editor, std::vector<ArpNote> &allNotes, uint64_t noteIndex, const juce::MouseEvent &event);
     };
 
     /**
@@ -208,17 +209,17 @@ public:
      */
     explicit PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec);
 
-    void paint(Graphics &g) override;
+    void paint(juce::Graphics &g) override;
 
-    void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) override;
-    void mouseMove(const MouseEvent &event) override;
-    void mouseDrag(const MouseEvent &event) override;
-    void mouseDown(const MouseEvent &event) override;
-    void mouseUp(const MouseEvent &event) override;
+    void mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
+    void mouseMove(const juce::MouseEvent &event) override;
+    void mouseDrag(const juce::MouseEvent &event) override;
+    void mouseDown(const juce::MouseEvent &event) override;
+    void mouseUp(const juce::MouseEvent &event) override;
 
-    bool keyPressed(const KeyPress &key) override;
+    bool keyPressed(const juce::KeyPress &key) override;
 
-    void audioUpdate(uint32 type) override;
+    void audioUpdate(uint32_t type) override;
 
     /**
      * Gets the pointer to the parent editor view.
@@ -249,7 +250,7 @@ private:
     /**
      * The pulse that the mouse cursor is hovering.
      */
-    int64 cursorPulse;
+    int64_t cursorPulse;
 
     /**
      * The note number that the mouse cursor is hovering.
@@ -268,12 +269,12 @@ private:
     /**
      * The selection rectangle.
      */
-    Rectangle<int> selection;
+    juce::Rectangle<int> selection;
 
     /**
      * The set of currently selected notes.
      */
-    std::set<uint64> selectedNotes;
+    std::set<uint64_t> selectedNotes;
 
 
     /**
@@ -297,14 +298,14 @@ private:
      *
      * @param event the mouse event
      */
-    void mouseAnyMove(const MouseEvent &event);
+    void mouseAnyMove(const juce::MouseEvent &event);
 
     /**
      * Mouse loop length resize.
      *
      * @param event the mouse event
      */
-    void loopResize(const MouseEvent &event);
+    void loopResize(const juce::MouseEvent &event);
 
     /**
      * Mouse note resize from left.
@@ -312,7 +313,7 @@ private:
      * @param event the mouse event
      * @param dragAction the drag action
      */
-    void noteStartResize(const MouseEvent &event, NoteDragAction *dragAction);
+    void noteStartResize(const juce::MouseEvent &event, NoteDragAction *dragAction);
 
     /**
      * Mouse note resize from right.
@@ -320,7 +321,7 @@ private:
      * @param event the mouse event
      * @param dragAction the drag action
      */
-    void noteEndResize(const MouseEvent &event, NoteDragAction *dragAction);
+    void noteEndResize(const juce::MouseEvent &event, NoteDragAction *dragAction);
 
     /**
      * Mouse note position move.
@@ -328,7 +329,7 @@ private:
      * @param event the mouse event
      * @param dragAction the drag action
      */
-    void noteMove(const MouseEvent &event, NoteDragAction *dragAction);
+    void noteMove(const juce::MouseEvent &event, NoteDragAction *dragAction);
 
     /**
      * Mouse note duplication.
@@ -342,14 +343,14 @@ private:
      *
      * @param event the mouse event
      */
-    void noteCreate(const MouseEvent &event);
+    void noteCreate(const juce::MouseEvent &event);
 
     /**
      * Mouse note deletion.
      *
      * @param event the mouse event
      */
-    void noteDelete(const MouseEvent &event);
+    void noteDelete(const juce::MouseEvent &event);
 
     /**
      * Mouse notes selection.
@@ -357,7 +358,7 @@ private:
      * @param event the mouse event
      * @param dragAction the drag action
      */
-    void select(const MouseEvent &event, SelectionDragAction *dragAction);
+    void select(const juce::MouseEvent &event, SelectionDragAction *dragAction);
 
 
 
@@ -394,13 +395,13 @@ private:
      * @param note the note
      * @return the rectangle in the canvas that the specified note is rendered in
      */
-    Rectangle<int> getRectangleForNote(ArpNote &note);
+    juce::Rectangle<int> getRectangleForNote(ArpNote &note);
 
     /**
      * Gets the active rectangle in the canvas of the loop that reacts to mouse events.
      * @return
      */
-    Rectangle<int> getRectangleForLoop();
+    juce::Rectangle<int> getRectangleForLoop();
 
 
 
@@ -412,7 +413,7 @@ private:
      *
      * @return the rounded pulse
      */
-    int64 snapPulse(int64 pulse, bool floor = false);
+    int64_t snapPulse(int64_t pulse, bool floor = false);
 
     /**
      * Converts a view-space X coordinate to a pulse position.
@@ -423,7 +424,7 @@ private:
      *
      * @return the pulse position
      */
-    int64 xToPulse(int x, bool snap = true, bool floor = false);
+    int64_t xToPulse(int x, bool snap = true, bool floor = false);
 
     /**
      * Converts a view-space Y coordinate to a note number.
@@ -433,12 +434,12 @@ private:
     /**
      * Converts a pulse position to a view-space X coordinate.
      */
-    int pulseToX(int64 pulse);
+    int pulseToX(int64_t pulse);
 
     /**
      * Converts a pulse position to absolute X coordinate (not offset by view offsets).
      */
-    int pulseToAbsX(int64 pulse);
+    int pulseToAbsX(int64_t pulse);
 
     /**
      * Converts a note number to a view-space Y coordinate.

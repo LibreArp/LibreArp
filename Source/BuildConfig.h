@@ -17,12 +17,12 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_core/juce_core.h>
 
 class BuildConfig {
 public:
 
     static const std::string UPDATE_CHECK_URL;
     static const bool DEFAULT_CHECK_FOR_UPDATES_ENABLED;
-    static const int64 DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK;
+    static const int64_t DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK;
 };

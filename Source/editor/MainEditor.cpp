@@ -28,48 +28,49 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
           processor(p),
           state(e),
           resizer(this, &boundsConstrainer),
-          tabs(TabbedButtonBar::Orientation::TabsAtTop),
+          tabs(juce::TabbedButtonBar::Orientation::TabsAtTop),
           patternEditor(p, e),
           behaviourSettingsEditor(p),
           settingsEditor(p),
           xmlEditor(p) {
 
-    LookAndFeel::setDefaultLookAndFeel(&LArpLookAndFeel::getInstance());
+    juce::LookAndFeel::setDefaultLookAndFeel(&LArpLookAndFeel::getInstance());
 
     setSize(state.width, state.height);
+    setResizable(true, true);
 
     boundsConstrainer.setMinimumSize(200, 200);
 
-    placeholderLabel.setText("Unimplemented component", NotificationType::dontSendNotification);
-    placeholderLabel.setJustificationType(Justification::centred);
-    placeholderLabel.setFont(Font(32.0f));
-    placeholderLabel.setColour(Label::textColourId, Colour(255, 0, 0));
+    placeholderLabel.setText("Unimplemented component", juce::NotificationType::dontSendNotification);
+    placeholderLabel.setJustificationType(juce::Justification::centred);
+    placeholderLabel.setFont(juce::Font(32.0f));
+    placeholderLabel.setColour(juce::Label::textColourId, juce::Colour(255, 0, 0));
 
     tabs.setOutline(0);
     tabs.addTab("Pattern Editor",
-            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &patternEditor, false);
+            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &patternEditor, false);
     tabs.addTab("Behaviour",
-            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &behaviourSettingsEditor, false);
+            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &behaviourSettingsEditor, false);
     tabs.addTab("Global settings",
-            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &settingsEditor, false);
+            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &settingsEditor, false);
 #if JUCE_DEBUG
     tabs.addTab("XML viewer",
-            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &xmlEditor, false);
+            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &xmlEditor, false);
 #endif
     tabs.addTab("About",
-            getLookAndFeel().findColour(ResizableWindow::backgroundColourId), &aboutBox, false);
+            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &aboutBox, false);
 
-    updateButton.setJustificationType(Justification::centredRight);
+    updateButton.setJustificationType(juce::Justification::centredRight);
 
     addAndMakeVisible(tabs);
-    addAndMakeVisible(resizer, 9999);
+//    addAndMakeVisible(resizer, 9999);
     addChildComponent(updateButton, 9999);
 }
 
 MainEditor::~MainEditor() = default;
 
 //==============================================================================
-void MainEditor::paint(Graphics &g) {
+void MainEditor::paint(juce::Graphics &g) {
     g.setColour(LArpLookAndFeel::MAIN_BACKGROUND_COLOUR);
     g.fillRect(getLocalBounds());
 }
@@ -101,7 +102,7 @@ void MainEditor::resized() {
             .removeFromRight(256));
 }
 
-void MainEditor::audioUpdate(uint32 type) {
+void MainEditor::audioUpdate(uint32_t type) {
     patternEditor.audioUpdate(type);
     xmlEditor.audioUpdate(type);
 }
@@ -112,7 +113,7 @@ void MainEditor::handleUpdateCheck() {
     if (globals.isCheckForUpdatesEnabled()) {
         auto minMsBeforeUpdateCheck = globals.getMinSecsBeforeUpdateCheck() * 1000L;
         auto lastUpdateCheckTime = globals.getLastUpdateCheckTime();
-        auto currentTime = Time::currentTimeMillis();
+        auto currentTime = juce::Time::currentTimeMillis();
 
         if ((currentTime - lastUpdateCheckTime) >= minMsBeforeUpdateCheck || globals.isFoundUpdateOnLastCheck()) {
             globals.setLastUpdateCheckTime(currentTime);
@@ -139,6 +140,6 @@ void MainEditor::updateUpdateButton() {
     std::stringstream infostr;
     infostr << "An update to " << info.name << " is available!";
     updateButton.setButtonText(infostr.str());
-    updateButton.setURL(URL(info.websiteUrl));
+    updateButton.setURL(juce::URL(info.websiteUrl));
     updateButton.setVisible(true);
 }

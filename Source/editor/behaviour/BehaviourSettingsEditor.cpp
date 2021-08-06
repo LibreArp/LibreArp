@@ -18,24 +18,24 @@
 #include "BehaviourSettingsEditor.h"
 
 BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
-    midiInChannelSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
-    midiInChannelSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    midiInChannelSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
+    midiInChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
     midiInChannelSlider.setRange(0, 16, 1);
     midiInChannelSlider.textFromValueFunction = [](auto value) {
-        return (value == 0) ? String("Any") : String(value);
+        return (value == 0) ? juce::String("Any") : juce::String(value);
     };
     midiInChannelSlider.onValueChange = [this] {
         processor.setInputMidiChannel(static_cast<int>(midiInChannelSlider.getValue()));
     };
-    midiInChannelLabel.setText("MIDI Input Channel (do not change while playing)", NotificationType::dontSendNotification);
+    midiInChannelLabel.setText("MIDI Input Channel (do not change while playing)", juce::NotificationType::dontSendNotification);
 
-    midiOutChannelSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
-    midiOutChannelSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    midiOutChannelSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
+    midiOutChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
     midiOutChannelSlider.setRange(1, 16, 1);
     midiOutChannelSlider.onValueChange = [this] {
         processor.setOutputMidiChannel(static_cast<int>(midiOutChannelSlider.getValue()));
     };
-    midiOutChannelLabel.setText("MIDI Output Channel", NotificationType::dontSendNotification);
+    midiOutChannelLabel.setText("MIDI Output Channel", juce::NotificationType::dontSendNotification);
 
     octavesToggle.setButtonText("Octave transposition");
     octavesToggle.setTooltip("Enables transposition by octaves when hitting notes that are out of bounds");
@@ -61,7 +61,7 @@ void BehaviourSettingsEditor::resized() {
     auto area = getLocalBounds().reduced(8);
 
     auto midiInChannelArea = area.removeFromTop(24);
-    midiInChannelSlider.setValue(processor.getInputMidiChannel(), NotificationType::dontSendNotification);
+    midiInChannelSlider.setValue(processor.getInputMidiChannel(), juce::NotificationType::dontSendNotification);
     midiInChannelSlider.updateText();
     midiInChannelSlider.setBounds(midiInChannelArea.removeFromLeft(96));
     midiInChannelLabel.setBounds(midiInChannelArea);
@@ -69,17 +69,17 @@ void BehaviourSettingsEditor::resized() {
     area.removeFromTop(4);
 
     auto midiOutChannelArea = area.removeFromTop(24);
-    midiOutChannelSlider.setValue(processor.getOutputMidiChannel(), NotificationType::dontSendNotification);
+    midiOutChannelSlider.setValue(processor.getOutputMidiChannel(), juce::NotificationType::dontSendNotification);
     midiOutChannelSlider.updateText();
     midiOutChannelSlider.setBounds(midiOutChannelArea.removeFromLeft(96));
     midiOutChannelLabel.setBounds(midiOutChannelArea);
 
     area.removeFromTop(8);
 
-    octavesToggle.setToggleState(processor.isTransposingOctaves(), NotificationType::dontSendNotification);
+    octavesToggle.setToggleState(processor.isTransposingOctaves(), juce::NotificationType::dontSendNotification);
     octavesToggle.setBounds(area.removeFromTop(24));
 
-    usingInputVelocityToggle.setToggleState(processor.isUsingInputVelocity(), NotificationType::dontSendNotification);
+    usingInputVelocityToggle.setToggleState(processor.isUsingInputVelocity(), juce::NotificationType::dontSendNotification);
     usingInputVelocityToggle.setBounds(area.removeFromTop(24));
 
 }

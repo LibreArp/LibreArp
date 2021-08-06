@@ -16,115 +16,115 @@
 //
 
 #include "LArpLookAndFeel.h"
-#include "BinaryData.h"
+#include <LibreArpBinaryData.h>
 
-const Colour LArpLookAndFeel::MAIN_BACKGROUND_COLOUR = Colour(42, 40, 34); // NOLINT
-const Colour LArpLookAndFeel::HIGHLIGHT_BACKGROUND_COLOUR = Colour(59, 56, 48); // NOLINT
-const Colour LArpLookAndFeel::MAIN_FOREGROUND_COLOUR = Colour(166, 164, 155); // NOLINT
-const Colour LArpLookAndFeel::HIGHLIGHT_FOREGROUND_COLOUR = Colour(171, 204, 41); // NOLINT
+const juce::Colour LArpLookAndFeel::MAIN_BACKGROUND_COLOUR = juce::Colour(42, 40, 34); // NOLINT
+const juce::Colour LArpLookAndFeel::HIGHLIGHT_BACKGROUND_COLOUR = juce::Colour(59, 56, 48); // NOLINT
+const juce::Colour LArpLookAndFeel::MAIN_FOREGROUND_COLOUR = juce::Colour(166, 164, 155); // NOLINT
+const juce::Colour LArpLookAndFeel::HIGHLIGHT_FOREGROUND_COLOUR = juce::Colour(171, 204, 41); // NOLINT
 
 const int MAIN_FONT_SIZE = 18;
 
 LArpLookAndFeel::LArpLookAndFeel() {
     mainTypeface =
-            Typeface::createSystemTypefaceFor(LArpBin::overpassregular_otf, LArpBin::overpassregular_otfSize);
+            juce::Typeface::createSystemTypefaceFor(LibreArpBin::overpassregular_otf, LibreArpBin::overpassregular_otfSize);
 
     setDefaultSansSerifTypeface(mainTypeface);
 
-    setColour(TooltipWindow::backgroundColourId, MAIN_BACKGROUND_COLOUR);
-    setColour(TooltipWindow::outlineColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(TooltipWindow::textColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TooltipWindow::backgroundColourId, MAIN_BACKGROUND_COLOUR);
+    setColour(juce::TooltipWindow::outlineColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TooltipWindow::textColourId, MAIN_FOREGROUND_COLOUR);
 
-    setColour(AlertWindow::outlineColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(AlertWindow::backgroundColourId, MAIN_BACKGROUND_COLOUR);
-    setColour(AlertWindow::textColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::AlertWindow::outlineColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::AlertWindow::backgroundColourId, MAIN_BACKGROUND_COLOUR);
+    setColour(juce::AlertWindow::textColourId, MAIN_FOREGROUND_COLOUR);
 
-    setColour(TextEditor::backgroundColourId, HIGHLIGHT_BACKGROUND_COLOUR);
-    setColour(TextEditor::textColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(TextEditor::highlightColourId, HIGHLIGHT_FOREGROUND_COLOUR);
-    setColour(TextEditor::highlightedTextColourId, Colour(255, 255, 255));
+    setColour(juce::TextEditor::backgroundColourId, HIGHLIGHT_BACKGROUND_COLOUR);
+    setColour(juce::TextEditor::textColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TextEditor::highlightColourId, HIGHLIGHT_FOREGROUND_COLOUR);
+    setColour(juce::TextEditor::highlightedTextColourId, juce::Colour(255, 255, 255));
 
-    setColour(ResizableWindow::backgroundColourId, HIGHLIGHT_BACKGROUND_COLOUR);
+    setColour(juce::ResizableWindow::backgroundColourId, HIGHLIGHT_BACKGROUND_COLOUR);
 
-    setColour(TabbedComponent::backgroundColourId, MAIN_BACKGROUND_COLOUR);
-    setColour(TabbedComponent::outlineColourId, HIGHLIGHT_BACKGROUND_COLOUR);
+    setColour(juce::TabbedComponent::backgroundColourId, MAIN_BACKGROUND_COLOUR);
+    setColour(juce::TabbedComponent::outlineColourId, HIGHLIGHT_BACKGROUND_COLOUR);
 
-    setColour(Label::textColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(ToggleButton::textColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::Label::textColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::ToggleButton::textColourId, MAIN_FOREGROUND_COLOUR);
 
-    setColour(TextButton::textColourOnId, MAIN_FOREGROUND_COLOUR);
-    setColour(TextButton::textColourOffId, MAIN_FOREGROUND_COLOUR);
-    setColour(TextButton::buttonColourId, MAIN_BACKGROUND_COLOUR);
-    setColour(ComboBox::outlineColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TextButton::textColourOnId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TextButton::textColourOffId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TextButton::buttonColourId, MAIN_BACKGROUND_COLOUR);
+    setColour(juce::ComboBox::outlineColourId, MAIN_FOREGROUND_COLOUR);
 
-    setColour(HyperlinkButton::textColourId, HIGHLIGHT_FOREGROUND_COLOUR);
+    setColour(juce::HyperlinkButton::textColourId, HIGHLIGHT_FOREGROUND_COLOUR);
 
-    setColour(Slider::textBoxTextColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(Slider::textBoxOutlineColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(Slider::textBoxBackgroundColourId, MAIN_BACKGROUND_COLOUR);
+    setColour(juce::Slider::textBoxTextColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::Slider::textBoxOutlineColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::Slider::textBoxBackgroundColourId, MAIN_BACKGROUND_COLOUR);
 
-    setColour(ScrollBar::thumbColourId, HIGHLIGHT_FOREGROUND_COLOUR);
-    setColour(ScrollBar::trackColourId, MAIN_BACKGROUND_COLOUR);
+    setColour(juce::ScrollBar::thumbColourId, HIGHLIGHT_FOREGROUND_COLOUR);
+    setColour(juce::ScrollBar::trackColourId, MAIN_BACKGROUND_COLOUR);
 }
 
 
 
 
 
-void LArpLookAndFeel::drawTabButton(TabBarButton &button, Graphics &g, bool isMouseOver, bool isMouseDown) {
-    const Rectangle<int> activeArea (button.getActiveArea());
+void LArpLookAndFeel::drawTabButton(juce::TabBarButton &button, juce::Graphics &g, bool isMouseOver, bool isMouseDown) {
+    const juce::Rectangle<int> activeArea (button.getActiveArea());
 
-    const TabbedButtonBar::Orientation o = button.getTabbedButtonBar().getOrientation();
+    const juce::TabbedButtonBar::Orientation o = button.getTabbedButtonBar().getOrientation();
 
-    const Colour bkg (button.getTabBackgroundColour());
+    const juce::Colour bkg (button.getTabBackgroundColour());
 
     if (button.getToggleState()) {
         g.setColour (bkg);
         g.fillRect (activeArea);
     }
 
-    Colour col = button.isEnabled() ?
+    juce::Colour col = button.isEnabled() ?
                  ((isMouseOver || isMouseDown) ?  MAIN_FOREGROUND_COLOUR.brighter() : MAIN_FOREGROUND_COLOUR) :
                  MAIN_FOREGROUND_COLOUR.withAlpha(0.3f);
 
-    const Rectangle<float> area (button.getTextArea().toFloat());
+    const juce::Rectangle<float> area (button.getTextArea().toFloat());
     float length = area.getWidth();
     float depth  = area.getHeight();
 
     if (button.getTabbedButtonBar().isVertical())
         std::swap (length, depth);
 
-    Font font (MAIN_FONT_SIZE);
+    juce::Font font (MAIN_FONT_SIZE);
     font.setUnderline (button.hasKeyboardFocus (false));
 
-    AttributedString s;
-    s.setJustification (Justification::centred);
+    juce::AttributedString s;
+    s.setJustification (juce::Justification::centred);
     s.append (button.getButtonText().trim(), font, col);
 
-    TextLayout textLayout;
+    juce::TextLayout textLayout;
     textLayout.createLayout (s, length);
 
 
-    AffineTransform t;
+    juce::AffineTransform t;
 
     switch (o) {
-        case TabbedButtonBar::TabsAtLeft:   t = t.rotated (MathConstants<float>::pi * -0.5f).translated (area.getX(), area.getBottom()); break;
-        case TabbedButtonBar::TabsAtRight:  t = t.rotated (MathConstants<float>::pi *  0.5f).translated (area.getRight(), area.getY()); break;
-        case TabbedButtonBar::TabsAtTop:
-        case TabbedButtonBar::TabsAtBottom: t = t.translated (area.getX(), area.getY()); break;
+        case juce::TabbedButtonBar::TabsAtLeft:   t = t.rotated (juce::MathConstants<float>::pi * -0.5f).translated (area.getX(), area.getBottom()); break;
+        case juce::TabbedButtonBar::TabsAtRight:  t = t.rotated (juce::MathConstants<float>::pi *  0.5f).translated (area.getRight(), area.getY()); break;
+        case juce::TabbedButtonBar::TabsAtTop:
+        case juce::TabbedButtonBar::TabsAtBottom: t = t.translated (area.getX(), area.getY()); break;
         default:                            jassertfalse; break;
     }
 
     g.addTransform (t);
 
-    textLayout.draw (g, Rectangle<float> (length, depth));
+    textLayout.draw (g, juce::Rectangle<float> (length, depth));
 }
 
 
 
-void LArpLookAndFeel::drawTabAreaBehindFrontButton(TabbedButtonBar &bar, Graphics &g, int w, int h) {}
+void LArpLookAndFeel::drawTabAreaBehindFrontButton(juce::TabbedButtonBar &bar, juce::Graphics &g, int w, int h) {}
 
-void LArpLookAndFeel::drawButtonBackground(Graphics &g, Button &button, const Colour &backgroundColour,
+void LArpLookAndFeel::drawButtonBackground(juce::Graphics &g, juce::Button &button, const juce::Colour &backgroundColour,
                                            bool isMouseOverButton, bool isButtonDown) {
     auto cornerSize = 2.0f;
     auto bounds = button.getLocalBounds().toFloat().expanded(0.5f, 0.5f);
@@ -152,7 +152,7 @@ void LArpLookAndFeel::drawButtonBackground(Graphics &g, Button &button, const Co
     }
 
     if (button.isConnectedOnLeft() || button.isConnectedOnRight()) {
-        Path path;
+        juce::Path path;
         path.addRoundedRectangle (bounds.getX(), bounds.getY(),
                                   bounds.getWidth(), bounds.getHeight(),
                                   cornerSize, cornerSize,
@@ -163,46 +163,46 @@ void LArpLookAndFeel::drawButtonBackground(Graphics &g, Button &button, const Co
 
         g.fillPath (path);
 
-        g.setColour (button.findColour (ComboBox::outlineColourId));
-        g.strokePath (path, PathStrokeType (1.0f));
+        g.setColour (button.findColour (juce::ComboBox::outlineColourId));
+        g.strokePath (path, juce::PathStrokeType (1.0f));
 
         if (button.isConnectedOnLeft()) {
-            g.fillRect(roundToInt(bounds.getX()), roundToInt(bounds.getY()), 1, roundToInt(bounds.getHeight()));
+            g.fillRect(juce::roundToInt(bounds.getX()), juce::roundToInt(bounds.getY()), 1, juce::roundToInt(bounds.getHeight()));
         }
     }
     else {
         g.fillRoundedRectangle (bounds, cornerSize);
 
-        g.setColour (button.findColour (ComboBox::outlineColourId));
+        g.setColour (button.findColour (juce::ComboBox::outlineColourId));
         g.drawRoundedRectangle (bounds, cornerSize, 1.0f);
     }
 }
 
-int LArpLookAndFeel::getTabButtonBestWidth(TabBarButton &button, int tabDepth) {
-    int width = Font (MAIN_FONT_SIZE + 4).getStringWidth (button.getButtonText().trim())
+int LArpLookAndFeel::getTabButtonBestWidth(juce::TabBarButton &button, int tabDepth) {
+    int width = juce::Font (MAIN_FONT_SIZE + 4).getStringWidth (button.getButtonText().trim())
                 + getTabButtonOverlap (MAIN_FONT_SIZE * 2) * 2;
 
     if (auto* extraComponent = button.getExtraComponent())
         width += button.getTabbedButtonBar().isVertical() ? extraComponent->getHeight()
                                                           : extraComponent->getWidth();
 
-    return jlimit (tabDepth * 2, tabDepth * 8, width);
+    return juce::jlimit (tabDepth * 2, tabDepth * 8, width);
 }
 
-void LArpLookAndFeel::drawScrollbar(Graphics &g, ScrollBar &bar, int x, int y, int width, int height,
+void LArpLookAndFeel::drawScrollbar(juce::Graphics &g, juce::ScrollBar &bar, int x, int y, int width, int height,
                                     bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool isMouseOver,
                                     bool isMouseDown) {
-    g.setColour(findColour(ScrollBar::trackColourId));
+    g.setColour(findColour(juce::ScrollBar::trackColourId));
     g.fillRect(bar.getLocalBounds());
 
-    Rectangle<int> thumbBounds;
+    juce::Rectangle<int> thumbBounds;
 
     if (isScrollbarVertical)
         thumbBounds = { x, thumbStartPosition, width, thumbSize };
     else
         thumbBounds = { thumbStartPosition, y, thumbSize, height };
 
-    auto c = bar.findColour (ScrollBar::ColourIds::thumbColourId);
+    auto c = bar.findColour (juce::ScrollBar::ColourIds::thumbColourId);
     g.setColour(isMouseOver ? c.brighter (0.25f) : c);
     g.fillRect(thumbBounds.reduced (1).toFloat());
 }

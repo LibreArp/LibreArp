@@ -17,13 +17,14 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_gui_basics/juce_gui_basics.h>
+
 #include "../../LibreArp.h"
 
 /**
  * A component for editing global settings of the plugin.
  */
-class SettingsEditor : public Component {
+class SettingsEditor : public juce::Component {
 public:
 
     /**
@@ -41,7 +42,7 @@ private:
 
     void updateSettingsValues();
 
-    ToggleButton updateCheckToggle;
+    juce::ToggleButton updateCheckToggle;
     LibreArp &processor;
 };
 

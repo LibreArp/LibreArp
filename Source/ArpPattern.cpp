@@ -18,10 +18,10 @@
 #include <map>
 #include "ArpPattern.h"
 
-const Identifier ArpPattern::TREEID_PATTERN = Identifier("pattern"); // NOLINT
-const Identifier ArpPattern::TREEID_TIMEBASE = Identifier("timebase"); // NOLINT
-const Identifier ArpPattern::TREEID_LOOP_LENGTH = Identifier("loopLength"); // NOLINT
-const Identifier ArpPattern::TREEID_NOTES = Identifier("notes"); // NOLINT
+const juce::Identifier ArpPattern::TREEID_PATTERN = juce::Identifier("pattern"); // NOLINT
+const juce::Identifier ArpPattern::TREEID_TIMEBASE = juce::Identifier("timebase"); // NOLINT
+const juce::Identifier ArpPattern::TREEID_LOOP_LENGTH = juce::Identifier("loopLength"); // NOLINT
+const juce::Identifier ArpPattern::TREEID_NOTES = juce::Identifier("notes"); // NOLINT
 
 ArpPattern::ArpPattern(int timebase) : timebase(timebase), loopLength(timebase) {}
 
@@ -48,7 +48,7 @@ std::vector<ArpNote> &ArpPattern::getNotes() {
 
 ArpBuiltEvents ArpPattern::buildEvents() {
     std::scoped_lock lock(mutex);
-    std::map<int64, ArpBuiltEvents::Event> eventMap;
+    std::map<int64_t, ArpBuiltEvents::Event> eventMap;
     ArpBuiltEvents result;
 
     result.timebase = this->timebase;
@@ -60,12 +60,12 @@ ArpBuiltEvents ArpPattern::buildEvents() {
         auto dataIndex = result.data.size();
         result.data.push_back(ArpBuiltEvents::EventNoteData::of(note.data, i));
 
-        int64 onTime = note.startPoint % loopLength;
+        int64_t onTime = note.startPoint % loopLength;
         ArpBuiltEvents::Event &onEvent = eventMap[onTime];
         onEvent.time = onTime;
         onEvent.ons.insert(dataIndex);
 
-        int64 offTime = note.endPoint % loopLength;
+        int64_t offTime = note.endPoint % loopLength;
         ArpBuiltEvents::Event &offEvent = eventMap[offTime];
         offEvent.time = offTime;
         offEvent.offs.insert(dataIndex);
@@ -82,14 +82,14 @@ ArpBuiltEvents ArpPattern::buildEvents() {
     return result;
 }
 
-ValueTree ArpPattern::toValueTree() {
+juce::ValueTree ArpPattern::toValueTree() {
     std::scoped_lock lock(mutex);
-    ValueTree result = ValueTree(TREEID_PATTERN);
+    juce::ValueTree result = juce::ValueTree(TREEID_PATTERN);
 
     result.setProperty(TREEID_TIMEBASE, this->timebase, nullptr);
-    result.setProperty(TREEID_LOOP_LENGTH, this->loopLength, nullptr);
+    result.setProperty(TREEID_LOOP_LENGTH, juce::int64(this->loopLength), nullptr);
 
-    ValueTree noteTree = result.getOrCreateChildWithName(TREEID_NOTES, nullptr);
+    juce::ValueTree noteTree = result.getOrCreateChildWithName(TREEID_NOTES, nullptr);
     for (ArpNote note : this->notes) {
         noteTree.appendChild(note.toValueTree(), nullptr);
     }
@@ -97,13 +97,13 @@ ValueTree ArpPattern::toValueTree() {
     return result;
 }
 
-void ArpPattern::toFile(const File &file) {
+void ArpPattern::toFile(const juce::File &file) {
     auto tree = toValueTree();
     file.replaceWithText(tree.toXmlString());
 }
 
 
-ArpPattern ArpPattern::fromValueTree(ValueTree &tree) {
+ArpPattern ArpPattern::fromValueTree(juce::ValueTree &tree) {
     int timebase = DEFAULT_TIMEBASE;
     if (tree.hasProperty(TREEID_TIMEBASE)) {
         timebase = tree.getProperty(TREEID_TIMEBASE);
@@ -116,13 +116,13 @@ ArpPattern ArpPattern::fromValueTree(ValueTree &tree) {
     }
 
     if (tree.hasProperty(TREEID_LOOP_LENGTH)) {
-        result.loopLength = tree.getProperty(TREEID_LOOP_LENGTH);
+        result.loopLength = juce::int64(tree.getProperty(TREEID_LOOP_LENGTH));
     }
 
-    ValueTree notesTree = tree.getChildWithName(TREEID_NOTES);
+    juce::ValueTree notesTree = tree.getChildWithName(TREEID_NOTES);
     if (notesTree.isValid()) {
         for (int i = 0; i < notesTree.getNumChildren(); i++) {
-            ValueTree noteTree = notesTree.getChild(i);
+            juce::ValueTree noteTree = notesTree.getChild(i);
             result.notes.push_back(ArpNote::fromValueTree(noteTree));
         }
     }
@@ -130,9 +130,9 @@ ArpPattern ArpPattern::fromValueTree(ValueTree &tree) {
     return result;
 }
 
-ArpPattern ArpPattern::fromFile(const File &file) {
-    auto xmlDoc = XmlDocument::parse(file);
-    auto tree = ValueTree::fromXml(*xmlDoc);
+ArpPattern ArpPattern::fromFile(const juce::File &file) {
+    auto xmlDoc = juce::XmlDocument::parse(file);
+    auto tree = juce::ValueTree::fromXml(*xmlDoc);
     return fromValueTree(tree);
 }
 

@@ -23,4 +23,4 @@ const std::string BuildConfig::UPDATE_CHECK_URL = "http://librearp.gitlab.io/ass
 
 // Default global settings values
 const bool BuildConfig::DEFAULT_CHECK_FOR_UPDATES_ENABLED = false;
-const int64 BuildConfig::DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK = 86400;
+const int64_t BuildConfig::DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK = 86400;

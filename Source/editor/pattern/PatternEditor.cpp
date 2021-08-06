@@ -20,28 +20,28 @@
 #include "PatternEditor.h"
 #include "PatternEditorView.h"
 
-const Colour BACKGROUND_COLOUR = Colour(82, 78, 67);
-const Colour GRIDLINES_COLOUR = Colour(42, 40, 34);
-const Colour POSITION_INDICATOR_COLOUR = Colour(255, 255, 255);
-const Colour LOOP_LINE_COLOUR = Colour(155, 36, 36);
+const juce::Colour BACKGROUND_COLOUR = juce::Colour(82, 78, 67);
+const juce::Colour GRIDLINES_COLOUR = juce::Colour(42, 40, 34);
+const juce::Colour POSITION_INDICATOR_COLOUR = juce::Colour(255, 255, 255);
+const juce::Colour LOOP_LINE_COLOUR = juce::Colour(155, 36, 36);
 
-const Colour ZERO_LINE_COLOUR = Colour((uint8) 0, 0, 0, 0.1f);
-const Colour ZERO_OCTAVE_COLOUR = Colour((uint8) 171, 204, 41, 0.1f);
-const Colour OCTAVE_LINE_COLOUR = Colour((uint8) 0, 0, 0, 1.0f);
+const juce::Colour ZERO_LINE_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 0.1f);
+const juce::Colour ZERO_OCTAVE_COLOUR = juce::Colour((uint8_t) 171, 204, 41, 0.1f);
+const juce::Colour OCTAVE_LINE_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 1.0f);
 
-const Colour BAR_SHADE_COLOUR = Colour((uint8) 0, 0, 0, 0.1f);
+const juce::Colour BAR_SHADE_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 0.1f);
 
-const Colour NOTE_FILL_COLOUR = Colour(171, 204, 41);
-const Colour NOTE_ACTIVE_FILL_COLOUR = Colour(228, 255, 122);
-const Colour NOTE_SELECTED_FILL_COLOUR = Colour(245, 255, 209);
-const Colour NOTE_SELECTED_ACTIVE_FILL_COLOUR = Colour(255, 255, 255);
-const Colour NOTE_BORDER_COLOUR = Colour((uint8) 0, 0, 0, 0.7f);
-const Colour NOTE_VELOCITY_COLOUR = Colour((uint8) 0, 0, 0, 0.2f);
+const juce::Colour NOTE_FILL_COLOUR = juce::Colour(171, 204, 41);
+const juce::Colour NOTE_ACTIVE_FILL_COLOUR = juce::Colour(228, 255, 122);
+const juce::Colour NOTE_SELECTED_FILL_COLOUR = juce::Colour(245, 255, 209);
+const juce::Colour NOTE_SELECTED_ACTIVE_FILL_COLOUR = juce::Colour(255, 255, 255);
+const juce::Colour NOTE_BORDER_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 0.7f);
+const juce::Colour NOTE_VELOCITY_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 0.2f);
 
-const Colour CURSOR_TIME_COLOUR = Colour((uint8) 255, 255, 255, 0.7f);
-const Colour CURSOR_NOTE_COLOUR = Colour((uint8) 255, 255, 255, 0.05f);
+const juce::Colour CURSOR_TIME_COLOUR = juce::Colour((uint8_t) 255, 255, 255, 0.7f);
+const juce::Colour CURSOR_NOTE_COLOUR = juce::Colour((uint8_t) 255, 255, 255, 0.05f);
 
-const Colour SELECTION_BORDER_COLOUR = Colour(255, 0, 0);
+const juce::Colour SELECTION_BORDER_COLOUR = juce::Colour(255, 0, 0);
 
 const int NOTE_RESIZE_TOLERANCE = 8;
 const int LOOP_RESIZE_TOLERANCE = 5;
@@ -58,7 +58,7 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
         state.lastNoteLength = processor.getPattern().getTimebase() / state.divisor;
     }
     snapEnabled = true;
-    selection = Rectangle<int>(0, 0, 0, 0);
+    selection = juce::Rectangle<int>(0, 0, 0, 0);
 
     cursorNote = 0;
     lastPlayPositionX = 0;
@@ -66,7 +66,7 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
     setWantsKeyboardFocus(true);
 }
 
-void PatternEditor::paint(Graphics &g) {
+void PatternEditor::paint(juce::Graphics &g) {
     ArpPattern &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
     auto pixelsPerNote = state.pixelsPerNote;
@@ -96,12 +96,12 @@ void PatternEditor::paint(Graphics &g) {
     if (numInputNotes > 0) {
         g.setColour(ZERO_OCTAVE_COLOUR);
         auto height = numInputNotes * pixelsPerNote;
-        auto rect = Rectangle<int>(
+        auto rect = juce::Rectangle<int>(
                 unoffsDrawRegion.getX(), noteZeroY - height + pixelsPerNote, unoffsDrawRegion.getWidth(), height);
         g.fillRect(rect);
     } else {
         g.setColour(ZERO_LINE_COLOUR);
-        auto rect = Rectangle<int>(unoffsDrawRegion.getX(), noteZeroY, unoffsDrawRegion.getWidth(), pixelsPerNote);
+        auto rect = juce::Rectangle<int>(unoffsDrawRegion.getX(), noteZeroY, unoffsDrawRegion.getWidth(), pixelsPerNote);
         g.fillRect(rect);
     }
 
@@ -118,9 +118,9 @@ void PatternEditor::paint(Graphics &g) {
     int beatN = 0;
     for (auto i = static_cast<float>((-state.offsetX) % pixelsPerBeat); i < static_cast<float>(getWidth()); i += beatDiv, beatN++) {
         if (beatN % state.divisor == 0) {
-            g.fillRect(roundToInt(i), 0, 4, getHeight());
+            g.fillRect(juce::roundToInt(i), 0, 4, getHeight());
         } else {
-            g.fillRect(roundToInt(i), 0, 2, getHeight());
+            g.fillRect(juce::roundToInt(i), 0, 2, getHeight());
         }
     }
 
@@ -139,7 +139,7 @@ void PatternEditor::paint(Graphics &g) {
     auto &notes = pattern.getNotes();
     for (unsigned long i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
-        Rectangle<int> noteRect = getRectangleForNote(note);
+        juce::Rectangle<int> noteRect = getRectangleForNote(note);
 
         if (noteRect.intersects(unoffsDrawRegion)) {
             auto isPlaying = processor.getPlayingPatternIndices().contains(i);
@@ -167,14 +167,14 @@ void PatternEditor::paint(Graphics &g) {
     // Draw loop line
     g.setColour(LOOP_LINE_COLOUR);
     auto loopLine = pulseToX(pattern.loopLength);
-    auto loopLineRect = Rectangle<int>(loopLine, 0, 4, getHeight());
+    auto loopLineRect = juce::Rectangle<int>(loopLine, 0, 4, getHeight());
     if (loopLineRect.intersects(drawRegion)){
         g.fillRect(loopLineRect);
     }
 
     // Draw playback position indicator
     if (lastPlayPositionX > 0) {
-        auto positionRect = Rectangle<int>(lastPlayPositionX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
+        auto positionRect = juce::Rectangle<int>(lastPlayPositionX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
         if (positionRect.intersects(drawRegion)) {
             g.setColour(POSITION_INDICATOR_COLOUR);
             g.fillRect(positionRect);
@@ -192,7 +192,7 @@ void PatternEditor::paint(Graphics &g) {
 
 
     auto cursorNoteY = noteToY(cursorNote);
-    auto cursorNoteRect = Rectangle<int>(unoffsDrawRegion.getX(), cursorNoteY, unoffsDrawRegion.getWidth(), pixelsPerNote);
+    auto cursorNoteRect = juce::Rectangle<int>(unoffsDrawRegion.getX(), cursorNoteY, unoffsDrawRegion.getWidth(), pixelsPerNote);
     if (cursorNoteRect.intersects(unoffsDrawRegion)) {
         g.setColour(CURSOR_NOTE_COLOUR);
         g.fillRect(cursorNoteRect);
@@ -200,7 +200,7 @@ void PatternEditor::paint(Graphics &g) {
 }
 
 
-void PatternEditor::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) {
+void PatternEditor::mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) {
     if (event.mods.isCtrlDown()) {
         // Zooming
         if (event.mods.isShiftDown()) {
@@ -215,7 +215,7 @@ void PatternEditor::mouseWheelMove(const MouseEvent &event, const MouseWheelDeta
             std::scoped_lock lock(this->processor.getPattern().getMutex());
             for (auto &noteOffset : noteDragAction->noteOffsets) {
                 auto &note = this->processor.getPattern().getNotes()[noteOffset.noteIndex];
-                note.data.velocity = jmax(0.0, jmin(note.data.velocity + wheel.deltaY * 0.1, 1.0));
+                note.data.velocity = juce::jmax(0.0, juce::jmin(note.data.velocity + wheel.deltaY * 0.1, 1.0));
             }
             processor.buildPattern();
         }
@@ -229,19 +229,19 @@ void PatternEditor::mouseWheelMove(const MouseEvent &event, const MouseWheelDeta
     }
 }
 
-void PatternEditor::mouseMove(const MouseEvent &event) {
+void PatternEditor::mouseMove(const juce::MouseEvent &event) {
     auto &pattern = processor.getPattern();
     std::scoped_lock lock(pattern.getMutex());
 
     mouseAnyMove(event);
 
     auto &notes = pattern.getNotes();
-    for (uint64 i = 0; i < notes.size(); i++) {
+    for (uint64_t i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
         auto noteRect = getRectangleForNote(note);
         if (noteRect.contains(event.x, event.y)) {
             if (event.x <= (noteRect.getX() + NOTE_RESIZE_TOLERANCE)) {
-                setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
+                setMouseCursor(juce::MouseCursor::LeftEdgeResizeCursor);
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, notes, event);
                 } else {
@@ -249,7 +249,7 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
                 }
                 return;
             } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - NOTE_RESIZE_TOLERANCE)) {
-                setMouseCursor(MouseCursor::RightEdgeResizeCursor);
+                setMouseCursor(juce::MouseCursor::RightEdgeResizeCursor);
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, notes, event);
                 } else {
@@ -257,7 +257,7 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
                 }
                 return;
             } else {
-                setMouseCursor(MouseCursor::DraggingHandCursor);
+                setMouseCursor(juce::MouseCursor::DraggingHandCursor);
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, notes, event);
                 } else {
@@ -270,7 +270,7 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
 
     auto loopRect = getRectangleForLoop();
     if (loopRect.contains(event.x, event.y)) {
-        setMouseCursor(MouseCursor::LeftRightResizeCursor);
+        setMouseCursor(juce::MouseCursor::LeftRightResizeCursor);
         new(dragAction) DragAction(DragAction::TYPE_LOOP_RESIZE);
         return;
     }
@@ -278,7 +278,7 @@ void PatternEditor::mouseMove(const MouseEvent &event) {
     new(dragAction) DragAction();
 }
 
-void PatternEditor::mouseDrag(const MouseEvent &event) {
+void PatternEditor::mouseDrag(const juce::MouseEvent &event) {
     mouseAnyMove(event);
 
     if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
@@ -311,7 +311,7 @@ void PatternEditor::mouseDrag(const MouseEvent &event) {
     }
 }
 
-void PatternEditor::mouseAnyMove(const MouseEvent &event) {
+void PatternEditor::mouseAnyMove(const juce::MouseEvent &event) {
     repaint(pulseToX(cursorPulse), 0, 1, getHeight());
     repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
 
@@ -320,13 +320,13 @@ void PatternEditor::mouseAnyMove(const MouseEvent &event) {
 
     snapEnabled = !(event.mods.isAltDown() || (event.mods.isCtrlDown() && event.mods.isShiftDown()));
 
-    setMouseCursor(MouseCursor::NormalCursor);
+    setMouseCursor(juce::MouseCursor::NormalCursor);
 
     repaint(pulseToX(cursorPulse), 0, 1, getHeight());
     repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
 }
 
-void PatternEditor::mouseDown(const MouseEvent &event) {
+void PatternEditor::mouseDown(const juce::MouseEvent &event) {
     if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
         if (this->dragAction == nullptr || this->dragAction->type == DragAction::TYPE_NONE) {
             if (event.mods.isCtrlDown()) {
@@ -395,38 +395,38 @@ void PatternEditor::mouseDown(const MouseEvent &event) {
     Component::mouseDown(event);
 }
 
-void PatternEditor::mouseUp(const MouseEvent &event) {
+void PatternEditor::mouseUp(const juce::MouseEvent &event) {
     new(dragAction) DragAction();
     repaint(selection);
-    selection = Rectangle<int>(0, 0, 0, 0);
-    setMouseCursor(MouseCursor::NormalCursor);
+    selection = juce::Rectangle<int>(0, 0, 0, 0);
+    setMouseCursor(juce::MouseCursor::NormalCursor);
     repaintNotes();
     Component::mouseUp(event);
 }
 
 
-bool PatternEditor::keyPressed(const KeyPress &key) {
-    if (key == KeyPress::deleteKey || key == KeyPress::numberPadDelete) {
+bool PatternEditor::keyPressed(const juce::KeyPress &key) {
+    if (key == juce::KeyPress::deleteKey || key == juce::KeyPress::numberPadDelete) {
         deleteSelected();
         return true;
     }
 
-    if (key.isKeyCode(KeyPress::upKey)) {
+    if (key.isKeyCode(juce::KeyPress::upKey)) {
         moveSelectedUp(key.getModifiers().isCtrlDown());
         return true;
     }
 
-    if (key.isKeyCode(KeyPress::downKey)) {
+    if (key.isKeyCode(juce::KeyPress::downKey)) {
         moveSelectedDown(key.getModifiers().isCtrlDown());
         return true;
     }
 
-    if (key == KeyPress::createFromDescription("CTRL+A")) {
+    if (key == juce::KeyPress::createFromDescription("CTRL+A")) {
         selectAll();
         return true;
     }
 
-    if (key == KeyPress::createFromDescription("CTRL+D")) {
+    if (key == juce::KeyPress::createFromDescription("CTRL+D")) {
         deselectAll();
         return true;
     }
@@ -435,24 +435,24 @@ bool PatternEditor::keyPressed(const KeyPress &key) {
 }
 
 
-void PatternEditor::loopResize(const MouseEvent &event) {
+void PatternEditor::loopResize(const juce::MouseEvent &event) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
-    int64 lastNoteEnd = 0;
+    int64_t lastNoteEnd = 0;
     for (auto &note : processor.getPattern().getNotes()) {
         if (note.endPoint > lastNoteEnd) {
             lastNoteEnd = note.endPoint;
         }
     }
 
-    processor.getPattern().loopLength = jmax((int64) 1, lastNoteEnd, xToPulse(event.x));
+    processor.getPattern().loopLength = juce::jmax((int64_t) 1, lastNoteEnd, xToPulse(event.x));
     processor.buildPattern();
     view->repaint();
-    setMouseCursor(MouseCursor::LeftRightResizeCursor);
+    setMouseCursor(juce::MouseCursor::LeftRightResizeCursor);
 }
 
 
-void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dragAction) {
+void PatternEditor::noteStartResize(const juce::MouseEvent &event, NoteDragAction *dragAction) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     auto timebase = processor.getPattern().getTimebase();
@@ -461,18 +461,18 @@ void PatternEditor::noteStartResize(const MouseEvent &event, NoteDragAction *dra
     repaintNotes();
     for (auto &noteOffset : dragAction->noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
-        int64 minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
-        note.startPoint = jmax((int64) 0, jmin(xToPulse(event.x) + noteOffset.startOffset, note.endPoint - minSize));
+        int64_t minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
+        note.startPoint = juce::jmax((int64_t) 0, juce::jmin(xToPulse(event.x) + noteOffset.startOffset, note.endPoint - minSize));
 
         state.lastNoteLength = note.endPoint - note.startPoint;
     }
 
     processor.buildPattern();
     repaintNotes();
-    setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
+    setMouseCursor(juce::MouseCursor::LeftEdgeResizeCursor);
 }
 
-void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragAction) {
+void PatternEditor::noteEndResize(const juce::MouseEvent &event, NoteDragAction *dragAction) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     auto timebase = processor.getPattern().getTimebase();
@@ -481,9 +481,9 @@ void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragA
     repaintNotes();
     for (auto &noteOffset : dragAction->noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
-        int64 minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
+        int64_t minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
         note.endPoint =
-                jmin(jmax(xToPulse(event.x) + noteOffset.endOffset, note.startPoint + minSize),
+                juce::jmin(juce::jmax(xToPulse(event.x) + noteOffset.endOffset, note.startPoint + minSize),
                      processor.getPattern().loopLength);
 
         state.lastNoteLength = note.endPoint - note.startPoint;
@@ -491,10 +491,10 @@ void PatternEditor::noteEndResize(const MouseEvent &event, NoteDragAction *dragA
 
     processor.buildPattern();
     repaintNotes();
-    setMouseCursor(MouseCursor::RightEdgeResizeCursor);
+    setMouseCursor(juce::MouseCursor::RightEdgeResizeCursor);
 }
 
-void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAction *dragAction) {
+void PatternEditor::noteMove(const juce::MouseEvent &event, PatternEditor::NoteDragAction *dragAction) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     repaintNotes();
@@ -505,8 +505,8 @@ void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAct
         auto wantedEnd = xToPulse(event.x) + noteOffset.endOffset;
 
         if (!event.mods.isCtrlDown()) {
-            note.endPoint = jmin(
-                    jmax(wantedEnd, noteLength),
+            note.endPoint = juce::jmin(
+                    juce::jmax(wantedEnd, noteLength),
                     processor.getPattern().loopLength);
             note.startPoint = note.endPoint - noteLength;
         }
@@ -519,7 +519,7 @@ void PatternEditor::noteMove(const MouseEvent &event, PatternEditor::NoteDragAct
     processor.buildPattern();
     repaintNotes();
 
-    setMouseCursor(MouseCursor::DraggingHandCursor);
+    setMouseCursor(juce::MouseCursor::DraggingHandCursor);
 }
 
 void PatternEditor::noteDuplicate(PatternEditor::NoteDragAction *dragAction) {
@@ -532,7 +532,7 @@ void PatternEditor::noteDuplicate(PatternEditor::NoteDragAction *dragAction) {
     processor.buildPattern();
 }
 
-void PatternEditor::noteCreate(const MouseEvent &event) {
+void PatternEditor::noteCreate(const juce::MouseEvent &event) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     auto &pattern = processor.getPattern();
@@ -543,7 +543,7 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
     }
 
     ArpNote note = ArpNote();
-    note.startPoint = jmin(pulse, pattern.loopLength - state.lastNoteLength);
+    note.startPoint = juce::jmin(pulse, pattern.loopLength - state.lastNoteLength);
     note.endPoint = note.startPoint + state.lastNoteLength;
     note.data.noteNumber = yToNote(event.y);
 
@@ -560,7 +560,7 @@ void PatternEditor::noteCreate(const MouseEvent &event) {
     }
 }
 
-void PatternEditor::noteDelete(const MouseEvent &event) {
+void PatternEditor::noteDelete(const juce::MouseEvent &event) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     auto &pattern = processor.getPattern();
@@ -646,9 +646,9 @@ void PatternEditor::moveSelectedDown(bool octave) {
 }
 
 
-void PatternEditor::select(const MouseEvent &event, PatternEditor::SelectionDragAction *dragAction) {
+void PatternEditor::select(const juce::MouseEvent &event, PatternEditor::SelectionDragAction *dragAction) {
     repaint(selection);
-    selection = Rectangle<int>(Point<int>(event.x, event.y), Point<int>(dragAction->startX, dragAction->startY));
+    selection = juce::Rectangle<int>(juce::Point<int>(event.x, event.y), juce::Point<int>(dragAction->startX, dragAction->startY));
     repaint(selection);
     repaintNotes();
 
@@ -667,11 +667,11 @@ void PatternEditor::select(const MouseEvent &event, PatternEditor::SelectionDrag
 }
 
 
-void PatternEditor::audioUpdate(uint32 type) {
+void PatternEditor::audioUpdate(uint32_t type) {
     auto position = processor.getLastPosition();
     if (position > 0) {
         if (processor.getLoopReset() > 0.0) {
-            position %= static_cast<int64>(processor.getLoopReset() * processor.getPattern().getTimebase());
+            position %= static_cast<int64_t>(processor.getLoopReset() * processor.getPattern().getTimebase());
         }
         position %= processor.getPattern().loopLength;
         lastPlayPositionX = pulseToX(position);
@@ -683,15 +683,15 @@ void PatternEditor::audioUpdate(uint32 type) {
 
 void PatternEditor::repaintNotes() {
     bool willRepaint = false;
-    auto notesRect = Rectangle<int>::leftTopRightBottom(INT32_MAX, INT32_MAX, 0, 0);
+    auto notesRect = juce::Rectangle<int>::leftTopRightBottom(INT32_MAX, INT32_MAX, 0, 0);
     auto &notes = processor.getPattern().getNotes();
     for(int i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
         auto noteRect = getRectangleForNote(note);
-        notesRect.setLeft(jmin(notesRect.getX(), noteRect.getX()));
-        notesRect.setTop(jmin(notesRect.getY(), noteRect.getY()));
-        notesRect.setRight(jmax(notesRect.getRight(), noteRect.getRight()));
-        notesRect.setBottom(jmax(notesRect.getBottom(), noteRect.getBottom()));
+        notesRect.setLeft(juce::jmin(notesRect.getX(), noteRect.getX()));
+        notesRect.setTop(juce::jmin(notesRect.getY(), noteRect.getY()));
+        notesRect.setRight(juce::jmax(notesRect.getRight(), noteRect.getRight()));
+        notesRect.setBottom(juce::jmax(notesRect.getBottom(), noteRect.getBottom()));
         willRepaint = true;
     }
 
@@ -705,24 +705,24 @@ PatternEditorView* PatternEditor::getView() {
 }
 
 
-Rectangle<int> PatternEditor::getRectangleForNote(ArpNote &note) {
+juce::Rectangle<int> PatternEditor::getRectangleForNote(ArpNote &note) {
     ArpPattern &pattern = processor.getPattern();
     auto pixelsPerNote = state.pixelsPerNote;
 
-    return Rectangle<int>(
+    return juce::Rectangle<int>(
             pulseToX(note.startPoint),
             noteToY(note.data.noteNumber),
             pulseToAbsX(note.endPoint - note.startPoint),
             pixelsPerNote);
 }
 
-Rectangle<int> PatternEditor::getRectangleForLoop() {
+juce::Rectangle<int> PatternEditor::getRectangleForLoop() {
     auto loopLine = pulseToX(processor.getPattern().loopLength);
-    return Rectangle<int>(loopLine - LOOP_RESIZE_TOLERANCE, 0, LOOP_RESIZE_TOLERANCE * 2, getHeight());
+    return juce::Rectangle<int>(loopLine - LOOP_RESIZE_TOLERANCE, 0, LOOP_RESIZE_TOLERANCE * 2, getHeight());
 }
 
 
-int64 PatternEditor::snapPulse(int64 pulse, bool floor) {
+int64_t PatternEditor::snapPulse(int64_t pulse, bool floor) {
     if (!snapEnabled) {
         return pulse;
     }
@@ -732,21 +732,21 @@ int64 PatternEditor::snapPulse(int64 pulse, bool floor) {
     double doubleDivisor = state.divisor;
 
     double base = (pulse * doubleDivisor) / timebase;
-    int64 roundedBase = static_cast<int64>((floor) ? std::floor(base) : std::round(base));
+    int64_t roundedBase = static_cast<int64_t>((floor) ? std::floor(base) : std::round(base));
 
     return roundedBase * (timebase / state.divisor);
 }
 
 
-int64 PatternEditor::xToPulse(int x, bool snap, bool floor) {
+int64_t PatternEditor::xToPulse(int x, bool snap, bool floor) {
     auto &pattern = processor.getPattern();
     auto timebase = pattern.getTimebase();
     double pixelsPerBeat = state.pixelsPerBeat;
 
-    auto pulse = static_cast<int64>(
+    auto pulse = static_cast<int64_t>(
             std::round(((x + state.offsetX) / pixelsPerBeat) * timebase));
 
-    return jmax(static_cast<int64>(0), (snap) ? snapPulse(pulse, floor) : pulse);
+    return juce::jmax(static_cast<int64_t>(0), (snap) ? snapPulse(pulse, floor) : pulse);
 }
 
 int PatternEditor::yToNote(int y) {
@@ -754,15 +754,15 @@ int PatternEditor::yToNote(int y) {
     return static_cast<int>(std::ceil(((getHeight() / 2.0) - (y + state.offsetY)) / pixelsPerNote - 0.5));
 }
 
-int PatternEditor::pulseToX(int64 pulse) {
+int PatternEditor::pulseToX(int64_t pulse) {
     return pulseToAbsX(pulse) - state.offsetX;
 }
 
-int PatternEditor::pulseToAbsX(int64 pulse) {
+int PatternEditor::pulseToAbsX(int64_t pulse) {
     auto &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
 
-    return jmax(0, roundToInt((pulse / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1);
+    return juce::jmax(0, juce::roundToInt((pulse / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1);
 }
 
 int PatternEditor::noteToY(int note) {
@@ -771,27 +771,27 @@ int PatternEditor::noteToY(int note) {
 
 int PatternEditor::noteToAbsY(int note) {
     double pixelsPerNote = state.pixelsPerNote;
-    return roundToInt(std::floor((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote)) + 1;
+    return juce::roundToInt(std::floor((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote)) + 1;
 }
 
 
-PatternEditor::NoteDragAction::NoteOffset::NoteOffset(uint64 i)
+PatternEditor::NoteDragAction::NoteOffset::NoteOffset(uint64_t i)
         : noteIndex(i) {
     this->startOffset = 0;
     this->endOffset = 0;
     this->noteOffset = 0;
 }
 
-PatternEditor::DragAction::DragAction(uint8 type)
+PatternEditor::DragAction::DragAction(uint8_t type)
         : type(type) {
 }
 
 PatternEditor::NoteDragAction::NoteDragAction(
         PatternEditor *editor,
-        uint8 type,
-        uint64 index,
+        uint8_t type,
+        uint64_t index,
         std::vector<ArpNote> &allNotes,
-        const MouseEvent &event,
+        const juce::MouseEvent &event,
         bool offset)
         :
         DragAction(type),
@@ -803,11 +803,11 @@ PatternEditor::NoteDragAction::NoteDragAction(
 
 PatternEditor::NoteDragAction::NoteDragAction(
         PatternEditor *editor,
-        uint8 type,
-        uint64 initiatorIndex,
-        std::set<uint64> &indices,
+        uint8_t type,
+        uint64_t initiatorIndex,
+        std::set<uint64_t> &indices,
         std::vector<ArpNote> &allNotes,
-        const MouseEvent &event,
+        const juce::MouseEvent &event,
         bool offset)
         :
         DragAction(type),
@@ -822,8 +822,8 @@ PatternEditor::NoteDragAction::NoteDragAction(
 PatternEditor::NoteDragAction::NoteOffset PatternEditor::NoteDragAction::createOffset(
         PatternEditor *editor,
         std::vector<ArpNote> &allNotes,
-        uint64 noteIndex,
-        const MouseEvent &event) {
+        uint64_t noteIndex,
+        const juce::MouseEvent &event) {
 
     auto pulse = editor->xToPulse(event.x);
 

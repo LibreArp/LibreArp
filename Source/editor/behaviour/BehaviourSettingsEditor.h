@@ -17,10 +17,11 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_gui_basics/juce_gui_basics.h>
+
 #include "../../LibreArp.h"
 
-class BehaviourSettingsEditor : public Component {
+class BehaviourSettingsEditor : public juce::Component {
 public:
 
     explicit BehaviourSettingsEditor(LibreArp &p);
@@ -33,14 +34,14 @@ private:
 
     LibreArp &processor;
 
-    ToggleButton octavesToggle;
-    ToggleButton usingInputVelocityToggle;
+    juce::ToggleButton octavesToggle;
+    juce::ToggleButton usingInputVelocityToggle;
 
-    Slider midiInChannelSlider;
-    Label midiInChannelLabel;
+    juce::Slider midiInChannelSlider;
+    juce::Label midiInChannelLabel;
 
-    Slider midiOutChannelSlider;
-    Label midiOutChannelLabel;
+    juce::Slider midiOutChannelSlider;
+    juce::Label midiOutChannelLabel;
 
 };
 

@@ -19,10 +19,10 @@
 
 #include <list>
 #include <memory>
-#include "JuceHeader.h"
+#include <juce_gui_basics/juce_gui_basics.h>
 
 
-class AboutBox : public Component {
+class AboutBox : public juce::Component {
 public:
 
     explicit AboutBox();
@@ -31,20 +31,20 @@ public:
 
 private:
 
-    AttributedString licenseNotice;
+    juce::AttributedString licenseNotice;
 
-    Label nameAndVersionLabel;
-    Label gplLabel;
-    Viewport gplViewport;
+    juce::Label nameAndVersionLabel;
+    juce::Label gplLabel;
+    juce::Viewport gplViewport;
 
-    std::list<std::shared_ptr<HyperlinkButton>> bottomLinks;
+    std::list<std::shared_ptr<juce::HyperlinkButton>> bottomLinks;
 
-    HyperlinkButton websiteButton;
-    HyperlinkButton sourceButton;
-    HyperlinkButton juceButton;
-    HyperlinkButton gplButton;
+    juce::HyperlinkButton websiteButton;
+    juce::HyperlinkButton sourceButton;
+    juce::HyperlinkButton juceButton;
+    juce::HyperlinkButton gplButton;
 
-    void addBottomLink(String text, URL url);
+    void addBottomLink(juce::String text, juce::URL url);
     void addBottomLinkSeparator();
 
 };

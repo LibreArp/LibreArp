@@ -17,23 +17,23 @@
 
 #include "EditorState.h"
 
-const Identifier EditorState::TREEID_EDITOR_STATE = Identifier("editorState"); // NOLINT
-const Identifier EditorState::TREEID_WIDTH = Identifier("width"); // NOLINT
-const Identifier EditorState::TREEID_HEIGHT = Identifier("height"); // NOLINT
-const Identifier EditorState::TREEID_DIVISOR = Identifier("divisor"); // NOLINT
-const Identifier EditorState::TREEID_LAST_NOTE_LENGTH = Identifier("lastNoteLength"); // NOLINT
-const Identifier EditorState::TREEID_PIXELS_PER_BEAT = Identifier("pixelsPerBeat"); // NOLINT
-const Identifier EditorState::TREEID_PIXELS_PER_NOTE = Identifier("pixelsPerNote"); // NOLINT
-const Identifier EditorState::TREEID_OFFSET_X = Identifier("editorOffsetX"); // NOLINT
-const Identifier EditorState::TREEID_OFFSET_Y = Identifier("editorOffsetY"); // NOLINT
+const juce::Identifier EditorState::TREEID_EDITOR_STATE = juce::Identifier("editorState"); // NOLINT
+const juce::Identifier EditorState::TREEID_WIDTH = juce::Identifier("width"); // NOLINT
+const juce::Identifier EditorState::TREEID_HEIGHT = juce::Identifier("height"); // NOLINT
+const juce::Identifier EditorState::TREEID_DIVISOR = juce::Identifier("divisor"); // NOLINT
+const juce::Identifier EditorState::TREEID_LAST_NOTE_LENGTH = juce::Identifier("lastNoteLength"); // NOLINT
+const juce::Identifier EditorState::TREEID_PIXELS_PER_BEAT = juce::Identifier("pixelsPerBeat"); // NOLINT
+const juce::Identifier EditorState::TREEID_PIXELS_PER_NOTE = juce::Identifier("pixelsPerNote"); // NOLINT
+const juce::Identifier EditorState::TREEID_OFFSET_X = juce::Identifier("editorOffsetX"); // NOLINT
+const juce::Identifier EditorState::TREEID_OFFSET_Y = juce::Identifier("editorOffsetY"); // NOLINT
 
 
-ValueTree EditorState::toValueTree() const {
-    ValueTree tree = ValueTree(TREEID_EDITOR_STATE);
+juce::ValueTree EditorState::toValueTree() const {
+    juce::ValueTree tree = juce::ValueTree(TREEID_EDITOR_STATE);
     tree.setProperty(TREEID_WIDTH, this->width, nullptr);
     tree.setProperty(TREEID_HEIGHT, this->height, nullptr);
     tree.setProperty(TREEID_DIVISOR, this->divisor, nullptr);
-    tree.setProperty(TREEID_LAST_NOTE_LENGTH, this->lastNoteLength, nullptr);
+    tree.setProperty(TREEID_LAST_NOTE_LENGTH, juce::int64(this->lastNoteLength), nullptr);
     tree.setProperty(TREEID_PIXELS_PER_BEAT, this->pixelsPerBeat, nullptr);
     tree.setProperty(TREEID_PIXELS_PER_NOTE, this->pixelsPerNote, nullptr);
     tree.setProperty(TREEID_OFFSET_X, this->offsetX, nullptr);
@@ -41,7 +41,7 @@ ValueTree EditorState::toValueTree() const {
     return tree;
 }
 
-EditorState EditorState::fromValueTree(ValueTree &tree) {
+EditorState EditorState::fromValueTree(juce::ValueTree &tree) {
     if (!tree.isValid() || !tree.hasType(TREEID_EDITOR_STATE)) {
         throw std::invalid_argument("Input tree must be valid and of the correct type!");
     }
@@ -57,7 +57,7 @@ EditorState EditorState::fromValueTree(ValueTree &tree) {
         result.divisor = tree.getProperty(TREEID_DIVISOR);
     }
     if (tree.hasProperty(TREEID_LAST_NOTE_LENGTH)) {
-        result.lastNoteLength = tree.getProperty(TREEID_LAST_NOTE_LENGTH);
+        result.lastNoteLength = (juce::int64) tree.getProperty(TREEID_LAST_NOTE_LENGTH);
     }
     if (tree.hasProperty(TREEID_PIXELS_PER_BEAT)) {
         result.pixelsPerBeat = tree.getProperty(TREEID_PIXELS_PER_BEAT);

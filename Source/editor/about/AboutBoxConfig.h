@@ -28,7 +28,7 @@
 #define GPL_URL "https://librearp.gitlab.io/license/"
 #define FONT_LICENSE_URL "https://github.com/RedHatBrand/Overpass/blob/master/LICENSE.md"
 
-#define LICENSE_NOTICE CharPointer_UTF8("LibreArp - A libre VST arpeggio generator\n" \
+#define LICENSE_NOTICE juce::CharPointer_UTF8("LibreArp - A libre VST arpeggio generator\n" \
 "Copyright \xc2\xa9 2019 The LibreArp contributors\n" \
 "\n" \
 "LibreArp is free software: you can redistribute it and/or modify " \

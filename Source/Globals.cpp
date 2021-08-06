@@ -18,12 +18,12 @@
 #include "Globals.h"
 #include "BuildConfig.h"
 
-const Identifier Globals::TREEID_SETTINGS = "globalSettings"; // NOLINT
-const Identifier Globals::TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT = "askedForUpdateCheckConsent"; // NOLINT
-const Identifier Globals::TREEID_UPDATE_CHECK = "checkForUpdates"; // NOLINT
-const Identifier Globals::TREEID_FOUND_UPDATE_ON_LAST_CHECK = "foundUpdateOnLastCheck"; // NOLINT
-const Identifier Globals::TREEID_MIN_SECS_BEFORE_UPDATE_CHECK = "minSecsBeforeUpdateCheck"; // NOLINT
-const Identifier Globals::TREEID_LAST_UPDATE_CHECK_TIME = "lastUpdateCheckTime"; // NOLINT
+const juce::Identifier Globals::TREEID_SETTINGS = "globalSettings"; // NOLINT
+const juce::Identifier Globals::TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT = "askedForUpdateCheckConsent"; // NOLINT
+const juce::Identifier Globals::TREEID_UPDATE_CHECK = "checkForUpdates"; // NOLINT
+const juce::Identifier Globals::TREEID_FOUND_UPDATE_ON_LAST_CHECK = "foundUpdateOnLastCheck"; // NOLINT
+const juce::Identifier Globals::TREEID_MIN_SECS_BEFORE_UPDATE_CHECK = "minSecsBeforeUpdateCheck"; // NOLINT
+const juce::Identifier Globals::TREEID_LAST_UPDATE_CHECK_TIME = "lastUpdateCheckTime"; // NOLINT
 
 Globals::Globals() :
         changed(false),
@@ -38,7 +38,7 @@ Globals::Globals() :
             .getChildFile("Application Support")
             .getChildFile(JucePlugin_Name);
 #else
-    globalsDir = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
+    globalsDir = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory)
             .getChildFile(JucePlugin_Name);
 #endif
 
@@ -98,8 +98,8 @@ void Globals::load() {
     std::scoped_lock lock(mutex);
 
     if (settingsFile.existsAsFile()) {
-        auto xmlDoc = XmlDocument::parse(settingsFile);
-        parseValueTree(ValueTree::fromXml(*xmlDoc));
+        auto xmlDoc = juce::XmlDocument::parse(settingsFile);
+        parseValueTree(juce::ValueTree::fromXml(*xmlDoc));
     } else {
         reset();
     }
@@ -110,24 +110,24 @@ void Globals::markChanged() {
     this->changed = true;
 }
 
-ValueTree Globals::toValueTree() {
+juce::ValueTree Globals::toValueTree() {
     std::scoped_lock lock(mutex);
-    auto tree = ValueTree(TREEID_SETTINGS);
+    auto tree = juce::ValueTree(TREEID_SETTINGS);
 
     tree.setProperty(TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT, this->askedForUpdateCheckConsent, nullptr);
     tree.setProperty(TREEID_UPDATE_CHECK, this->checkForUpdatesEnabled, nullptr);
     tree.setProperty(TREEID_FOUND_UPDATE_ON_LAST_CHECK, this->foundUpdateOnLastCheck, nullptr);
-    tree.setProperty(TREEID_MIN_SECS_BEFORE_UPDATE_CHECK, this->minSecsBeforeUpdateCheck, nullptr);
-    tree.setProperty(TREEID_LAST_UPDATE_CHECK_TIME, this->lastUpdateCheckTime, nullptr);
+    tree.setProperty(TREEID_MIN_SECS_BEFORE_UPDATE_CHECK, juce::int64(this->minSecsBeforeUpdateCheck), nullptr);
+    tree.setProperty(TREEID_LAST_UPDATE_CHECK_TIME, juce::int64(this->lastUpdateCheckTime), nullptr);
 
     return tree;
 }
 
-void Globals::parseValueTree(const ValueTree &tree) {
+void Globals::parseValueTree(const juce::ValueTree &tree) {
     std::scoped_lock lock(mutex);
     reset();
     if (!tree.hasType(TREEID_SETTINGS)) {
-        Logger::writeToLog("Invalid settings tag! Skipping load.");
+        juce::Logger::writeToLog("Invalid settings tag! Skipping load.");
         return;
     }
 
@@ -141,23 +141,23 @@ void Globals::parseValueTree(const ValueTree &tree) {
         this->foundUpdateOnLastCheck = tree.getProperty(TREEID_FOUND_UPDATE_ON_LAST_CHECK);
     }
     if (tree.hasProperty(TREEID_MIN_SECS_BEFORE_UPDATE_CHECK)) {
-        this->minSecsBeforeUpdateCheck = tree.getProperty(TREEID_MIN_SECS_BEFORE_UPDATE_CHECK);
+        this->minSecsBeforeUpdateCheck = juce::int64(tree.getProperty(TREEID_MIN_SECS_BEFORE_UPDATE_CHECK));
     }
     if (tree.hasProperty(TREEID_LAST_UPDATE_CHECK_TIME)) {
-        this->lastUpdateCheckTime = tree.getProperty(TREEID_LAST_UPDATE_CHECK_TIME);
+        this->lastUpdateCheckTime = juce::int64(tree.getProperty(TREEID_LAST_UPDATE_CHECK_TIME));
     }
 }
 
 
-File Globals::getGlobalsDir() {
+juce::File Globals::getGlobalsDir() {
     return this->globalsDir;
 }
 
-File Globals::getSettingsFile() {
+juce::File Globals::getSettingsFile() {
     return this->settingsFile;
 }
 
-File Globals::getPatternPresetsDir() {
+juce::File Globals::getPatternPresetsDir() {
     return this->patternPresetsDir;
 }
 
@@ -183,23 +183,23 @@ void Globals::setAskedForUpdateCheckConsent(bool asked) {
     this->changed = true;
 }
 
-int64 Globals::getMinSecsBeforeUpdateCheck() const {
+int64_t Globals::getMinSecsBeforeUpdateCheck() const {
     std::scoped_lock lock(mutex);
     return minSecsBeforeUpdateCheck;
 }
 
-void Globals::setMinSecsBeforeUpdateCheck(int64 minSecsBeforeUpdateCheck) {
+void Globals::setMinSecsBeforeUpdateCheck(int64_t minSecsBeforeUpdateCheck) {
     std::scoped_lock lock(mutex);
     Globals::minSecsBeforeUpdateCheck = minSecsBeforeUpdateCheck;
     this->changed = true;
 }
 
-int64 Globals::getLastUpdateCheckTime() const {
+int64_t Globals::getLastUpdateCheckTime() const {
     std::scoped_lock lock(mutex);
     return lastUpdateCheckTime;
 }
 
-void Globals::setLastUpdateCheckTime(int64 lastUpdateCheckTime) {
+void Globals::setLastUpdateCheckTime(int64_t lastUpdateCheckTime) {
     std::scoped_lock lock(mutex);
     Globals::lastUpdateCheckTime = lastUpdateCheckTime;
     this->changed = true;

@@ -15,13 +15,14 @@
 // along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
-#include "JuceHeader.h"
+#include <juce_core/juce_core.h>
+
 #include "Updater.h"
 #include "BuildConfig.h"
 
 Updater::UpdateInfo Updater::checkForUpdates() {
-    auto updateUrl = URL(BuildConfig::UPDATE_CHECK_URL);
-    auto updateData = JSON::parse(updateUrl.readEntireTextStream());
+    auto updateUrl = juce::URL(BuildConfig::UPDATE_CHECK_URL);
+    auto updateData = juce::JSON::parse(updateUrl.readEntireTextStream());
     if (!updateData.isArray()) {
         return UpdateInfo();
     }

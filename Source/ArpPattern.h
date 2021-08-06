@@ -18,8 +18,9 @@
 #pragma once
 
 #include <mutex>
+#include <juce_core/juce_core.h>
+#include <juce_data_structures/juce_data_structures.h>
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "ArpNote.h"
 #include "ArpBuiltEvents.h"
 
@@ -29,10 +30,10 @@
 class ArpPattern {
 public:
 
-    static const Identifier TREEID_PATTERN;
-    static const Identifier TREEID_TIMEBASE;
-    static const Identifier TREEID_LOOP_LENGTH;
-    static const Identifier TREEID_NOTES;
+    static const juce::Identifier TREEID_PATTERN;
+    static const juce::Identifier TREEID_TIMEBASE;
+    static const juce::Identifier TREEID_LOOP_LENGTH;
+    static const juce::Identifier TREEID_NOTES;
 
     static constexpr int DEFAULT_TIMEBASE = 96;
 
@@ -40,7 +41,7 @@ public:
     /**
      * The length of the loop.
      */
-    int64 loopLength;
+    int64_t loopLength;
 
 
     /**
@@ -96,14 +97,14 @@ public:
      *
      * @return the value tree representing this pattern
      */
-    ValueTree toValueTree();
+    juce::ValueTree toValueTree();
 
     /**
      * Serializes this pattern and saves it to the specified file.
      *
      * @param file the file where the pattern is to be saved
      */
-    void toFile(const File &file);
+    void toFile(const juce::File &file);
 
     /**
      * Deserializes the specified ValueTree into the pattern it represents.
@@ -111,7 +112,7 @@ public:
      * @param tree the tree to deserialize
      * @return the pattern represented by the ValueTree (empty if failed)
      */
-    static ArpPattern fromValueTree(ValueTree &tree);
+    static ArpPattern fromValueTree(juce::ValueTree &tree);
 
     /**
      * Loads the specified file and deserializes it into the pattern it represents.
@@ -119,7 +120,7 @@ public:
      * @param file the file to load
      * @return the pattern represented by the file (empty if failed)
      */
-    static ArpPattern fromFile(const File &file);
+    static ArpPattern fromFile(const juce::File &file);
 
 private:
 

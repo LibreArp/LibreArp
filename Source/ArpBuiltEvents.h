@@ -18,7 +18,7 @@
 #pragma once
 
 #include <set>
-#include "JuceHeader.h"
+
 #include "NoteData.h"
 
 /**
@@ -49,7 +49,7 @@ public:
         /**
          * The time in the pattern on which the event fires.
          */
-        int64 time;
+        int64_t time;
 
         /**
          * The indices of on-data.
@@ -130,7 +130,7 @@ public:
     /**
      * The loop length of the built pattern.
      */
-    int64 loopLength;
+    int64_t loopLength;
 };
 
 bool operator> (ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);

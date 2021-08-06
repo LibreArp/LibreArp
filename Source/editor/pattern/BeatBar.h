@@ -17,21 +17,22 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_gui_basics/juce_gui_basics.h>
+
 #include "../../LibreArp.h"
 
 class PatternEditorView;
 
-class BeatBar : public Component {
+class BeatBar : public juce::Component {
 public:
 
     explicit BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec);
 
-    void paint(Graphics &g) override;
+    void paint(juce::Graphics &g) override;
 
-    void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel) override;
+    void mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
 
-    void mouseDown(const MouseEvent& event) override;
+    void mouseDown(const juce::MouseEvent& event) override;
 
 private:
 

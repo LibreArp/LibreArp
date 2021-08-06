@@ -17,17 +17,18 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <juce_core/juce_core.h>
+#include <juce_data_structures/juce_data_structures.h>
 
 /**
  * The data of a note.
  */
 class NoteData {
 public:
-    static const Identifier TREEID_NOTE_DATA;
-    static const Identifier TREEID_NOTE_NUMBER;
-    static const Identifier TREEID_VELOCITY;
-    static const Identifier TREEID_PAN;
+    static const juce::Identifier TREEID_NOTE_DATA;
+    static const juce::Identifier TREEID_NOTE_NUMBER;
+    static const juce::Identifier TREEID_VELOCITY;
+    static const juce::Identifier TREEID_PAN;
 
     /**
      * The index of the note among the input notes.
@@ -58,7 +59,7 @@ public:
      *
      * @return a ValueTree representing this note
      */
-    ValueTree toValueTree();
+    juce::ValueTree toValueTree();
 
     /**
      * Deserializes the specified ValueTree into note data.
@@ -66,7 +67,7 @@ public:
      * @param tree the tree to deserialize
      * @return the note represented by the ValueTree
      */
-    static NoteData fromValueTree(ValueTree &tree);
+    static NoteData fromValueTree(juce::ValueTree &tree);
 };
 
 

@@ -17,14 +17,15 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_gui_basics/juce_gui_basics.h>
+
 #include "../../LibreArp.h"
 #include "PatternEditor.h"
 #include "BeatBar.h"
 #include "../../AudioUpdatable.h"
 
 
-class PatternEditorView : public Component, public AudioUpdatable {
+class PatternEditorView : public juce::Component, public AudioUpdatable {
 public:
 
     explicit PatternEditorView(LibreArp &p, EditorState &editorState);
@@ -38,23 +39,23 @@ public:
     int getRenderWidth();
     int getRenderHeight();
 
-    void audioUpdate(uint32 type) override;
+    void audioUpdate(uint32_t type) override;
 
 private:
 
     LibreArp &processor;
     EditorState &state;
 
-    FileChooser presetChooser;
+    juce::FileChooser presetChooser;
 
-    TextButton saveButton;
-    TextButton loadButton;
+    juce::TextButton saveButton;
+    juce::TextButton loadButton;
 
-    Slider snapSlider;
-    Label snapSliderLabel;
+    juce::Slider snapSlider;
+    juce::Label snapSliderLabel;
 
-    Slider loopResetSlider;
-    Label loopResetSliderLabel;
+    juce::Slider loopResetSlider;
+    juce::Label loopResetSliderLabel;
 
     PatternEditor editor;
     BeatBar beatBar;

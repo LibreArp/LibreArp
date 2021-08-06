@@ -17,8 +17,9 @@
 
 #pragma once
 
+#include <juce_core/juce_core.h>
+#include <juce_data_structures/juce_data_structures.h>
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "NoteData.h"
 
 /**
@@ -26,9 +27,9 @@
  */
 class ArpNote {
 public:
-    static const Identifier TREEID_NOTE;
-    static const Identifier TREEID_START_POINT;
-    static const Identifier TREEID_END_POINT;
+    static const juce::Identifier TREEID_NOTE;
+    static const juce::Identifier TREEID_START_POINT;
+    static const juce::Identifier TREEID_END_POINT;
 
     /**
      * Constructs a note with the specified data, or empty data if unspecified.
@@ -45,12 +46,12 @@ public:
     /**
      * The start point of the note in the pattern.
      */
-    int64 startPoint;
+    int64_t startPoint;
 
     /**
      * The end point of the note in the pattern.
      */
-    int64 endPoint;
+    int64_t endPoint;
 
 
 
@@ -59,7 +60,7 @@ public:
      *
      * @return a ValueTree representing this note
      */
-    ValueTree toValueTree();
+    juce::ValueTree toValueTree();
 
     /**
      * Deserializes the specified ValueTree into a note it represents.
@@ -67,7 +68,7 @@ public:
      * @param tree the tree to deserialize
      * @return the note represented by the ValueTree
      */
-    static ArpNote fromValueTree(ValueTree &tree);
+    static ArpNote fromValueTree(juce::ValueTree &tree);
 };
 
 

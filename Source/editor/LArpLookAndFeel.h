@@ -17,32 +17,32 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_gui_basics/juce_gui_basics.h>
 
 
-class LArpLookAndFeel : public LookAndFeel_V4 {
+class LArpLookAndFeel : public juce::LookAndFeel_V4 {
 
 public:
 
-    static const Colour MAIN_BACKGROUND_COLOUR;
-    static const Colour HIGHLIGHT_BACKGROUND_COLOUR;
+    static const juce::Colour MAIN_BACKGROUND_COLOUR;
+    static const juce::Colour HIGHLIGHT_BACKGROUND_COLOUR;
 
-    static const Colour MAIN_FOREGROUND_COLOUR;
-    static const Colour HIGHLIGHT_FOREGROUND_COLOUR;
+    static const juce::Colour MAIN_FOREGROUND_COLOUR;
+    static const juce::Colour HIGHLIGHT_FOREGROUND_COLOUR;
 
 
-    void drawTabButton(TabBarButton &button, Graphics &graphics, bool isMouseOver, bool isMouseDown) override;
+    void drawTabButton(juce::TabBarButton &button, juce::Graphics &graphics, bool isMouseOver, bool isMouseDown) override;
 
-    void drawTabAreaBehindFrontButton(TabbedButtonBar &bar, Graphics &g, int w, int h) override;
+    void drawTabAreaBehindFrontButton(juce::TabbedButtonBar &bar, juce::Graphics &g, int w, int h) override;
 
-    int getTabButtonBestWidth(TabBarButton &button, int tabDepth) override;
+    int getTabButtonBestWidth(juce::TabBarButton &button, int tabDepth) override;
 
     void
-    drawButtonBackground(Graphics &graphics, Button &button, const Colour &backgroundColour, bool isMouseOverButton,
+    drawButtonBackground(juce::Graphics &graphics, juce::Button &button, const juce::Colour &backgroundColour, bool isMouseOverButton,
                          bool isButtonDown) override;
 
     void
-    drawScrollbar(Graphics &g, ScrollBar &bar, int x, int y, int width, int height, bool isScrollbarVertical,
+    drawScrollbar(juce::Graphics &g, juce::ScrollBar &bar, int x, int y, int width, int height, bool isScrollbarVertical,
                   int thumbStartPosition, int thumbSize, bool isMouseOver, bool isMouseDown) override;
 
     static LArpLookAndFeel &getInstance();
@@ -50,7 +50,7 @@ public:
 private:
 
     explicit LArpLookAndFeel();
-    Typeface::Ptr mainTypeface;
+    juce::Typeface::Ptr mainTypeface;
 
 };
 

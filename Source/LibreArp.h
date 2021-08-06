@@ -19,7 +19,9 @@
 
 #include <sstream>
 #include <mutex>
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <juce_core/juce_core.h>
+#include <juce_audio_processors/juce_audio_processors.h>
+
 #include "ArpPattern.h"
 #include "editor/EditorState.h"
 #include "AudioUpdatable.h"
@@ -29,7 +31,7 @@
 /**
  * The LibreArp audio processor.
  */
-class LibreArp : public AudioProcessor {
+class LibreArp : public juce::AudioProcessor {
 public:
 
     class InputNote {
@@ -41,14 +43,14 @@ public:
         double velocity;
     };
 
-    static const Identifier TREEID_LIBREARP;
-    static const Identifier TREEID_LOOP_RESET;
-    static const Identifier TREEID_PATTERN_XML;
-    static const Identifier TREEID_OCTAVES;
-    static const Identifier TREEID_INPUT_VELOCITY;
-    static const Identifier TREEID_NUM_INPUT_NOTES;
-    static const Identifier TREEID_OUTPUT_MIDI_CHANNEL;
-    static const Identifier TREEID_INPUT_MIDI_CHANNEL;
+    static const juce::Identifier TREEID_LIBREARP;
+    static const juce::Identifier TREEID_LOOP_RESET;
+    static const juce::Identifier TREEID_PATTERN_XML;
+    static const juce::Identifier TREEID_OCTAVES;
+    static const juce::Identifier TREEID_INPUT_VELOCITY;
+    static const juce::Identifier TREEID_NUM_INPUT_NOTES;
+    static const juce::Identifier TREEID_OUTPUT_MIDI_CHANNEL;
+    static const juce::Identifier TREEID_INPUT_MIDI_CHANNEL;
 
 
     LibreArp();
@@ -60,21 +62,17 @@ public:
 
     void releaseResources() override;
 
-#ifndef JucePlugin_PreferredChannelConfigurations
-
     bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
 
-#endif
-
-    void processBlock(AudioBuffer<float> &, MidiBuffer &) override;
+    void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
 
 
-    AudioProcessorEditor *createEditor() override;
+    juce::AudioProcessorEditor *createEditor() override;
 
     bool hasEditor() const override;
 
 
-    const String getName() const override;
+    const juce::String getName() const override;
 
     bool acceptsMidi() const override;
 
@@ -91,9 +89,9 @@ public:
 
     void setCurrentProgram(int index) override;
 
-    const String getProgramName(int index) override;
+    const juce::String getProgramName(int index) override;
 
-    void changeProgramName(int index, const String &newName) override;
+    void changeProgramName(int index, const juce::String &newName) override;
 
 
     /**
@@ -101,9 +99,9 @@ public:
      *
      * @return the value tree representing this pattern
      */
-    ValueTree toValueTree();
+    juce::ValueTree toValueTree();
 
-    void getStateInformation(MemoryBlock &destData) override;
+    void getStateInformation(juce::MemoryBlock &destData) override;
 
     void setStateInformation(const void *data, int sizeInBytes) override;
 
@@ -128,7 +126,7 @@ public:
      *
      * @param file the file to load
      */
-    void loadPatternFromFile(const File &file);
+    void loadPatternFromFile(const juce::File &file);
 
 
     /**
@@ -148,7 +146,7 @@ public:
      *
      * @return the current pattern's XML
      */
-    String getStateXml();
+    juce::String getStateXml();
 
 
 
@@ -157,7 +155,7 @@ public:
      *
      * @return the last position the processor has played
      */
-    int64 getLastPosition();
+    int64_t getLastPosition();
 
     /**
      * Sets the amount of beats after which the loop should reset.
@@ -178,7 +176,7 @@ public:
      *
      * @return the currently playing pattern indices
      */
-    SortedSet<unsigned long> &getPlayingPatternIndices();
+    juce::SortedSet<unsigned long> &getPlayingPatternIndices();
 
 
     bool isTransposingOctaves();
@@ -234,7 +232,7 @@ public:
      *
      * @param cpi the position information to fill
      */
-    void fillCurrentDebugPositionInfo(AudioPlayHead::CurrentPositionInfo &cpi);
+    void fillCurrentDebugPositionInfo(juce::AudioPlayHead::CurrentPositionInfo &cpi);
 
 
     /**
@@ -309,7 +307,7 @@ private:
     /**
      * The current pattern's XML representation.
      */
-    String patternXml;
+    juce::String patternXml;
 
     /**
      * The current pattern, built for playback.
@@ -321,19 +319,19 @@ private:
     /**
      * Whether the plugin should transpose octaves upon "note overflow".
      */
-    AudioParameterBool *octaves;
+    juce::AudioParameterBool *octaves;
 
     /**
      * Whether the plugin is using the velocity of input notes.
      */
-    AudioParameterBool *usingInputVelocity;
+    juce::AudioParameterBool *usingInputVelocity;
 
 
 
     /**
      * The last position the processor has played, in pulses.
      */
-    int64 lastPosition;
+    int64_t lastPosition;
 
     /**
      * The amount of beats after which the loop should reset.
@@ -362,17 +360,17 @@ private:
     /**
      * The set of currently fed input notes.
      */
-    SortedSet<InputNote> inputNotes;
+    juce::SortedSet<InputNote> inputNotes;
 
     /**
      * The set of currently playing output notes.
      */
-    SortedSet<ArpBuiltEvents::PlayingNote> playingNotes;
+    juce::SortedSet<ArpBuiltEvents::PlayingNote> playingNotes;
 
     /**
      * The set of currently playing pattern indices.
      */
-    SortedSet<unsigned long> playingPatternIndices;
+    juce::SortedSet<unsigned long> playingPatternIndices;
 
     /**
      * The last active number of input notes.
@@ -398,7 +396,7 @@ private:
     /**
      * The timestamp of the last debug playback reset.
      */
-    unsigned long debugPlaybackResetTime;
+    int64_t debugPlaybackResetTime;
 
 
     /**
@@ -423,19 +421,19 @@ private:
      *
      * @param inMidi the input MIDI messages
      */
-    void processInputMidi(MidiBuffer &inMidi);
+    void processInputMidi(juce::MidiBuffer &inMidi);
 
     /**
      * Sends a noteOff for all currently playing output notes.
      *
      * @param midi the midi messages
      */
-    void stopAll(MidiBuffer &midi);
+    void stopAll(juce::MidiBuffer &midi);
 
     /**
      * Sends an update to the editor.
      */
-    void updateEditor(uint32 type = AudioUpdatable::GENERAL_UPDATE);
+    void updateEditor(uint32_t type = AudioUpdatable::GENERAL_UPDATE);
 
 
 
@@ -443,11 +441,11 @@ private:
      * Calculates the next time of the specified event.
      *
      * @param event the event of which the next time should be calculated
-     * @param blockStartPosition the current processed position
-     * @param blockEndPosition the last processed position
+     * @param blockEndPosition the current processed position
+     * @param blockStartPosition the last processed position
      * @return the next time of the event
      */
-    int64 nextTime(ArpBuiltEvents::Event &event, int64 blockStartPosition, int64 blockEndPosition) const;
+    int64_t nextTime(ArpBuiltEvents::Event& event, int64_t blockStartPosition, int64_t blockEndPosition) const;
 };
 
 bool operator> (const LibreArp::InputNote &a, const LibreArp::InputNote &b);

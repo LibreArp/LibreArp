@@ -18,9 +18,8 @@
 #pragma once
 
 #include <mutex>
-
-#include "JuceHeader.h"
-
+#include <juce_core/juce_core.h>
+#include <juce_data_structures/juce_data_structures.h>
 
 /**
  * A class managing global data (like global settings) of the plugin.
@@ -28,12 +27,12 @@
 class Globals {
 public:
 
-    static const Identifier TREEID_SETTINGS;
-    static const Identifier TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT;
-    static const Identifier TREEID_UPDATE_CHECK;
-    static const Identifier TREEID_FOUND_UPDATE_ON_LAST_CHECK;
-    static const Identifier TREEID_MIN_SECS_BEFORE_UPDATE_CHECK;
-    static const Identifier TREEID_LAST_UPDATE_CHECK_TIME;
+    static const juce::Identifier TREEID_SETTINGS;
+    static const juce::Identifier TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT;
+    static const juce::Identifier TREEID_UPDATE_CHECK;
+    static const juce::Identifier TREEID_FOUND_UPDATE_ON_LAST_CHECK;
+    static const juce::Identifier TREEID_MIN_SECS_BEFORE_UPDATE_CHECK;
+    static const juce::Identifier TREEID_LAST_UPDATE_CHECK_TIME;
 
 
     explicit Globals();
@@ -72,30 +71,30 @@ public:
      *
      * @return a value tree representing this object
      */
-    ValueTree toValueTree();
+    juce::ValueTree toValueTree();
 
     /**
      * Resets this Globals object and repopulates it according to the specified value tree.
      *
      * @param tree the tree to use for repopulation
      */
-    void parseValueTree(const ValueTree &tree);
+    void parseValueTree(const juce::ValueTree &tree);
 
 
     /**
      * @return the directory where global data is stored
      */
-    File getGlobalsDir();
+    juce::File getGlobalsDir();
 
     /**
      * @return the global settings file
      */
-    File getSettingsFile();
+    juce::File getSettingsFile();
 
     /**
      * @return the directory where pattern presets are stored
      */
-    File getPatternPresetsDir();
+    juce::File getPatternPresetsDir();
 
     bool isCheckForUpdatesEnabled() const;
 
@@ -109,13 +108,13 @@ public:
 
     void setFoundUpdateOnLastCheck(bool foundUpdateOnLastCheck);
 
-    int64 getMinSecsBeforeUpdateCheck() const;
+    int64_t getMinSecsBeforeUpdateCheck() const;
 
-    void setMinSecsBeforeUpdateCheck(int64 minSecsBeforeUpdateCheck);
+    void setMinSecsBeforeUpdateCheck(int64_t minSecsBeforeUpdateCheck);
 
-    int64 getLastUpdateCheckTime() const;
+    int64_t getLastUpdateCheckTime() const;
 
-    void setLastUpdateCheckTime(int64 lastUpdateCheckTime);
+    void setLastUpdateCheckTime(int64_t lastUpdateCheckTime);
 
 private:
 
@@ -127,17 +126,17 @@ private:
     /**
      * Directory of the global data.
      */
-    File globalsDir;
+    juce::File globalsDir;
 
     /**
      * Global settings file.
      */
-    File settingsFile;
+    juce::File settingsFile;
 
     /**
      * Default presets directory.
      */
-    File patternPresetsDir;
+    juce::File patternPresetsDir;
 
     /**
      * Whether the GUI of the plugin has already asked the user for consent about automatic update checks.
@@ -157,12 +156,12 @@ private:
     /**
      * The minimum amount of seconds that need to elapse before another check for updates is performed.
      */
-    int64 minSecsBeforeUpdateCheck;
+    int64_t minSecsBeforeUpdateCheck;
 
     /**
      * The timestamp (in milliseconds) of the last update check.
      */
-    int64 lastUpdateCheckTime;
+    int64_t lastUpdateCheckTime;
 
     /**
      * Mutex for the globals.

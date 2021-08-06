@@ -55,10 +55,10 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     addAndMakeVisible(beatBar);
     addAndMakeVisible(editor);
 
-    loopResetSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
+    loopResetSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
     loopResetSlider.setRange(0, 65535, 1);
     loopResetSlider.setNumDecimalPlacesToDisplay(0);
-    loopResetSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    loopResetSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
     loopResetSlider.setValue(processor.getLoopReset());
     loopResetSlider.onValueChange = [this] {
         processor.setLoopReset(loopResetSlider.getValue());
@@ -66,22 +66,22 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     };
     addAndMakeVisible(loopResetSlider);
 
-    loopResetSliderLabel.setText("Reset every (beats):", NotificationType::dontSendNotification);
-    loopResetSliderLabel.setJustificationType(Justification::centredLeft);
+    loopResetSliderLabel.setText("Reset every (beats):", juce::NotificationType::dontSendNotification);
+    loopResetSliderLabel.setJustificationType(juce::Justification::centredLeft);
     addAndMakeVisible(loopResetSliderLabel);
 
-    snapSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
+    snapSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
     snapSlider.setRange(1, 16, 1);
-    snapSlider.setValue(state.divisor, NotificationType::dontSendNotification);
-    snapSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    snapSlider.setValue(state.divisor, juce::NotificationType::dontSendNotification);
+    snapSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
     snapSlider.onValueChange = [this] {
         state.divisor = static_cast<int>(snapSlider.getValue());
         editor.repaint();
     };
     addAndMakeVisible(snapSlider);
 
-    snapSliderLabel.setText("Snap:", NotificationType::dontSendNotification);
-    snapSliderLabel.setJustificationType(Justification::centredRight);
+    snapSliderLabel.setText("Snap:", juce::NotificationType::dontSendNotification);
+    snapSliderLabel.setJustificationType(juce::Justification::centredRight);
     addAndMakeVisible(snapSliderLabel);
 }
 
@@ -108,15 +108,15 @@ void PatternEditorView::resized() {
 }
 
 void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
-    state.pixelsPerBeat = jmax(32, state.pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
-    state.pixelsPerNote = jmax(8, state.pixelsPerNote + static_cast<int>(deltaY * Y_ZOOM_RATE));
+    state.pixelsPerBeat = juce::jmax(32, state.pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
+    state.pixelsPerNote = juce::jmax(8, state.pixelsPerNote + static_cast<int>(deltaY * Y_ZOOM_RATE));
 
     editor.repaint();
     beatBar.repaint();
 }
 
 void PatternEditorView::scrollPattern(float deltaX, float deltaY) {
-    state.offsetX = jmax(0, state.offsetX - static_cast<int>(deltaX * X_SCROLL_RATE));
+    state.offsetX = juce::jmax(0, state.offsetX - static_cast<int>(deltaX * X_SCROLL_RATE));
     state.offsetY = state.offsetY - static_cast<int>(deltaY * Y_SCROLL_RATE);
 
     editor.repaint();
@@ -152,6 +152,6 @@ int PatternEditorView::getRenderHeight() {
     return dist * state.pixelsPerNote;
 }
 
-void PatternEditorView::audioUpdate(uint32 type) {
+void PatternEditorView::audioUpdate(uint32_t type) {
     editor.audioUpdate(type);
 }

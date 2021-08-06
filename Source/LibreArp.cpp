@@ -18,14 +18,14 @@
 #include "LibreArp.h"
 #include "editor/MainEditor.h"
 
-const Identifier LibreArp::TREEID_LIBREARP = Identifier("libreArpPlugin"); // NOLINT
-const Identifier LibreArp::TREEID_LOOP_RESET = Identifier("loopReset"); // NOLINT
-const Identifier LibreArp::TREEID_PATTERN_XML = Identifier("patternXml"); // NOLINT
-const Identifier LibreArp::TREEID_OCTAVES = Identifier("octaves"); // NOLINT
-const Identifier LibreArp::TREEID_INPUT_VELOCITY = Identifier("usingInputVelocity"); // NOLINT
-const Identifier LibreArp::TREEID_NUM_INPUT_NOTES = Identifier("numInputNotes"); // NOLINT
-const Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = Identifier("outputMidiChannel"); // NOLINT
-const Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = Identifier("inputMidiChannel"); // NOLINT
+const juce::Identifier LibreArp::TREEID_LIBREARP = "libreArpPlugin"; // NOLINT
+const juce::Identifier LibreArp::TREEID_LOOP_RESET = "loopReset"; // NOLINT
+const juce::Identifier LibreArp::TREEID_PATTERN_XML = "patternXml"; // NOLINT
+const juce::Identifier LibreArp::TREEID_OCTAVES = "octaves"; // NOLINT
+const juce::Identifier LibreArp::TREEID_INPUT_VELOCITY = "usingInputVelocity"; // NOLINT
+const juce::Identifier LibreArp::TREEID_NUM_INPUT_NOTES = "numInputNotes"; // NOLINT
+const juce::Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = "outputMidiChannel"; // NOLINT
+const juce::Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = "inputMidiChannel"; // NOLINT
 
 
 LibreArp::InputNote::InputNote(int note, double velocity) : note(note), velocity(velocity) {}
@@ -52,9 +52,8 @@ bool operator==(const LibreArp::InputNote &a, const LibreArp::InputNote &b) {
 
 
 LibreArp::LibreArp()
-#ifndef JucePlugin_PreferredChannelConfigurations
-        : AudioProcessor(BusesProperties())
-#endif
+    // The following input channel is needed, otherwise JUCE reports numSamples of 0
+    : AudioProcessor(BusesProperties().withInput("Input", juce::AudioChannelSet::mono(), true))
 {
     this->lastPosition = 0;
     this->wasPlaying = false;
@@ -67,18 +66,18 @@ LibreArp::LibreArp()
     this->timeSigNumerator = 4;
     this->timeSigDenominator = 4;
     this->debugPlaybackEnabled = false;
-    this->debugPlaybackResetTime = Time::currentTimeMillis();
+    this->debugPlaybackResetTime = juce::Time::currentTimeMillis();
     resetDebugPlayback();
 
     globals.markChanged();
 
-    addParameter(octaves = new AudioParameterBool(
+    addParameter(octaves = new juce::AudioParameterBool(
             "octaves",
             "Octaves",
             true,
             "Overflow octave transposition"));
 
-    addParameter(usingInputVelocity = new AudioParameterBool(
+    addParameter(usingInputVelocity = new juce::AudioParameterBool(
             "usingInputVelocity",
             "Input velocity",
             true,
@@ -88,32 +87,20 @@ LibreArp::LibreArp()
 LibreArp::~LibreArp() = default;
 
 //==============================================================================
-const String LibreArp::getName() const {
+const juce::String LibreArp::getName() const {
     return JucePlugin_Name;
 }
 
 bool LibreArp::acceptsMidi() const {
-#if JucePlugin_WantsMidiInput
     return true;
-#else
-    return false;
-#endif
 }
 
 bool LibreArp::producesMidi() const {
-#if JucePlugin_ProducesMidiOutput
     return true;
-#else
-    return false;
-#endif
 }
 
 bool LibreArp::isMidiEffect() const {
-#if JucePlugin_IsMidiEffect
     return true;
-#else
-    return false;
-#endif
 }
 
 double LibreArp::getTailLengthSeconds() const {
@@ -129,41 +116,37 @@ int LibreArp::getCurrentProgram() {
 }
 
 void LibreArp::setCurrentProgram(int index) {
-    ignoreUnused(index);
+    juce::ignoreUnused(index);
 }
 
-const String LibreArp::getProgramName(int index) {
-    ignoreUnused(index);
+const juce::String LibreArp::getProgramName(int index) {
+    juce::ignoreUnused(index);
     return {};
 }
 
-void LibreArp::changeProgramName(int index, const String &newName) {
-    ignoreUnused(index);
+void LibreArp::changeProgramName(int index, const juce::String &newName) {
+    juce::ignoreUnused(index);
 }
 
 //==============================================================================
 void LibreArp::prepareToPlay(double sampleRate, int samplesPerBlock) {
-    ignoreUnused(samplesPerBlock);
-    ignoreUnused(sampleRate);
+    juce::ignoreUnused(samplesPerBlock);
+    juce::ignoreUnused(sampleRate);
 }
 
 void LibreArp::releaseResources() {
 
 }
 
-#ifndef JucePlugin_PreferredChannelConfigurations
-
 bool LibreArp::isBusesLayoutSupported(const BusesLayout &layouts) const {
     ignoreUnused(layouts);
     return true;
 }
 
-#endif
-
-void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
+void LibreArp::processBlock(juce::AudioBuffer<float> &audio, juce::MidiBuffer &midi) {
     std::scoped_lock lock(mutex);
+    juce::ScopedNoDenormals noDenormals;
 
-    ScopedNoDenormals noDenormals;
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
@@ -183,8 +166,8 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
 
     processInputMidi(midi);
 
-    AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
-    if (isDebugPlaybackEnabled() || JUCEApplicationBase::isStandaloneApp()) {
+    juce::AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
+    if (isDebugPlaybackEnabled() || juce::JUCEApplicationBase::isStandaloneApp()) {
         fillCurrentDebugPositionInfo(cpi);
     } else {
         if (getPlayHead() != nullptr) {
@@ -200,8 +183,8 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = getSampleRate() * pulseLength;
 
-        auto blockStartPosition = static_cast<int64>(std::floor(cpi.ppqPosition * timebase));
-        auto blockEndPosition = blockStartPosition + static_cast<int64>(std::ceil(numSamples / pulseSamples));
+        auto blockStartPosition = static_cast<int64_t>(std::floor(cpi.ppqPosition * timebase));
+        auto blockEndPosition = blockStartPosition + static_cast<int64_t>(std::ceil(numSamples / pulseSamples));
 
         if (stopScheduled) {
             this->stopAll(midi);
@@ -213,11 +196,11 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
         }
 
         for(auto event : events.events) {
-            auto time = nextTime(event, blockEndPosition, blockStartPosition);
+            auto time = nextTime(event, blockStartPosition, blockEndPosition);
 
             if (time < blockEndPosition) {
                 auto offsetBase = static_cast<int>(std::floor((double) (time - this->lastPosition) * pulseSamples));
-                int offset = jmin(offsetBase, numSamples - 1);
+                int offset = juce::jmin(offsetBase, numSamples - 1);
 
                 if (this->lastPosition > blockEndPosition && offset < 0) {
                     offset = 0;
@@ -227,7 +210,7 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                     for (auto i : event.offs) {
                         auto &data = events.data[i];
                         if (data.lastNote.noteNumber >= 0) {
-                            midi.addEvent(MidiMessage::noteOff(data.lastNote.outChannel, data.lastNote.noteNumber), offset);
+                            midi.addEvent(juce::MidiMessage::noteOff(data.lastNote.outChannel, data.lastNote.noteNumber), offset);
                             playingNotes.removeValue(data.lastNote);
                             playingPatternIndices.removeValue(data.noteIndex);
                             data.lastNote = ArpBuiltEvents::PlayingNote(-1, -1);
@@ -254,10 +237,10 @@ void LibreArp::processBlock(AudioBuffer<float> &audio, MidiBuffer &midi) {
                                 note += octave * 12;
                             }
 
-                            if (isPositiveAndBelow(note, 128) && data.lastNote.noteNumber != note) {
+                            if (juce::isPositiveAndBelow(note, 128) && data.lastNote.noteNumber != note) {
                                 data.lastNote = ArpBuiltEvents::PlayingNote(note, outputMidiChannel);
                                 midi.addEvent(
-                                        MidiMessage::noteOn(
+                                        juce::MidiMessage::noteOn(
                                                 data.lastNote.outChannel, data.lastNote.noteNumber, static_cast<float>(velocity)), offset);
                                 playingNotes.add(data.lastNote);
                                 playingPatternIndices.add(data.noteIndex);
@@ -289,13 +272,13 @@ bool LibreArp::hasEditor() const {
     return true;
 }
 
-AudioProcessorEditor *LibreArp::createEditor() {
+juce::AudioProcessorEditor *LibreArp::createEditor() {
     return new MainEditor(*this, editorState);
 }
 
-ValueTree LibreArp::toValueTree() {
+juce::ValueTree LibreArp::toValueTree() {
     std::scoped_lock lock(mutex);
-    ValueTree tree = ValueTree(TREEID_LIBREARP);
+    juce::ValueTree tree = juce::ValueTree(TREEID_LIBREARP);
     tree.appendChild(this->pattern.toValueTree(), nullptr);
     tree.appendChild(this->editorState.toValueTree(), nullptr);
     tree.setProperty(TREEID_LOOP_RESET, this->loopReset, nullptr);
@@ -308,24 +291,24 @@ ValueTree LibreArp::toValueTree() {
     return tree;
 }
 
-void LibreArp::getStateInformation(MemoryBlock &destData) {
+void LibreArp::getStateInformation(juce::MemoryBlock &destData) {
     destData.reset();
-    MemoryOutputStream(destData, true).writeString(toValueTree().toXmlString());
+    juce::MemoryOutputStream(destData, true).writeString(toValueTree().toXmlString());
 }
 
 void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
     std::scoped_lock lock(mutex);
 
     if (sizeInBytes > 0) {
-        String xml = MemoryInputStream(data, static_cast<size_t>(sizeInBytes), false).readString();
-        std::unique_ptr<XmlElement> doc = XmlDocument::parse(xml);
-        ValueTree tree = ValueTree::fromXml(*doc);
+        juce::String xml = juce::MemoryInputStream(data, static_cast<size_t>(sizeInBytes), false).readString();
+        std::unique_ptr<juce::XmlElement> doc = juce::XmlDocument::parse(xml);
+        juce::ValueTree tree = juce::ValueTree::fromXml(*doc);
 
         if (tree.isValid() && tree.hasType(TREEID_LIBREARP)) {
-            ValueTree patternTree = tree.getChildWithName(ArpPattern::TREEID_PATTERN);
+            juce::ValueTree patternTree = tree.getChildWithName(ArpPattern::TREEID_PATTERN);
             ArpPattern loadedPattern = ArpPattern::fromValueTree(patternTree);
 
-            ValueTree editorTree = tree.getChildWithName(EditorState::TREEID_EDITOR_STATE);
+            juce::ValueTree editorTree = tree.getChildWithName(EditorState::TREEID_EDITOR_STATE);
             if (editorTree.isValid()) {
                 this->editorState = EditorState::fromValueTree(editorTree);
             }
@@ -366,7 +349,7 @@ void LibreArp::setPattern(const ArpPattern &newPattern) {
     buildPattern();
 }
 
-void LibreArp::loadPatternFromFile(const File &file) {
+void LibreArp::loadPatternFromFile(const juce::File &file) {
     setPattern(ArpPattern::fromFile(file));
 }
 
@@ -378,13 +361,13 @@ ArpPattern &LibreArp::getPattern() {
     return this->pattern;
 }
 
-String LibreArp::getStateXml() {
+juce::String LibreArp::getStateXml() {
     std::scoped_lock lock(mutex);
     return this->toValueTree().toXmlString();
 }
 
 
-int64 LibreArp::getLastPosition() {
+int64_t LibreArp::getLastPosition() {
     std::scoped_lock lock(mutex);
     return this->lastPosition;
 }
@@ -393,7 +376,7 @@ int64 LibreArp::getLastPosition() {
 
 void LibreArp::setLoopReset(double beats) {
     std::scoped_lock lock(mutex);
-    this->loopReset = jmax(0.0, beats);
+    this->loopReset = juce::jmax(0.0, beats);
 }
 
 double LibreArp::getLoopReset() const {
@@ -402,7 +385,7 @@ double LibreArp::getLoopReset() const {
 
 
 
-SortedSet<unsigned long>& LibreArp::getPlayingPatternIndices() {
+juce::SortedSet<unsigned long>& LibreArp::getPlayingPatternIndices() {
     std::scoped_lock lock(mutex);
     return this->playingPatternIndices;
 }
@@ -441,7 +424,7 @@ int LibreArp::getTimeSigDenominator() const {
 
 
 bool LibreArp::isDebugPlaybackEnabled() const {
-    return this->debugPlaybackEnabled || JUCEApplicationBase::isStandaloneApp();
+    return this->debugPlaybackEnabled || juce::JUCEApplicationBase::isStandaloneApp();
 }
 
 void LibreArp::setDebugPlaybackEnabled(bool enabled) {
@@ -450,7 +433,7 @@ void LibreArp::setDebugPlaybackEnabled(bool enabled) {
 }
 
 void LibreArp::resetDebugPlayback() {
-    this->debugPlaybackResetTime = Time::currentTimeMillis();
+    this->debugPlaybackResetTime = juce::Time::currentTimeMillis();
 
     this->inputNotes.clear();
     if (this->isDebugPlaybackEnabled()) {
@@ -460,15 +443,15 @@ void LibreArp::resetDebugPlayback() {
     }
 }
 
-void LibreArp::fillCurrentDebugPositionInfo(AudioPlayHead::CurrentPositionInfo &cpi) {
+void LibreArp::fillCurrentDebugPositionInfo(juce::AudioPlayHead::CurrentPositionInfo &cpi) {
     // Dummy data
     cpi.isLooping = false;
     cpi.isRecording = false;
     cpi.editOriginTime = 0.0;
-    cpi.frameRate = AudioPlayHead::FrameRateType::fps24;
+    cpi.frameRate = juce::AudioPlayHead::FrameRateType::fps24;
     cpi.ppqLoopStart = 0.0;
     cpi.ppqLoopEnd = 0.0;
-    cpi.ppqPositionOfLastBarStart = 0.0; // TODO
+    cpi.ppqPositionOfLastBarStart = 0.0; // TODO (update: yea, who knows what past me wanted to do here *facepalm*)
 
     // Metadata
     cpi.bpm = 128.0;
@@ -477,9 +460,9 @@ void LibreArp::fillCurrentDebugPositionInfo(AudioPlayHead::CurrentPositionInfo &
     cpi.isPlaying = true;
 
     // Time data
-    auto positionMillis = Time::currentTimeMillis() - debugPlaybackResetTime;
-    cpi.timeInSeconds = positionMillis * 0.001;
-    cpi.timeInSamples = static_cast<int64>(cpi.timeInSeconds * getSampleRate());
+    auto positionMillis = juce::Time::currentTimeMillis() - debugPlaybackResetTime;
+    cpi.timeInSeconds = static_cast<double>(positionMillis) * 0.001;
+    cpi.timeInSamples = static_cast<int64_t>(cpi.timeInSeconds * getSampleRate());
     cpi.ppqPosition = cpi.timeInSeconds * (cpi.bpm / 60);
 }
 
@@ -523,12 +506,13 @@ Updater::UpdateInfo& LibreArp::getLastUpdateInfo() {
 }
 
 
-void LibreArp::processInputMidi(MidiBuffer &inMidi) {
+void LibreArp::processInputMidi(juce::MidiBuffer &inMidi) {
     int sample;
-    MidiBuffer outMidi;
-    MidiMessage message;
+    juce::MidiBuffer outMidi;
 
-    for (MidiBuffer::Iterator i(inMidi); i.getNextEvent(message, sample);) {
+    for (const juce::MidiMessageMetadata metadata : inMidi) {
+        juce::MidiMessage message = metadata.getMessage();
+
         if (inputMidiChannel == 0 || message.getChannel() == inputMidiChannel) {
             if (message.isNoteOn()) {
                 inputNotes.add(InputNote(message.getNoteNumber(), message.getVelocity() / 127.0));
@@ -551,9 +535,9 @@ void LibreArp::stopAll() {
     this->stopScheduled = true;
 }
 
-void LibreArp::stopAll(MidiBuffer &midi) {
+void LibreArp::stopAll(juce::MidiBuffer &midi) {
     for (auto note : playingNotes) {
-        midi.addEvent(MidiMessage::noteOff(note.outChannel, note.noteNumber), 0);
+        midi.addEvent(juce::MidiMessage::noteOff(note.outChannel, note.noteNumber), 0);
     }
     playingNotes.clear();
     playingPatternIndices.clear();
@@ -563,8 +547,8 @@ void LibreArp::stopAll(MidiBuffer &midi) {
     }
 }
 
-void LibreArp::updateEditor(uint32 type) {
-    MessageManager::callAsync([this, type] {
+void LibreArp::updateEditor(uint32_t type) {
+    juce::MessageManager::callAsync([this, type] {
         auto editor = (MainEditor *) getActiveEditor();
         if (editor != nullptr && editor->isVisible()) {
             editor->audioUpdate(type);
@@ -574,26 +558,26 @@ void LibreArp::updateEditor(uint32 type) {
 
 
 
-int64 LibreArp::nextTime(ArpBuiltEvents::Event &event, int64 blockStartPosition, int64 blockEndPosition) const {
-    int64 result;
+int64_t LibreArp::nextTime(ArpBuiltEvents::Event& event, int64_t blockStartPosition, int64_t blockEndPosition) const {
+    int64_t result;
 
     if (loopReset > 0.0) {
-        auto loopResetLength = static_cast<int64>(std::ceil(events.timebase * loopReset));
-        auto resetPosition = blockStartPosition % loopResetLength;
+        auto loopResetLength = static_cast<int64_t>(std::ceil(events.timebase * loopReset));
+        auto resetPosition = blockEndPosition % loopResetLength;
         auto intermediateResult = resetPosition - (resetPosition % events.loopLength) + event.time;
 
-        result = blockStartPosition - (blockStartPosition % loopResetLength) + intermediateResult;
+        result = blockEndPosition - (blockEndPosition % loopResetLength) + intermediateResult;
     } else {
-        result = blockStartPosition - (blockStartPosition % events.loopLength) + event.time;
+        result = blockEndPosition - (blockEndPosition % events.loopLength) + event.time;
     }
 
-    if (result < blockEndPosition) {
+    while (result < blockStartPosition) {
         result += events.loopLength;
     }
 
     return result;
 }
 
-AudioProcessor *JUCE_CALLTYPE createPluginFilter() {
+juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter() {
     return new LibreArp();
 }

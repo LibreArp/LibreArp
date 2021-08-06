@@ -35,7 +35,7 @@ void SettingsEditor::resized() {
 }
 
 void SettingsEditor::updateSettingsValues() {
-    updateCheckToggle.setToggleState(processor.getGlobals().isCheckForUpdatesEnabled(), NotificationType::dontSendNotification);
+    updateCheckToggle.setToggleState(processor.getGlobals().isCheckForUpdatesEnabled(), juce::NotificationType::dontSendNotification);
 }
 
 void SettingsEditor::visibilityChanged() {
