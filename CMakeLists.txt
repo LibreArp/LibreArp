@@ -19,7 +19,10 @@ cmake_minimum_required(VERSION 3.16)
 project(LibreArp VERSION 2.0)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
+endif()
 
 add_subdirectory(Vendor/juce)
 
@@ -44,6 +47,10 @@ juce_add_plugin(LibreArp
         PLUGIN_CODE Larx
         FORMATS AU VST3 Standalone
         PRODUCT_NAME "LibreArp")
+
+if(MINGW)
+    target_compile_options(LibreArp PRIVATE "-Wa,-mbig-obj")
+endif()
 
 target_sources(LibreArp
         PRIVATE
@@ -79,6 +86,9 @@ target_compile_definitions(LibreArp
         PUBLIC
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
+        JUCE_USE_FLAC=0
+        JUCE_USE_OGGVORBIS=0
+        JUCE_USE_WINDOWS_MEDIA_FORMAT=0
         JUCE_VST3_CAN_REPLACE_VST2=0
         JUCE_DISPLAY_SPLASH_SCREEN=0 # we are GPL so we are allowed
         )
