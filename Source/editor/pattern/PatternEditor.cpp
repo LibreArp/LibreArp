@@ -178,7 +178,6 @@ void PatternEditor::paint(juce::Graphics &g) {
         if (positionRect.intersects(drawRegion)) {
             g.setColour(POSITION_INDICATOR_COLOUR);
             g.fillRect(positionRect);
-            repaint(positionRect);
         }
     }
 
@@ -674,8 +673,10 @@ void PatternEditor::audioUpdate(uint32_t type) {
             position %= static_cast<int64_t>(processor.getLoopReset() * processor.getPattern().getTimebase());
         }
         position %= processor.getPattern().loopLength;
+
+        if (lastPlayPositionX >= 0 && lastPlayPositionX <= getHeight()) repaint(lastPlayPositionX, 0, 1, getHeight());
         lastPlayPositionX = pulseToX(position);
-        repaint(lastPlayPositionX, 0, 1, getHeight());
+        if (lastPlayPositionX >= 0 && lastPlayPositionX <= getHeight()) repaint(lastPlayPositionX, 0, 1, getHeight());
     }
 
     repaintNotes();
