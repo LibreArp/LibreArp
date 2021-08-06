@@ -48,7 +48,6 @@ AboutBox::AboutBox() {
     addBottomLinkSeparator();
     addBottomLink("JUCE 5 website", juce::URL(JUCE_WEBSITE_URL));
     addBottomLink("VST3 SDK source repository", juce::URL(VST3_SOURCE_URL));
-    addBottomLink("FST source repository", juce::URL(FST_SOURCE_URL));
     addBottomLink("Overpass font website", juce::URL(FONT_WEBSITE_URL));
     addBottomLinkSeparator();
     addBottomLink("GNU General Public License v3", juce::URL(GPL_URL));

@@ -22,7 +22,6 @@
 
 #define JUCE_WEBSITE_URL "https://juce.com/"
 #define VST3_SOURCE_URL "https://github.com/steinbergmedia/vst3sdk"
-#define FST_SOURCE_URL "https://git.iem.at/zmoelnig/FST"
 #define FONT_WEBSITE_URL "http://overpassfont.org/"
 
 #define GPL_URL "https://librearp.gitlab.io/license/"
@@ -43,8 +42,7 @@
 "\n" \
 "\n" \
 "LibreArp is powered by:\n" \
-" - JUCE 5 framework by ROLI under the GNU General Public License, version 3\n" \
+" - JUCE 6 framework by ROLI under the GNU General Public License, version 3\n" \
 " - VST3 SDK by Steinberg under the GNU General Public License, version 3\n" \
-" - FST by Johannes M. Zmölnig under the GNU General Public License, version 3\n" \
 "\n" \
 "LibreArp uses the Overpass font by Delve Fonts (sponsored by Red Hat) under the SIL Open Font License version 1.1")
