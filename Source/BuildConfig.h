@@ -19,10 +19,8 @@
 
 #include <juce_core/juce_core.h>
 
-class BuildConfig {
-public:
-
-    static const std::string UPDATE_CHECK_URL;
-    static const bool DEFAULT_CHECK_FOR_UPDATES_ENABLED;
-    static const int64_t DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK;
+namespace BuildConfig {
+    const std::string UPDATE_CHECK_URL = "http://librearp.gitlab.io/assets/librearp-updates.json"; // NOLINT
+    const bool DEFAULT_CHECK_FOR_UPDATES_ENABLED = false;
+    const int64_t DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK = 86400;
 };

@@ -82,19 +82,11 @@ void MainEditor::visibilityChanged() {
     processor.getGlobals().load();
     handleUpdateCheck();
     updateUpdateButton();
+    updateLayout();
 }
 
 void MainEditor::resized() {
-    state.width = getWidth();
-    state.height = getHeight();
-
-    tabs.setBounds(getLocalBounds().reduced(8));
-
-    updateUpdateButton();
-    auto updateButtonArea = getLocalBounds().reduced(8);
-    updateButton.setBounds(updateButtonArea
-            .removeFromTop(24)
-            .removeFromRight(256));
+    updateLayout();
 }
 
 void MainEditor::audioUpdate(uint32_t type) {
@@ -137,4 +129,21 @@ void MainEditor::updateUpdateButton() {
     updateButton.setButtonText(infostr.str());
     updateButton.setURL(juce::URL(info.websiteUrl));
     updateButton.setVisible(true);
+}
+
+void MainEditor::updateLayout() {
+    if (!isVisible()) {
+        return;
+    }
+
+    state.width = getWidth();
+    state.height = getHeight();
+
+    tabs.setBounds(getLocalBounds().reduced(8));
+
+    updateUpdateButton();
+    auto updateButtonArea = getLocalBounds().reduced(8);
+    updateButton.setBounds(updateButtonArea
+    .removeFromTop(24)
+    .removeFromRight(256));
 }

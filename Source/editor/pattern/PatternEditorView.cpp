@@ -86,25 +86,12 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
 }
 
 void PatternEditorView::resized() {
-    auto area = getLocalBounds().reduced(8);
+    updateLayout();
+}
 
-    auto toolBarArea = area.removeFromTop(24);
-    loopResetSliderLabel.setBounds(
-            toolBarArea.removeFromLeft(8 + loopResetSliderLabel.getFont().getStringWidth(loopResetSliderLabel.getText())));
-    loopResetSlider.setBounds(toolBarArea.removeFromLeft(96));
-    snapSlider.setBounds(toolBarArea.removeFromRight(96));
-    snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
-
-    area.removeFromTop(8);
-
-    auto bottomButtonArea = area.removeFromBottom(24);
-    loadButton.setBounds(bottomButtonArea.removeFromLeft(100));
-    saveButton.setBounds(bottomButtonArea.removeFromLeft(100));
-
-    area.removeFromBottom(8);
-
-    beatBar.setBounds(area.removeFromTop(20));
-    editor.setBounds(area);
+void PatternEditorView::visibilityChanged() {
+    Component::visibilityChanged();
+    updateLayout();
 }
 
 void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
@@ -154,4 +141,30 @@ int PatternEditorView::getRenderHeight() {
 
 void PatternEditorView::audioUpdate(uint32_t type) {
     editor.audioUpdate(type);
+}
+
+void PatternEditorView::updateLayout() {
+    if (!isVisible()) {
+        return;
+    }
+
+    auto area = getLocalBounds().reduced(8);
+
+    auto toolBarArea = area.removeFromTop(24);
+    loopResetSliderLabel.setBounds(
+            toolBarArea.removeFromLeft(8 + loopResetSliderLabel.getFont().getStringWidth(loopResetSliderLabel.getText())));
+    loopResetSlider.setBounds(toolBarArea.removeFromLeft(96));
+    snapSlider.setBounds(toolBarArea.removeFromRight(96));
+    snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
+
+    area.removeFromTop(8);
+
+    auto bottomButtonArea = area.removeFromBottom(24);
+    loadButton.setBounds(bottomButtonArea.removeFromLeft(100));
+    saveButton.setBounds(bottomButtonArea.removeFromLeft(100));
+
+    area.removeFromBottom(8);
+
+    beatBar.setBounds(area.removeFromTop(20));
+    editor.setBounds(area);
 }

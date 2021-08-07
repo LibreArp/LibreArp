@@ -22,8 +22,7 @@
 /**
  * A class for handling update checks.
  */
-class Updater {
-public:
+namespace Updater {
 
     /**
      * Data structure containing information about an available update.
@@ -40,7 +39,7 @@ public:
      *
      * @return information about an update
      */
-    static UpdateInfo checkForUpdates();
+    UpdateInfo checkForUpdates();
 
 };
 

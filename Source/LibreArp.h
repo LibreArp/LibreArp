@@ -34,9 +34,7 @@
 class LibreArp : public juce::AudioProcessor {
 public:
 
-    class InputNote {
-    public:
-
+    struct InputNote {
         explicit InputNote(int note = -1, double velocity = 0.8);
 
         int note;

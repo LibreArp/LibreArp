@@ -26,9 +26,8 @@ public:
 
     explicit BehaviourSettingsEditor(LibreArp &p);
 
-    ~BehaviourSettingsEditor();
-
     void resized() override;
+    void visibilityChanged() override;
 
 private:
 
@@ -42,6 +41,8 @@ private:
 
     juce::Slider midiOutChannelSlider;
     juce::Label midiOutChannelLabel;
+
+    void updateLayout();
 
 };
 

@@ -27,11 +27,7 @@ SettingsEditor::SettingsEditor(LibreArp& p) : processor(p) {
 }
 
 void SettingsEditor::resized() {
-    auto area = getLocalBounds().reduced(8);
-
-    updateCheckToggle.setBounds(area.removeFromTop(24));
-
-    updateSettingsValues();
+    updateLayout();
 }
 
 void SettingsEditor::updateSettingsValues() {
@@ -40,5 +36,16 @@ void SettingsEditor::updateSettingsValues() {
 
 void SettingsEditor::visibilityChanged() {
     Component::visibilityChanged();
+    updateLayout();
+}
+
+void SettingsEditor::updateLayout() {
+    if (!isVisible()) {
+        return;
+    }
+
     updateSettingsValues();
+
+    auto area = getLocalBounds().reduced(8);
+    updateCheckToggle.setBounds(area.removeFromTop(24));
 }

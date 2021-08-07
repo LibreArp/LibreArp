@@ -31,6 +31,7 @@ public:
     explicit PatternEditorView(LibreArp &p, EditorState &editorState);
 
     void resized() override;
+    void visibilityChanged() override;
 
     void zoomPattern(float deltaX, float deltaY);
     void scrollPattern(float deltaX, float deltaY);
@@ -59,6 +60,8 @@ private:
 
     PatternEditor editor;
     BeatBar beatBar;
+
+    void updateLayout();
 };
 
 

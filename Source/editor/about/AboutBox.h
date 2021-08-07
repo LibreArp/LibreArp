@@ -28,6 +28,7 @@ public:
     explicit AboutBox();
 
     void resized() override;
+    void visibilityChanged() override;
 
 private:
 
@@ -39,13 +40,10 @@ private:
 
     std::list<std::shared_ptr<juce::HyperlinkButton>> bottomLinks;
 
-    juce::HyperlinkButton websiteButton;
-    juce::HyperlinkButton sourceButton;
-    juce::HyperlinkButton juceButton;
-    juce::HyperlinkButton gplButton;
-
     void addBottomLink(juce::String text, juce::URL url);
     void addBottomLinkSeparator();
+
+    void updateLayout();
 
 };
 

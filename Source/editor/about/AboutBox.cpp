@@ -55,6 +55,29 @@ AboutBox::AboutBox() {
 }
 
 void AboutBox::resized() {
+    updateLayout();
+}
+
+void AboutBox::visibilityChanged() {
+    Component::visibilityChanged();
+    updateLayout();
+}
+
+void AboutBox::addBottomLink(juce::String text, juce::URL url) {
+    std::shared_ptr<juce::HyperlinkButton> button(new juce::HyperlinkButton(text, url));
+    addAndMakeVisible(*button);
+    bottomLinks.push_front(button);
+}
+
+void AboutBox::addBottomLinkSeparator() {
+    bottomLinks.push_front(std::shared_ptr<juce::HyperlinkButton>(nullptr));
+}
+
+void AboutBox::updateLayout() {
+    if (!isVisible()) {
+        return;
+    }
+
     auto area = getLocalBounds();
 
     nameAndVersionLabel.setBounds(area.removeFromTop(64));
@@ -73,14 +96,4 @@ void AboutBox::resized() {
     gplLabel.setSize(
             static_cast<int>(std::ceil(layout.getWidth())),
             static_cast<int>(std::ceil(layout.getHeight()) + LICENSE_NOTICE_HEIGHT_ADDITION));
-}
-
-void AboutBox::addBottomLink(juce::String text, juce::URL url) {
-    std::shared_ptr<juce::HyperlinkButton> button(new juce::HyperlinkButton(text, url));
-    addAndMakeVisible(*button);
-    bottomLinks.push_front(button);
-}
-
-void AboutBox::addBottomLinkSeparator() {
-    bottomLinks.push_front(std::shared_ptr<juce::HyperlinkButton>(nullptr));
 }

@@ -23,8 +23,8 @@
 /**
  * The data of a note.
  */
-class NoteData {
-public:
+struct NoteData {
+
     static const juce::Identifier TREEID_NOTE_DATA;
     static const juce::Identifier TREEID_NOTE_NUMBER;
     static const juce::Identifier TREEID_VELOCITY;
@@ -33,25 +33,17 @@ public:
     /**
      * The index of the note among the input notes.
      */
-    int noteNumber;
+    int noteNumber = 0;
 
     /**
      * The velocity of the note.
      */
-    double velocity;
+    double velocity = 0.8;
 
     /**
      * The panning of the note.
      */
-    double pan;
-
-
-
-    /**
-     * Constructs new note data.
-     */
-    NoteData();
-
+    double pan = 0;
 
 
     /**
@@ -59,7 +51,7 @@ public:
      *
      * @return a ValueTree representing this note
      */
-    juce::ValueTree toValueTree();
+    [[nodiscard]] juce::ValueTree toValueTree() const;
 
     /**
      * Deserializes the specified ValueTree into note data.

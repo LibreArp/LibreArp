@@ -21,17 +21,33 @@ XmlEditor::XmlEditor(LibreArp &p) : processor(p) {
     xmlEditor.setMultiLine(true, false);
     xmlEditor.setReturnKeyStartsNewLine(true);
     xmlEditor.setEnabled(false);
-    audioUpdate(AudioUpdatable::PATTERN_UPDATE);
 
     addAndMakeVisible(xmlEditor);
 }
 
 void XmlEditor::resized() {
-    xmlEditor.setBounds(getLocalBounds());
+    updateLayout();
+}
+
+void XmlEditor::visibilityChanged() {
+    Component::visibilityChanged();
+    updateLayout();
+
+    if (isVisible()) {
+        audioUpdate(AudioUpdatable::PATTERN_UPDATE);
+    }
 }
 
 void XmlEditor::audioUpdate(uint32_t type) {
     if (type == AudioUpdatable::PATTERN_UPDATE) {
         xmlEditor.setText(processor.getStateXml(), false);
     }
+}
+
+void XmlEditor::updateLayout() {
+    if (!isVisible()) {
+        return;
+    }
+
+    xmlEditor.setBounds(getLocalBounds());
 }

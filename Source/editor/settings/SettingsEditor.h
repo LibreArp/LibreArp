@@ -35,12 +35,12 @@ public:
     explicit SettingsEditor(LibreArp &p);
 
     void resized() override;
-
     void visibilityChanged() override;
 
 private:
 
     void updateSettingsValues();
+    void updateLayout();
 
     juce::ToggleButton updateCheckToggle;
     LibreArp &processor;

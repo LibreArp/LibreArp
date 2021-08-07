@@ -29,12 +29,16 @@ public:
 
     void resized() override;
 
+    void visibilityChanged() override;
+
     void audioUpdate(uint32_t type) override;
 
 private:
     LibreArp &processor;
 
     juce::TextEditor xmlEditor;
+
+    void updateLayout();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlEditor)
 };

@@ -58,6 +58,19 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
 }
 
 void BehaviourSettingsEditor::resized() {
+    updateLayout();
+}
+
+void BehaviourSettingsEditor::visibilityChanged() {
+    Component::visibilityChanged();
+    updateLayout();
+}
+
+void BehaviourSettingsEditor::updateLayout() {
+    if (!isVisible()) {
+        return;
+    }
+
     auto area = getLocalBounds().reduced(8);
 
     auto midiInChannelArea = area.removeFromTop(24);
@@ -81,7 +94,4 @@ void BehaviourSettingsEditor::resized() {
 
     usingInputVelocityToggle.setToggleState(processor.isUsingInputVelocity(), juce::NotificationType::dontSendNotification);
     usingInputVelocityToggle.setBounds(area.removeFromTop(24));
-
 }
-
-BehaviourSettingsEditor::~BehaviourSettingsEditor() = default;

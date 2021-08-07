@@ -22,14 +22,8 @@ const juce::Identifier NoteData::TREEID_NOTE_NUMBER = "noteNumber"; // NOLINT
 const juce::Identifier NoteData::TREEID_VELOCITY = "velocity"; // NOLINT
 const juce::Identifier NoteData::TREEID_PAN = "pan"; // NOLINT
 
-NoteData::NoteData() {
-    noteNumber = 0;
-    velocity = 0.8;
-    pan = 0;
-}
 
-
-juce::ValueTree NoteData::toValueTree() {
+juce::ValueTree NoteData::toValueTree() const {
     juce::ValueTree result = juce::ValueTree(TREEID_NOTE_DATA);
     result.setProperty(TREEID_NOTE_NUMBER, this->noteNumber, nullptr);
     result.setProperty(TREEID_VELOCITY, this->velocity, nullptr);

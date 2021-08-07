@@ -75,7 +75,7 @@ target_sources(LibreArp
         Source/ArpNote.cpp Source/ArpNote.h
         Source/ArpPattern.cpp Source/ArpPattern.h
         Source/AudioUpdatable.h
-        Source/BuildConfig.cpp Source/BuildConfig.h
+        Source/BuildConfig.h
         Source/Globals.cpp Source/Globals.h
         Source/LibreArp.cpp Source/LibreArp.h
         Source/NoteData.cpp Source/NoteData.h
