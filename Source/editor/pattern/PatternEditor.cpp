@@ -676,9 +676,17 @@ void PatternEditor::audioUpdate(uint32_t type) {
         }
         position %= processor.getPattern().loopLength;
 
-        if (lastPlayPositionX >= 0 && lastPlayPositionX <= getHeight()) repaint(lastPlayPositionX, 0, 1, getHeight());
-        lastPlayPositionX = pulseToX(position);
-        if (lastPlayPositionX >= 0 && lastPlayPositionX <= getHeight()) repaint(lastPlayPositionX, 0, 1, getHeight());
+        auto oldPosition = lastPlayPositionX;
+        auto newPosition = pulseToX(position);
+
+        if (oldPosition <= newPosition) {
+            repaint(oldPosition, 0, newPosition - oldPosition + 1, getHeight());
+        } else {
+            repaint(oldPosition, 0, 1, getHeight());
+            repaint(newPosition, 0, 1, getHeight());
+        }
+
+        lastPlayPositionX = newPosition;
     }
 
     repaintNotes();
