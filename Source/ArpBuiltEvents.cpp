@@ -22,7 +22,6 @@ ArpBuiltEvents::EventNoteData ArpBuiltEvents::EventNoteData::of(NoteData &orig, 
     result.noteNumber = orig.noteNumber;
     result.velocity = orig.velocity;
     result.pan = orig.pan;
-    result.noteIndex = noteIndex;
 
     return result;
 }
