@@ -17,6 +17,8 @@
 
 #include <new>
 
+#include "../../util/Defer.h"
+
 #include "PatternEditor.h"
 #include "PatternEditorView.h"
 
@@ -233,6 +235,7 @@ void PatternEditor::mouseMove(const juce::MouseEvent &event) {
     std::scoped_lock lock(pattern.getMutex());
 
     mouseAnyMove(event);
+    defer d([this]() { updateMouseCursor(); });
 
     auto &notes = pattern.getNotes();
     for (uint64_t i = 0; i < notes.size(); i++) {
@@ -240,7 +243,7 @@ void PatternEditor::mouseMove(const juce::MouseEvent &event) {
         auto noteRect = getRectangleForNote(note);
         if (noteRect.contains(event.x, event.y)) {
             if (event.x <= (noteRect.getX() + NOTE_RESIZE_TOLERANCE)) {
-                setMouseCursor(juce::MouseCursor::LeftEdgeResizeCursor);
+                mouseCursor = juce::MouseCursor::LeftEdgeResizeCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, notes, event);
                 } else {
@@ -248,7 +251,7 @@ void PatternEditor::mouseMove(const juce::MouseEvent &event) {
                 }
                 return;
             } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - NOTE_RESIZE_TOLERANCE)) {
-                setMouseCursor(juce::MouseCursor::RightEdgeResizeCursor);
+                mouseCursor = juce::MouseCursor::RightEdgeResizeCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, notes, event);
                 } else {
@@ -256,7 +259,7 @@ void PatternEditor::mouseMove(const juce::MouseEvent &event) {
                 }
                 return;
             } else {
-                setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+                mouseCursor = juce::MouseCursor::DraggingHandCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, notes, event);
                 } else {
@@ -269,7 +272,7 @@ void PatternEditor::mouseMove(const juce::MouseEvent &event) {
 
     auto loopRect = getRectangleForLoop();
     if (loopRect.contains(event.x, event.y)) {
-        setMouseCursor(juce::MouseCursor::LeftRightResizeCursor);
+        mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
         new(dragAction) DragAction(DragAction::TYPE_LOOP_RESIZE);
         return;
     }
@@ -279,6 +282,7 @@ void PatternEditor::mouseMove(const juce::MouseEvent &event) {
 
 void PatternEditor::mouseDrag(const juce::MouseEvent &event) {
     mouseAnyMove(event);
+    defer d([this]() { updateMouseCursor(); });
 
     if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
         if (this->dragAction != nullptr && this->dragAction->type != DragAction::TYPE_NONE) {
@@ -310,6 +314,12 @@ void PatternEditor::mouseDrag(const juce::MouseEvent &event) {
     }
 }
 
+void PatternEditor::updateMouseCursor() {
+    if (mouseCursor != getMouseCursor()) {
+        setMouseCursor(mouseCursor);
+    }
+}
+
 void PatternEditor::mouseAnyMove(const juce::MouseEvent &event) {
     repaint(pulseToX(cursorPulse), 0, 1, getHeight());
     repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
@@ -319,7 +329,7 @@ void PatternEditor::mouseAnyMove(const juce::MouseEvent &event) {
 
     snapEnabled = !(event.mods.isAltDown() || (event.mods.isCtrlDown() && event.mods.isShiftDown()));
 
-    setMouseCursor(juce::MouseCursor::NormalCursor);
+    mouseCursor = juce::MouseCursor::NormalCursor;
 
     repaint(pulseToX(cursorPulse), 0, 1, getHeight());
     repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
@@ -398,9 +408,10 @@ void PatternEditor::mouseUp(const juce::MouseEvent &event) {
     new(dragAction) DragAction();
     repaint(selection);
     selection = juce::Rectangle<int>(0, 0, 0, 0);
-    setMouseCursor(juce::MouseCursor::NormalCursor);
+    mouseAnyMove(event);
     repaintNotes();
     Component::mouseUp(event);
+    updateMouseCursor();
 }
 
 
@@ -447,7 +458,7 @@ void PatternEditor::loopResize(const juce::MouseEvent &event) {
     processor.getPattern().loopLength = juce::jmax((int64_t) 1, lastNoteEnd, xToPulse(event.x));
     processor.buildPattern();
     view->repaint();
-    setMouseCursor(juce::MouseCursor::LeftRightResizeCursor);
+    mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
 }
 
 
@@ -468,7 +479,7 @@ void PatternEditor::noteStartResize(const juce::MouseEvent &event, NoteDragActio
 
     processor.buildPattern();
     repaintNotes();
-    setMouseCursor(juce::MouseCursor::LeftEdgeResizeCursor);
+    mouseCursor = juce::MouseCursor::LeftEdgeResizeCursor;
 }
 
 void PatternEditor::noteEndResize(const juce::MouseEvent &event, NoteDragAction *dragAction) {
@@ -490,7 +501,7 @@ void PatternEditor::noteEndResize(const juce::MouseEvent &event, NoteDragAction 
 
     processor.buildPattern();
     repaintNotes();
-    setMouseCursor(juce::MouseCursor::RightEdgeResizeCursor);
+    mouseCursor = juce::MouseCursor::RightEdgeResizeCursor;
 }
 
 void PatternEditor::noteMove(const juce::MouseEvent &event, PatternEditor::NoteDragAction *dragAction) {
@@ -518,7 +529,7 @@ void PatternEditor::noteMove(const juce::MouseEvent &event, PatternEditor::NoteD
     processor.buildPattern();
     repaintNotes();
 
-    setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+    mouseCursor = juce::MouseCursor::DraggingHandCursor;
 }
 
 void PatternEditor::noteDuplicate(PatternEditor::NoteDragAction *dragAction) {
@@ -552,6 +563,8 @@ void PatternEditor::noteCreate(const juce::MouseEvent &event) {
     processor.buildPattern();
     repaintNotes();
 
+    mouseAnyMove(event);
+
     if (event.mods.isShiftDown()) {
         new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, index, notes, event, false);
     } else {
@@ -582,6 +595,9 @@ void PatternEditor::noteDelete(const juce::MouseEvent &event) {
         processor.buildPattern();
         repaintNotes();
     }
+
+    mouseAnyMove(event);
+    updateMouseCursor();
 }
 
 

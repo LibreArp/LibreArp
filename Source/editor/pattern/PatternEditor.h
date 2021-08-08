@@ -290,6 +290,13 @@ private:
      */
     int lastPlayPositionX;
 
+    /**
+     * The desired mouse cursor that will actually be changed
+     */
+    juce::MouseCursor mouseCursor;
+
+
+    void updateMouseCursor();
 
     /**
      * Fired on any cursor movement (dragging or non-dragging).

@@ -71,6 +71,8 @@ target_sources(LibreArp
         Source/editor/LArpLookAndFeel.cpp Source/editor/LArpLookAndFeel.h
         Source/editor/MainEditor.cpp Source/editor/MainEditor.h
 
+        Source/util/Defer.h
+
         Source/ArpBuiltEvents.cpp Source/ArpBuiltEvents.h
         Source/ArpNote.cpp Source/ArpNote.h
         Source/ArpPattern.cpp Source/ArpPattern.h
