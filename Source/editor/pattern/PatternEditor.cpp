@@ -179,14 +179,14 @@ void PatternEditor::paint(juce::Graphics &g) {
     g.setColour(LOOP_LINE_COLOUR);
     auto loopLine = pulseToX(pattern.loopLength);
     auto loopLineRect = juce::Rectangle<int>(loopLine, 0, 4, getHeight());
-    if (loopLineRect.intersects(drawRegion)){
+    if (loopLineRect.intersects(unoffsDrawRegion)){
         g.fillRect(loopLineRect);
     }
 
     // Draw playback position indicator
     if (lastPlayPositionX > 0) {
         auto positionRect = juce::Rectangle<int>(lastPlayPositionX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
-        if (positionRect.intersects(drawRegion)) {
+        if (positionRect.intersects(unoffsDrawRegion)) {
             g.setColour(POSITION_INDICATOR_COLOUR);
             g.fillRect(positionRect);
         }
@@ -194,7 +194,7 @@ void PatternEditor::paint(juce::Graphics &g) {
 
     // Draw selection
     if (selection.getWidth() != 0 && selection.getHeight() != 0) {
-        if (selection.intersects(drawRegion)) {
+        if (selection.intersects(unoffsDrawRegion)) {
             g.setColour(SELECTION_BORDER_COLOUR);
             g.drawRect(selection, 3);
         }
