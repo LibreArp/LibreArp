@@ -19,6 +19,7 @@
 
 #include <sstream>
 #include <mutex>
+#include <bitset>
 #include <juce_core/juce_core.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
@@ -357,7 +358,7 @@ private:
     /**
      * The set of currently playing output notes.
      */
-    juce::SortedSet<ArpBuiltEvents::PlayingNote> playingNotes;
+    std::bitset<128 * 16> playingNotesBitset;
 
     /**
      * The last active number of input notes.
@@ -419,6 +420,14 @@ private:
      * @param midi the midi messages
      */
     void stopAll(juce::MidiBuffer &midi);
+
+    static int noteBitsetPosition(int channel, int noteNumber);
+
+    bool isNotePlaying(int channel, int noteNumber);
+
+    void setNotePlaying(int channel, int noteNumber);
+
+    void setNoteNotPlaying(int channel, int noteNumber);
 
     /**
      * Sends an update to the editor.

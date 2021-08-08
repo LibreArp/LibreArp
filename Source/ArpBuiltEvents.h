@@ -30,10 +30,8 @@ public:
     /**
      * Data class containing information about a playing note and its channel number.
      */
-    class PlayingNote {
-    public:
-
-        explicit PlayingNote(int noteNumber, int outChannel);
+    struct PlayingNote {
+        explicit PlayingNote(int noteNumber, int outChannel) : noteNumber(noteNumber), outChannel(outChannel) {};
 
         int noteNumber;
         int outChannel;
@@ -67,23 +65,21 @@ public:
     /**
      * Class of note data in an event.
      */
-    class EventNoteData {
-    public:
-
+    struct EventNoteData {
         /**
          * The index of the note among the input notes.
          */
-        int noteNumber;
+        int noteNumber = -1;
 
         /**
          * The velocity of the note.
          */
-        double velocity;
+        double velocity = 0;
 
         /**
          * The panning of the note.
          */
-        double pan;
+        double pan = 0;
 
 
 
@@ -91,11 +87,6 @@ public:
          * The last played MIDI note number.
          */
         PlayingNote lastNote = PlayingNote(-1, -1);
-
-        /**
-         * The index of the note in the pattern from which the events were built.
-         */
-        unsigned long noteIndex = 0;
 
 
 
@@ -132,9 +123,3 @@ public:
      */
     int64_t loopLength;
 };
-
-bool operator> (ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);
-bool operator< (ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);
-bool operator>=(ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);
-bool operator<=(ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);
-bool operator==(ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b);

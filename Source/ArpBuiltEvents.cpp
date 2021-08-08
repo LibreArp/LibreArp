@@ -17,24 +17,6 @@
 
 #include "ArpBuiltEvents.h"
 
-ArpBuiltEvents::PlayingNote::PlayingNote(int noteNumber, int outChannel) : noteNumber(noteNumber), outChannel(outChannel) {}
-
-bool operator> (ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b) {
-    return a.noteNumber > b.noteNumber;
-}
-bool operator< (ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b) {
-    return a.noteNumber < b.noteNumber;
-}
-bool operator>=(ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b) {
-    return a.noteNumber >= b.noteNumber;
-}
-bool operator<=(ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b) {
-    return a.noteNumber <= b.noteNumber;
-}
-bool operator==(ArpBuiltEvents::PlayingNote const &a, ArpBuiltEvents::PlayingNote const &b) {
-    return a.noteNumber == b.noteNumber && a.outChannel == b.outChannel;
-}
-
 ArpBuiltEvents::EventNoteData ArpBuiltEvents::EventNoteData::of(NoteData &orig, unsigned long noteIndex) {
     EventNoteData result;
     result.noteNumber = orig.noteNumber;

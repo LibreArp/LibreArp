@@ -230,7 +230,7 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
                         auto &data = events.data[i];
                         if (data.lastNote.noteNumber >= 0) {
                             midi.addEvent(juce::MidiMessage::noteOff(data.lastNote.outChannel, data.lastNote.noteNumber), offset);
-                            playingNotes.removeValue(data.lastNote);
+                            setNoteNotPlaying(data.lastNote.outChannel, data.lastNote.noteNumber);
                             data.lastNote = ArpBuiltEvents::PlayingNote(-1, -1);
                         }
                     }
@@ -260,7 +260,7 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
                                 midi.addEvent(
                                         juce::MidiMessage::noteOn(
                                                 data.lastNote.outChannel, data.lastNote.noteNumber, static_cast<float>(velocity)), offset);
-                                playingNotes.add(data.lastNote);
+                                setNotePlaying(data.lastNote.outChannel, data.lastNote.noteNumber);
                             }
                         }
                     }
@@ -546,14 +546,46 @@ void LibreArp::stopAll() {
 }
 
 void LibreArp::stopAll(juce::MidiBuffer &midi) {
-    for (auto note : playingNotes) {
-        midi.addEvent(juce::MidiMessage::noteOff(note.outChannel, note.noteNumber), 0);
+    for (int channel = 1; channel <= 16; channel++) {
+        for (int noteNumber = 0; noteNumber <= 127; noteNumber++) {
+            if (isNotePlaying(channel, noteNumber)) {
+                midi.addEvent(juce::MidiMessage::noteOff(channel, noteNumber), 0);
+            }
+        }
     }
-    playingNotes.clear();
+    playingNotesBitset.reset();
 
     for (auto &data : events.data) {
         data.lastNote = ArpBuiltEvents::PlayingNote(-1, -1);
     }
+}
+
+int LibreArp::noteBitsetPosition(int channel, int noteNumber) {
+    return (channel - 1) * 128 + noteNumber;
+}
+
+bool LibreArp::isNotePlaying(int channel, int noteNumber) {
+    if (noteNumber < 0 || noteNumber > 127 || channel < 1 || channel > 16) {
+        return false;
+    }
+
+    return playingNotesBitset.test((size_t) noteBitsetPosition(channel, noteNumber));
+}
+
+void LibreArp::setNotePlaying(int channel, int noteNumber) {
+    if (noteNumber < 0 || noteNumber > 127 || channel < 1 || channel > 16) {
+        return;
+    }
+
+    playingNotesBitset.set((size_t) noteBitsetPosition(channel, noteNumber));
+}
+
+void LibreArp::setNoteNotPlaying(int channel, int noteNumber) {
+    if (noteNumber < 0 || noteNumber > 127 || channel < 1 || channel > 16) {
+        return;
+    }
+
+    playingNotesBitset.reset((size_t) noteBitsetPosition(channel, noteNumber));
 }
 
 void LibreArp::updateEditor(uint32_t type) {
