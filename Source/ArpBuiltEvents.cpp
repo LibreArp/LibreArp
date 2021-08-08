@@ -17,7 +17,7 @@
 
 #include "ArpBuiltEvents.h"
 
-ArpBuiltEvents::EventNoteData ArpBuiltEvents::EventNoteData::of(NoteData &orig, unsigned long noteIndex) {
+ArpBuiltEvents::EventNoteData ArpBuiltEvents::EventNoteData::of(NoteData& orig) {
     EventNoteData result;
     result.noteNumber = orig.noteNumber;
     result.velocity = orig.velocity;

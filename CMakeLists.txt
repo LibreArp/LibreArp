@@ -65,8 +65,6 @@ target_sources(LibreArp
 
         Source/editor/settings/SettingsEditor.cpp Source/editor/settings/SettingsEditor.h
 
-        Source/editor/xml/XmlEditor.cpp Source/editor/xml/XmlEditor.h
-
         Source/editor/EditorState.cpp Source/editor/EditorState.h
         Source/editor/LArpLookAndFeel.cpp Source/editor/LArpLookAndFeel.h
         Source/editor/MainEditor.cpp Source/editor/MainEditor.h

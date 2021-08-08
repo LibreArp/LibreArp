@@ -179,7 +179,7 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
     if (buildScheduled) {
         this->stopAll();
         events = pattern.buildEvents();
-        updateEditor(AudioUpdatable::PATTERN_UPDATE);
+        updateEditor();
         buildScheduled = false;
     }
 
@@ -588,13 +588,11 @@ void LibreArp::setNoteNotPlaying(int channel, int noteNumber) {
     playingNotesBitset.reset((size_t) noteBitsetPosition(channel, noteNumber));
 }
 
-void LibreArp::updateEditor(uint32_t type) {
-    juce::MessageManager::callAsync([this, type] {
-        auto editor = (MainEditor *) getActiveEditor();
-        if (editor != nullptr && editor->isVisible()) {
-            editor->audioUpdate(type);
-        }
-    });
+void LibreArp::updateEditor() {
+    auto editor = (MainEditor *) getActiveEditor();
+    if (editor) {
+        editor->triggerAsyncUpdate();
+    }
 }
 
 

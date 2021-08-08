@@ -432,7 +432,7 @@ private:
     /**
      * Sends an update to the editor.
      */
-    void updateEditor(uint32_t type = AudioUpdatable::GENERAL_UPDATE);
+    void updateEditor();
 
 
 

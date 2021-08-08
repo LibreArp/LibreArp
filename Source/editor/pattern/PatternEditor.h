@@ -217,7 +217,7 @@ public:
     void mouseUp(const juce::MouseEvent &event) override;
     bool keyPressed(const juce::KeyPress &key) override;
 
-    void audioUpdate(uint32_t type) override;
+    void audioUpdate() override;
 
     /**
      * Gets the pointer to the parent editor view.

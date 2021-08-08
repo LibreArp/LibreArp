@@ -17,11 +17,8 @@
 
 #include <sstream>
 #include "../LibreArp.h"
-#include "../Updater.h"
 #include "MainEditor.h"
 
-
-const int RESIZER_SIZE = 18;
 
 MainEditor::MainEditor(LibreArp &p, EditorState &e)
         : AudioProcessorEditor(&p),
@@ -30,8 +27,7 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
           tabs(juce::TabbedButtonBar::Orientation::TabsAtTop),
           patternEditor(p, e),
           behaviourSettingsEditor(p),
-          settingsEditor(p),
-          xmlEditor(p) {
+          settingsEditor(p) {
 
     juce::LookAndFeel::setDefaultLookAndFeel(&LArpLookAndFeel::getInstance());
 
@@ -50,10 +46,6 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &behaviourSettingsEditor, false);
     tabs.addTab("Global settings",
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &settingsEditor, false);
-#if JUCE_DEBUG
-    tabs.addTab("XML viewer",
-            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &xmlEditor, false);
-#endif
     tabs.addTab("About",
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &aboutBox, false);
 
@@ -89,9 +81,8 @@ void MainEditor::resized() {
     updateLayout();
 }
 
-void MainEditor::audioUpdate(uint32_t type) {
-    patternEditor.audioUpdate(type);
-    xmlEditor.audioUpdate(type);
+void MainEditor::handleAsyncUpdate() {
+    patternEditor.audioUpdate();
 }
 
 void MainEditor::handleUpdateCheck() {

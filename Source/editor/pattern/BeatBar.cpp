@@ -33,6 +33,7 @@ BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec)
         : processor(p), state(e), view(ec) {
 
     setSize(1, 1);
+    setOpaque(true);
 }
 
 void BeatBar::paint(juce::Graphics &g) {

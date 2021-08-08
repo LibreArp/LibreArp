@@ -23,16 +23,12 @@
  * An interface for elements that are updatable by the LibreArp audio processor.
  */
 class AudioUpdatable {
-
 public:
-
-    static const uint32_t GENERAL_UPDATE = 0x0000;
-    static const uint32_t PATTERN_UPDATE = 0x0100;
 
     /**
      * Gets called upon audio processor update.
      */
-    virtual void audioUpdate(uint32_t type = GENERAL_UPDATE) = 0;
+    virtual void audioUpdate() = 0;
 
 };
 

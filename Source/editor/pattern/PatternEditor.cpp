@@ -53,6 +53,7 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
         : processor(p), state(e), view(ec)
 {
     setSize(1, 1); // We have to set this, otherwise it won't render at all
+    setOpaque(true);
 
     cursorPulse = 0;
     new(dragAction) DragAction(); // initialize a no-op drag action
@@ -691,9 +692,7 @@ void PatternEditor::select(const juce::MouseEvent &event, PatternEditor::Selecti
 }
 
 
-void PatternEditor::audioUpdate(uint32_t type) {
-    juce::ignoreUnused(type);
-
+void PatternEditor::audioUpdate() {
     auto position = processor.getLastPosition();
     if (position > 0) {
         if (processor.getLoopReset() > 0.0) {

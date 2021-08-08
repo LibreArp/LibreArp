@@ -20,7 +20,6 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include "../LibreArp.h"
-#include "xml/XmlEditor.h"
 #include "pattern/PatternEditor.h"
 #include "pattern/PatternEditorView.h"
 #include "settings/SettingsEditor.h"
@@ -32,7 +31,9 @@
 /**
  * Main LibreArp editor component.
  */
-class MainEditor : public juce::AudioProcessorEditor, public AudioUpdatable {
+class MainEditor :
+        public juce::AudioProcessorEditor,
+        public juce::AsyncUpdater {
 public:
 
     explicit MainEditor(LibreArp &, EditorState &);
@@ -42,8 +43,9 @@ public:
 
     void paint(juce::Graphics &) override;
     void resized() override;
-    void audioUpdate(uint32_t type) override;
     void visibilityChanged() override;
+
+    void handleAsyncUpdate() override;
 
 private:
     LibreArp &processor;
@@ -58,7 +60,6 @@ private:
     PatternEditorView patternEditor;
     BehaviourSettingsEditor behaviourSettingsEditor;
     SettingsEditor settingsEditor;
-    XmlEditor xmlEditor;
     AboutBox aboutBox;
 
     juce::HyperlinkButton updateButton;

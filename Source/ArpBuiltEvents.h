@@ -96,7 +96,7 @@ public:
          * @param orig
          * @return
          */
-        static EventNoteData of(NoteData &orig, unsigned long noteIndex);
+        static ArpBuiltEvents::EventNoteData of(NoteData& orig);
     };
 
 
