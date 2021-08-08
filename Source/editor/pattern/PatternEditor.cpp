@@ -137,6 +137,15 @@ void PatternEditor::paint(juce::Graphics &g) {
         }
     }
 
+    // Get playback position
+    auto position = processor.getLastPosition();
+    if (position > 0) {
+        if (processor.getLoopReset() > 0.0) {
+            position %= static_cast<int64_t>(processor.getLoopReset() * processor.getPattern().getTimebase());
+        }
+        position %= processor.getPattern().loopLength;
+    }
+
     // Draw notes
     auto &notes = pattern.getNotes();
     for (unsigned long i = 0; i < notes.size(); i++) {
@@ -144,7 +153,7 @@ void PatternEditor::paint(juce::Graphics &g) {
         juce::Rectangle<int> noteRect = getRectangleForNote(note);
 
         if (noteRect.intersects(unoffsDrawRegion)) {
-            auto isPlaying = processor.getPlayingPatternIndices().contains(i);
+            bool isPlaying = (position > 0 && position >= note.startPoint && position < note.endPoint);
 
             if (selectedNotes.find(i) == selectedNotes.end()) {
                 g.setColour(isPlaying ? NOTE_ACTIVE_FILL_COLOUR : NOTE_FILL_COLOUR);

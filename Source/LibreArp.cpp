@@ -231,7 +231,6 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
                         if (data.lastNote.noteNumber >= 0) {
                             midi.addEvent(juce::MidiMessage::noteOff(data.lastNote.outChannel, data.lastNote.noteNumber), offset);
                             playingNotes.removeValue(data.lastNote);
-                            playingPatternIndices.removeValue(data.noteIndex);
                             data.lastNote = ArpBuiltEvents::PlayingNote(-1, -1);
                         }
                     }
@@ -262,7 +261,6 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
                                         juce::MidiMessage::noteOn(
                                                 data.lastNote.outChannel, data.lastNote.noteNumber, static_cast<float>(velocity)), offset);
                                 playingNotes.add(data.lastNote);
-                                playingPatternIndices.add(data.noteIndex);
                             }
                         }
                     }
@@ -400,13 +398,6 @@ void LibreArp::setLoopReset(double beats) {
 
 double LibreArp::getLoopReset() const {
     return this->loopReset;
-}
-
-
-
-juce::SortedSet<unsigned long>& LibreArp::getPlayingPatternIndices() {
-    std::scoped_lock lock(mutex);
-    return this->playingPatternIndices;
 }
 
 
@@ -559,7 +550,6 @@ void LibreArp::stopAll(juce::MidiBuffer &midi) {
         midi.addEvent(juce::MidiMessage::noteOff(note.outChannel, note.noteNumber), 0);
     }
     playingNotes.clear();
-    playingPatternIndices.clear();
 
     for (auto &data : events.data) {
         data.lastNote = ArpBuiltEvents::PlayingNote(-1, -1);

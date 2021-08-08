@@ -170,13 +170,6 @@ public:
      */
     double getLoopReset() const;
 
-    /**
-     * Gets the currently playing pattern indices.
-     *
-     * @return the currently playing pattern indices
-     */
-    juce::SortedSet<unsigned long> &getPlayingPatternIndices();
-
 
     bool isTransposingOctaves();
 
@@ -365,11 +358,6 @@ private:
      * The set of currently playing output notes.
      */
     juce::SortedSet<ArpBuiltEvents::PlayingNote> playingNotes;
-
-    /**
-     * The set of currently playing pattern indices.
-     */
-    juce::SortedSet<unsigned long> playingPatternIndices;
 
     /**
      * The last active number of input notes.
