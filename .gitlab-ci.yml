@@ -1,0 +1,20 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - build
+
+build-linux:
+  stage: build
+  image: spiffyk/librearp-linux:latest
+  tags:
+    - linux
+  script:
+    - mkdir build && cd build
+    - cmake ..
+    - cmake --build .
+  artifacts:
+    untracked: false
+    expire_in: 30 days
+    paths:
+      - "build/LibreArp_artefacts"
