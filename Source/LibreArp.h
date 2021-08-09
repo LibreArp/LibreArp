@@ -130,7 +130,7 @@ public:
 
 
     /**
-     * Builds the current pattern.
+     * Schedules a pattern build for the processing of the next block.
      */
     void buildPattern();
 

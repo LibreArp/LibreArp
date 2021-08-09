@@ -344,6 +344,11 @@ private:
     void noteDuplicate(NoteDragAction *dragAction);
 
     /**
+     * Mouse note velocity reset.
+     */
+    void noteResetVelocity(NoteDragAction *dragAction);
+
+    /**
      * Mouse note creation.
      *
      * @param event the mouse event

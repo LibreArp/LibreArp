@@ -30,6 +30,8 @@ struct NoteData {
     static const juce::Identifier TREEID_VELOCITY;
     static const juce::Identifier TREEID_PAN;
 
+    constexpr static const double DEFAULT_VELOCITY = 0.8;
+
     /**
      * The index of the note among the input notes.
      */
@@ -38,7 +40,7 @@ struct NoteData {
     /**
      * The velocity of the note.
      */
-    double velocity = 0.8;
+    double velocity = DEFAULT_VELOCITY;
 
     /**
      * The panning of the note.

@@ -407,8 +407,17 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
     }
 
     if (!event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && event.mods.isMiddleButtonDown()) {
-        view->resetPatternOffset();
-        return;
+        if (!event.mods.isAltDown() && !event.mods.isShiftDown() && !event.mods.isCtrlDown()) {
+            view->resetPatternOffset();
+            return;
+        }
+
+        if (event.mods.isAltDown() && !event.mods.isShiftDown() && !event.mods.isCtrlDown()) {
+            if (this->dragAction && this->dragAction->type == DragAction::TYPE_NOTE_MOVE) {
+                noteResetVelocity((NoteDragAction *) this->dragAction);
+                return;
+            }
+        }
     }
 
     Component::mouseDown(event);
@@ -550,6 +559,18 @@ void PatternEditor::noteDuplicate(PatternEditor::NoteDragAction *dragAction) {
         processor.getPattern().getNotes().push_back(notes[noteOffset.noteIndex]);
     }
     processor.buildPattern();
+    repaintNotes();
+}
+
+void PatternEditor::noteResetVelocity(PatternEditor::NoteDragAction* dragAction) {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
+    auto &notes = processor.getPattern().getNotes();
+    for (auto &noteOffset : dragAction->noteOffsets) {
+        notes[noteOffset.noteIndex].data.velocity = NoteData::DEFAULT_VELOCITY;
+    }
+    processor.buildPattern();
+    repaintNotes();
 }
 
 void PatternEditor::noteCreate(const juce::MouseEvent &event) {
