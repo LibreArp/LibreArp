@@ -186,7 +186,7 @@ void PatternEditor::paint(juce::Graphics &g) {
 
     // Draw playback position indicator
     if (lastPlayPositionX > 0) {
-        auto positionRect = juce::Rectangle<int>(lastPlayPositionX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
+        auto positionRect = juce::Rectangle<int>(lastPlayPositionX - state.offsetX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
         if (positionRect.intersects(unoffsDrawRegion)) {
             g.setColour(POSITION_INDICATOR_COLOUR);
             g.fillRect(positionRect);
@@ -701,13 +701,13 @@ void PatternEditor::audioUpdate() {
         position %= processor.getPattern().loopLength;
 
         auto oldPosition = lastPlayPositionX;
-        auto newPosition = pulseToX(position);
+        auto newPosition = pulseToAbsX(position);
 
         if (oldPosition <= newPosition) {
-            repaint(oldPosition, 0, newPosition - oldPosition + 1, getHeight());
+            repaint(oldPosition - state.offsetX, 0, newPosition - oldPosition + 1, getHeight());
         } else {
-            repaint(oldPosition, 0, 1, getHeight());
-            repaint(newPosition, 0, 1, getHeight());
+            repaint(oldPosition - state.offsetX, 0, 1, getHeight());
+            repaint(newPosition - state.offsetX, 0, 1, getHeight());
         }
 
         lastPlayPositionX = newPosition;
