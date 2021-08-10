@@ -1,21 +1,34 @@
 variables:
+  GIT_DEPTH: 5
   GIT_SUBMODULE_STRATEGY: recursive
   DOCKER_IMAGE_NAME_LINUX: librearp/linux-build-docker
 
 stages:
   - build
 
-build-linux:
+.build-job:
   stage: build
-  image: $CI_REGISTRY/$DOCKER_IMAGE_NAME_LINUX:latest
-  tags:
-    - linux
   script:
-    - mkdir build && cd build
+    - mkdir build
+    - cd build
     - cmake ..
-    - cmake --build .
+    - cmake --build . --config Release
   artifacts:
     untracked: false
     expire_in: 30 days
     paths:
       - "build/LibreArp_artefacts"
+
+build-linux:
+  extends: .build-job
+  tags:
+    - linux
+  image: $CI_REGISTRY/$DOCKER_IMAGE_NAME_LINUX:latest
+
+build-win:
+  extends: .build-job
+  tags:
+    - windows
+  before_script:
+    - choco install --yes --no-progress cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+    - $env:Path += ";C:\Program Files\CMake\bin\"
