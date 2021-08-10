@@ -1,12 +1,13 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  DOCKER_IMAGE_NAME_LINUX: librearp/linux-build-docker
 
 stages:
   - build
 
 build-linux:
   stage: build
-  image: spiffyk/librearp-linux:latest
+  image: $CI_REGISTRY/$DOCKER_IMAGE_NAME_LINUX:latest
   tags:
     - linux
   script:
