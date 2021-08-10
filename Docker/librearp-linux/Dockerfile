@@ -7,6 +7,7 @@ RUN apt-get update && \
         g++ \
         cmake \
         pkg-config \
+        libcurl4-gnutls-dev \
         libfreetype6-dev \
         libx11-dev \
         libxinerama-dev \
