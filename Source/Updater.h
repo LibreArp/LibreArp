@@ -30,8 +30,8 @@ namespace Updater {
     struct UpdateInfo {
         bool hasUpdate = false;
         int code = 0;
-        std::string name = "";
-        std::string websiteUrl = "";
+        std::string name;
+        std::string websiteUrl;
     };
 
     /**

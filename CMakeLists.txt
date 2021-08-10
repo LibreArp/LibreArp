@@ -15,8 +15,15 @@
 # along with this program.  If not, see https://librearp.gitlab.io/license/.
 #
 
+set(LIBREARP_VERSION "2.0")
+set(LIBREARP_VERSION_CODE "020000")
+
 cmake_minimum_required(VERSION 3.16)
-project(LibreArp VERSION 2.0)
+project(LibreArp VERSION ${LIBREARP_VERSION})
+
+add_definitions(
+        -DLIBREARP_VERSION=\"${LIBREARP_VERSION}\"
+        -DLIBREARP_VERSION_CODE=\"${LIBREARP_VERSION_CODE}\")
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -46,6 +53,7 @@ juce_add_plugin(LibreArp
         PLUGIN_MANUFACTURER_CODE Larx
         PLUGIN_CODE Larx
         FORMATS AU VST3 Standalone
+        NEEDS_CURL TRUE
         PRODUCT_NAME "LibreArp")
 
 if(MINGW)
@@ -85,7 +93,7 @@ target_sources(LibreArp
 target_compile_definitions(LibreArp
         PUBLIC
         JUCE_WEB_BROWSER=0
-        JUCE_USE_CURL=0
+        JUCE_USE_CURL=1
         JUCE_USE_FLAC=0
         JUCE_USE_OGGVORBIS=0
         JUCE_USE_WINDOWS_MEDIA_FORMAT=0

@@ -92,8 +92,9 @@ void MainEditor::handleUpdateCheck() {
         auto minMsBeforeUpdateCheck = globals.getMinSecsBeforeUpdateCheck() * 1000L;
         auto lastUpdateCheckTime = globals.getLastUpdateCheckTime();
         auto currentTime = juce::Time::currentTimeMillis();
+        auto difference = currentTime - lastUpdateCheckTime;
 
-        if ((currentTime - lastUpdateCheckTime) >= minMsBeforeUpdateCheck || globals.isFoundUpdateOnLastCheck()) {
+        if (difference >= minMsBeforeUpdateCheck || globals.isFoundUpdateOnLastCheck()) {
             globals.setLastUpdateCheckTime(currentTime);
             auto info = Updater::checkForUpdates();
 

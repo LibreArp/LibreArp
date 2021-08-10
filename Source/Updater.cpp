@@ -21,10 +21,11 @@
 #include "BuildConfig.h"
 
 Updater::UpdateInfo Updater::checkForUpdates() {
-    auto updateUrl = juce::URL(BuildConfig::UPDATE_CHECK_URL);
-    auto updateData = juce::JSON::parse(updateUrl.readEntireTextStream());
+    auto updateUrl = juce::URL::createWithoutParsing(BuildConfig::UPDATE_CHECK_URL);
+    auto str = updateUrl.readEntireTextStream();
+    auto updateData = juce::JSON::parse(str);
     if (!updateData.isArray()) {
-        return UpdateInfo();
+        return {};
     }
 
     auto &updateArray = *updateData.getArray();
@@ -46,7 +47,7 @@ Updater::UpdateInfo Updater::checkForUpdates() {
         }
 
         auto code = codeVar.toString().getHexValue32();
-        if (code <= JucePlugin_VersionCode) {
+        if (code <= juce::String(LIBREARP_VERSION_CODE).getHexValue32()) {
             continue;
         }
 

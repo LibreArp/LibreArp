@@ -28,6 +28,7 @@
 #define FONT_LICENSE_URL "https://github.com/RedHatBrand/Overpass/blob/master/LICENSE.md"
 
 #define LICENSE_NOTICE juce::CharPointer_UTF8("LibreArp - A libre VST arpeggio generator\n" \
+"\n" \
 "Copyright \xc2\xa9 2019-2021 The LibreArp contributors\n" \
 "\n" \
 "LibreArp is free software: you can redistribute it and/or modify " \
@@ -45,4 +46,6 @@
 " - JUCE 6 under the GNU General Public License, version 3\n" \
 " - VST3 SDK under the GNU General Public License, version 3\n" \
 "\n" \
-"LibreArp uses the Overpass font under the SIL Open Font License version 1.1")
+"LibreArp uses the Overpass font under the SIL Open Font License version 1.1\n" \
+"\n" \
+"Version: " LIBREARP_VERSION " (" LIBREARP_VERSION_CODE ")\n")
