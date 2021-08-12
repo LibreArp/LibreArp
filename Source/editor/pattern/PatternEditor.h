@@ -291,6 +291,11 @@ private:
     int lastPlayPositionX;
 
     /**
+     * The last number of input notes (used to trigger a full repaint if the number changes).
+     */
+    int lastNumInputNotes;
+
+    /**
      * The desired mouse cursor that will actually be changed
      */
     juce::MouseCursor mouseCursor;

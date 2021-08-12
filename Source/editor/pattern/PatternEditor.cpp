@@ -49,8 +49,10 @@ const int NOTE_RESIZE_TOLERANCE = 8;
 const int LOOP_RESIZE_TOLERANCE = 5;
 
 
-PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
-        : processor(p), state(e), view(ec)
+PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec) :
+        processor(p),
+        state(e),
+        view(ec)
 {
     setSize(1, 1); // We have to set this, otherwise it won't render at all
     setOpaque(true);
@@ -65,6 +67,7 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
 
     cursorNote = 0;
     lastPlayPositionX = 0;
+    lastNumInputNotes = 0;
 
     setWantsKeyboardFocus(true);
 }
@@ -734,7 +737,13 @@ void PatternEditor::audioUpdate() {
         lastPlayPositionX = newPosition;
     }
 
-    repaintNotes();
+    auto numInputNotes = processor.getNumInputNotes();
+    if (numInputNotes != lastNumInputNotes) {
+        repaint();
+        lastNumInputNotes = numInputNotes;
+    } else {
+        repaintNotes();
+    }
 }
 
 void PatternEditor::repaintNotes() {
