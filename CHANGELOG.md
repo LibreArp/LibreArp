@@ -36,7 +36,7 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 * **UNDER-THE-HOOD** Builds are now pure CMake (allows for automated builds)
 * **UNDER-THE-HOOD** Added standalone version for debugging purposes
 
-**Important note:** For licensing and technical reasons, the plugin no longer supports VST2. The VST3 version is incompatible with older versions of the plugin and cannot be simply dropp.
+**Important note:** For licensing and technical reasons, the plugin no longer supports VST2. The VST3 version is incompatible with older versions of the plugin and cannot be simply dropped-in in the older versions' stead.
 
 
 ### LibreArp 1.1
