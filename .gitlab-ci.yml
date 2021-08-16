@@ -22,8 +22,8 @@ stages:
     exclude:
       - build/LibreArp_artefacts/**/*.a
       - build/LibreArp_artefacts/**/*.lib
-      - build/LibreArp_artefacts/**/Standalone/**/*
-      - build/LibreArp_artefacts/**/JuceLibraryCode/**/*
+      - build/LibreArp_artefacts/**/Standalone
+      - build/LibreArp_artefacts/**/JuceLibraryCode
 
 build-linux:
   extends: .build-job
