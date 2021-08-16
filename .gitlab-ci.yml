@@ -2,6 +2,7 @@ variables:
   GIT_DEPTH: 5
   GIT_SUBMODULE_STRATEGY: recursive
   DOCKER_IMAGE_NAME_LINUX: librearp/linux-build-docker
+  CMAKE_TARGETS: VST3
 
 stages:
   - build
@@ -12,18 +13,25 @@ stages:
     - mkdir build
     - cd build
     - cmake ..
-    - cmake --build . --config Release
+    - cmake --build . --target $CMAKE_TARGETS --config Release
   artifacts:
     untracked: false
-    expire_in: 30 days
+    expire_in: 10 days
     paths:
-      - "build/LibreArp_artefacts"
+      - build/LibreArp_artefacts/
+    exclude:
+      - build/LibreArp_artefacts/**/*.a
+      - build/LibreArp_artefacts/**/*.lib
+      - build/LibreArp_artefacts/**/Standalone/**/*
+      - build/LibreArp_artefacts/**/JuceLibraryCode/**/*
 
 build-linux:
   extends: .build-job
   tags:
     - linux
   image: $CI_REGISTRY/$DOCKER_IMAGE_NAME_LINUX:latest
+  artifacts:
+    name: LibreArp-vst3-linux
 
 build-win:
   extends: .build-job
@@ -32,3 +40,5 @@ build-win:
   before_script:
     - choco install --yes --no-progress cmake --installargs 'ADD_CMAKE_TO_PATH=System'
     - $env:Path += ";C:\Program Files\CMake\bin\"
+  artifacts:
+    name: LibreArp-vst3-windows
