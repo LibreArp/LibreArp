@@ -2,7 +2,7 @@ variables:
   GIT_DEPTH: 5
   GIT_SUBMODULE_STRATEGY: recursive
   DOCKER_IMAGE_NAME_LINUX: librearp/linux-build-docker
-  CMAKE_TARGETS: VST3
+  CMAKE_TARGETS: LibreArp_VST3
 
 stages:
   - build
