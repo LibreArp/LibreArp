@@ -25,10 +25,12 @@ build-linux:
     - linux
   image: $CI_REGISTRY/$DOCKER_IMAGE_NAME_LINUX:latest
 
-build-win:
-  extends: .build-job
-  tags:
-    - windows
-  before_script:
-    - choco install --yes --no-progress cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-    - $env:Path += ";C:\Program Files\CMake\bin\"
+# LV2 does not work with Windows yet, so we'll ignore it
+
+#build-win:
+#  extends: .build-job
+#  tags:
+#    - windows
+#  before_script:
+#    - choco install --yes --no-progress cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+#    - $env:Path += ";C:\Program Files\CMake\bin\"

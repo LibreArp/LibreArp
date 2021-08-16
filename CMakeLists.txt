@@ -52,7 +52,8 @@ juce_add_plugin(LibreArp
         COPY_PLUGIN_AFTER_BUILD FALSE
         PLUGIN_MANUFACTURER_CODE Larx
         PLUGIN_CODE Larx
-        FORMATS AU VST3 Standalone
+        FORMATS LV2
+        LV2_URI https://librearp.gitlab.io
         NEEDS_CURL TRUE
         PRODUCT_NAME "LibreArp")
 
