@@ -22,6 +22,7 @@ const juce::Identifier EditorState::TREEID_WIDTH = juce::Identifier("width"); //
 const juce::Identifier EditorState::TREEID_HEIGHT = juce::Identifier("height"); // NOLINT
 const juce::Identifier EditorState::TREEID_DIVISOR = juce::Identifier("divisor"); // NOLINT
 const juce::Identifier EditorState::TREEID_LAST_NOTE_LENGTH = juce::Identifier("lastNoteLength"); // NOLINT
+const juce::Identifier EditorState::TREEID_LAST_NOTE_VELOCITY = juce::Identifier("lastNoteVelocity"); // NOLINT
 const juce::Identifier EditorState::TREEID_PIXELS_PER_BEAT = juce::Identifier("pixelsPerBeat"); // NOLINT
 const juce::Identifier EditorState::TREEID_PIXELS_PER_NOTE = juce::Identifier("pixelsPerNote"); // NOLINT
 const juce::Identifier EditorState::TREEID_OFFSET_X = juce::Identifier("editorOffsetX"); // NOLINT
@@ -34,6 +35,7 @@ juce::ValueTree EditorState::toValueTree() const {
     tree.setProperty(TREEID_HEIGHT, this->height, nullptr);
     tree.setProperty(TREEID_DIVISOR, this->divisor, nullptr);
     tree.setProperty(TREEID_LAST_NOTE_LENGTH, juce::int64(this->lastNoteLength), nullptr);
+    tree.setProperty(TREEID_LAST_NOTE_VELOCITY, this->lastNoteVelocity, nullptr);
     tree.setProperty(TREEID_PIXELS_PER_BEAT, this->pixelsPerBeat, nullptr);
     tree.setProperty(TREEID_PIXELS_PER_NOTE, this->pixelsPerNote, nullptr);
     tree.setProperty(TREEID_OFFSET_X, this->offsetX, nullptr);
@@ -58,6 +60,9 @@ EditorState EditorState::fromValueTree(juce::ValueTree &tree) {
     }
     if (tree.hasProperty(TREEID_LAST_NOTE_LENGTH)) {
         result.lastNoteLength = (juce::int64) tree.getProperty(TREEID_LAST_NOTE_LENGTH);
+    }
+    if (tree.hasProperty(TREEID_LAST_NOTE_VELOCITY)) {
+        result.lastNoteVelocity = tree.getProperty(TREEID_LAST_NOTE_VELOCITY);
     }
     if (tree.hasProperty(TREEID_PIXELS_PER_BEAT)) {
         result.pixelsPerBeat = tree.getProperty(TREEID_PIXELS_PER_BEAT);

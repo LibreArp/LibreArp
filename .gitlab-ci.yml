@@ -28,6 +28,10 @@ build-linux:
   tags:
     - linux
   image: $CI_REGISTRY/$DOCKER_IMAGE_NAME_LINUX:latest
+  after_script:
+    - cd build/LibreArp_artefacts/LV2
+    - tar -czvf LibreArp.lv2.tar.gz LibreArp.lv2
+    - cd -
   artifacts:
     name: LibreArp-lv2-linux
 

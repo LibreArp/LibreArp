@@ -52,8 +52,12 @@ bool operator==(const LibreArp::InputNote &a, const LibreArp::InputNote &b) {
 
 
 LibreArp::LibreArp()
-    // The following input channel is needed, otherwise JUCE reports numSamples of 0
-    : AudioProcessor(BusesProperties().withInput("Input", juce::AudioChannelSet::mono(), true))
+    // NOTE: The plugin technically does not need any audio channels, but there are two things:
+    //        - ever since migration to JUCE 6, without any channels, it reported numSamples of 0
+    //        - Renoise does not accept our MIDI output when there is no output channel
+    : AudioProcessor(BusesProperties()
+            .withInput("Input", juce::AudioChannelSet::mono(), true)
+            .withOutput("Output", juce::AudioChannelSet::mono(), true))
 {
     this->lastPosition = 0;
     this->wasPlaying = false;
