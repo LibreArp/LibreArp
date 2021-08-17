@@ -209,6 +209,12 @@ void PatternEditor::mouseWheelMove(const juce::MouseEvent &event, const juce::Mo
                 auto &note = this->processor.getPattern().getNotes()[noteOffset.noteIndex];
                 note.data.velocity = juce::jmax(0.0, juce::jmin(note.data.velocity + wheel.deltaY * 0.1, 1.0));
             }
+            if (noteDragAction->noteOffsets.size() == 1) {
+                auto noteIndex = noteDragAction->noteOffsets[0].noteIndex;
+                auto &note = this->processor.getPattern().getNotes()[noteIndex];
+                state.lastNoteVelocity = note.data.velocity;
+                state.lastNoteLength = note.endPoint - note.startPoint;
+            }
             processor.buildPattern();
         }
     } else {
@@ -349,6 +355,7 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
                             auto &offsets = ((NoteDragAction *) this->dragAction)->noteOffsets;
                             if (offsets.size() == 1) {
                                 auto &note = processor.getPattern().getNotes()[offsets[0].noteIndex];
+                                state.lastNoteVelocity = note.data.velocity;
                                 state.lastNoteLength = note.endPoint - note.startPoint;
                             }
                         }
@@ -550,6 +557,14 @@ void PatternEditor::noteResetVelocity(PatternEditor::NoteDragAction* dragAction)
     for (auto &noteOffset : dragAction->noteOffsets) {
         notes[noteOffset.noteIndex].data.velocity = NoteData::DEFAULT_VELOCITY;
     }
+    if (!dragAction->noteOffsets.empty()) {
+        state.lastNoteVelocity = NoteData::DEFAULT_VELOCITY;
+    }
+    if (dragAction->noteOffsets.size() == 1) {
+        auto noteIndex = dragAction->noteOffsets[0].noteIndex;
+        auto &note = this->processor.getPattern().getNotes()[noteIndex];
+        state.lastNoteLength = note.endPoint - note.startPoint;
+    }
     processor.buildPattern();
     repaintNotes();
 }
@@ -568,6 +583,7 @@ void PatternEditor::noteCreate(const juce::MouseEvent &event) {
     note.startPoint = juce::jmin(pulse, pattern.loopLength - state.lastNoteLength);
     note.endPoint = note.startPoint + state.lastNoteLength;
     note.data.noteNumber = yToNote(event.y);
+    note.data.velocity = state.lastNoteVelocity;
 
     auto index = notes.size();
     notes.push_back(note);

@@ -20,6 +20,8 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_data_structures/juce_data_structures.h>
 
+#include "../NoteData.h"
+
 
 class EditorState {
 public:
@@ -29,6 +31,7 @@ public:
     static const juce::Identifier TREEID_HEIGHT;
     static const juce::Identifier TREEID_DIVISOR;
     static const juce::Identifier TREEID_LAST_NOTE_LENGTH;
+    static const juce::Identifier TREEID_LAST_NOTE_VELOCITY;
     static const juce::Identifier TREEID_PIXELS_PER_BEAT;
     static const juce::Identifier TREEID_PIXELS_PER_NOTE;
     static const juce::Identifier TREEID_OFFSET_X;
@@ -41,6 +44,7 @@ public:
     // Pattern editor
     int divisor = 4;
     int64_t lastNoteLength = -1;
+    double lastNoteVelocity = NoteData::DEFAULT_VELOCITY;
     int pixelsPerBeat = 100;
     int pixelsPerNote = 12;
     int offsetX = 0;
