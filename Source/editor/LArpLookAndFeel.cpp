@@ -17,11 +17,7 @@
 
 #include "LArpLookAndFeel.h"
 #include <LibreArpBinaryData.h>
-
-const juce::Colour LArpLookAndFeel::MAIN_BACKGROUND_COLOUR = juce::Colour(42, 40, 34); // NOLINT
-const juce::Colour LArpLookAndFeel::HIGHLIGHT_BACKGROUND_COLOUR = juce::Colour(59, 56, 48); // NOLINT
-const juce::Colour LArpLookAndFeel::MAIN_FOREGROUND_COLOUR = juce::Colour(166, 164, 155); // NOLINT
-const juce::Colour LArpLookAndFeel::HIGHLIGHT_FOREGROUND_COLOUR = juce::Colour(171, 204, 41); // NOLINT
+#include "style/Colours.h"
 
 const int MAIN_FONT_SIZE = 18;
 
@@ -31,40 +27,40 @@ LArpLookAndFeel::LArpLookAndFeel() {
 
     setDefaultSansSerifTypeface(mainTypeface);
 
-    setColour(juce::TooltipWindow::backgroundColourId, MAIN_BACKGROUND_COLOUR);
-    setColour(juce::TooltipWindow::outlineColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(juce::TooltipWindow::textColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TooltipWindow::backgroundColourId, Style::MAIN_BACKGROUND_COLOUR);
+    setColour(juce::TooltipWindow::outlineColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TooltipWindow::textColourId, Style::MAIN_FOREGROUND_COLOUR);
 
-    setColour(juce::AlertWindow::outlineColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(juce::AlertWindow::backgroundColourId, MAIN_BACKGROUND_COLOUR);
-    setColour(juce::AlertWindow::textColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::AlertWindow::outlineColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::AlertWindow::backgroundColourId, Style::MAIN_BACKGROUND_COLOUR);
+    setColour(juce::AlertWindow::textColourId, Style::MAIN_FOREGROUND_COLOUR);
 
-    setColour(juce::TextEditor::backgroundColourId, HIGHLIGHT_BACKGROUND_COLOUR);
-    setColour(juce::TextEditor::textColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(juce::TextEditor::highlightColourId, HIGHLIGHT_FOREGROUND_COLOUR);
+    setColour(juce::TextEditor::backgroundColourId, Style::HIGHLIGHT_BACKGROUND_COLOUR);
+    setColour(juce::TextEditor::textColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TextEditor::highlightColourId, Style::HIGHLIGHT_FOREGROUND_COLOUR);
     setColour(juce::TextEditor::highlightedTextColourId, juce::Colour(255, 255, 255));
 
-    setColour(juce::ResizableWindow::backgroundColourId, HIGHLIGHT_BACKGROUND_COLOUR);
+    setColour(juce::ResizableWindow::backgroundColourId, Style::HIGHLIGHT_BACKGROUND_COLOUR);
 
-    setColour(juce::TabbedComponent::backgroundColourId, MAIN_BACKGROUND_COLOUR);
-    setColour(juce::TabbedComponent::outlineColourId, HIGHLIGHT_BACKGROUND_COLOUR);
+    setColour(juce::TabbedComponent::backgroundColourId, Style::MAIN_BACKGROUND_COLOUR);
+    setColour(juce::TabbedComponent::outlineColourId, Style::HIGHLIGHT_BACKGROUND_COLOUR);
 
-    setColour(juce::Label::textColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(juce::ToggleButton::textColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::Label::textColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::ToggleButton::textColourId, Style::MAIN_FOREGROUND_COLOUR);
 
-    setColour(juce::TextButton::textColourOnId, MAIN_FOREGROUND_COLOUR);
-    setColour(juce::TextButton::textColourOffId, MAIN_FOREGROUND_COLOUR);
-    setColour(juce::TextButton::buttonColourId, MAIN_BACKGROUND_COLOUR);
-    setColour(juce::ComboBox::outlineColourId, MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TextButton::textColourOnId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TextButton::textColourOffId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::TextButton::buttonColourId, Style::MAIN_BACKGROUND_COLOUR);
+    setColour(juce::ComboBox::outlineColourId, Style::MAIN_FOREGROUND_COLOUR);
 
-    setColour(juce::HyperlinkButton::textColourId, HIGHLIGHT_FOREGROUND_COLOUR);
+    setColour(juce::HyperlinkButton::textColourId, Style::HIGHLIGHT_FOREGROUND_COLOUR);
 
-    setColour(juce::Slider::textBoxTextColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(juce::Slider::textBoxOutlineColourId, MAIN_FOREGROUND_COLOUR);
-    setColour(juce::Slider::textBoxBackgroundColourId, MAIN_BACKGROUND_COLOUR);
+    setColour(juce::Slider::textBoxTextColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::Slider::textBoxOutlineColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::Slider::textBoxBackgroundColourId, Style::MAIN_BACKGROUND_COLOUR);
 
-    setColour(juce::ScrollBar::thumbColourId, HIGHLIGHT_FOREGROUND_COLOUR);
-    setColour(juce::ScrollBar::trackColourId, MAIN_BACKGROUND_COLOUR);
+    setColour(juce::ScrollBar::thumbColourId, Style::HIGHLIGHT_FOREGROUND_COLOUR);
+    setColour(juce::ScrollBar::trackColourId, Style::MAIN_BACKGROUND_COLOUR);
 }
 
 
@@ -84,8 +80,8 @@ void LArpLookAndFeel::drawTabButton(juce::TabBarButton &button, juce::Graphics &
     }
 
     juce::Colour col = button.isEnabled() ?
-                 ((isMouseOver || isMouseDown) ?  MAIN_FOREGROUND_COLOUR.brighter() : MAIN_FOREGROUND_COLOUR) :
-                 MAIN_FOREGROUND_COLOUR.withAlpha(0.3f);
+                 ((isMouseOver || isMouseDown) ?  Style::MAIN_FOREGROUND_COLOUR.brighter() : Style::MAIN_FOREGROUND_COLOUR) :
+                 Style::MAIN_FOREGROUND_COLOUR.withAlpha(0.3f);
 
     const juce::Rectangle<float> area (button.getTextArea().toFloat());
     float length = area.getWidth();

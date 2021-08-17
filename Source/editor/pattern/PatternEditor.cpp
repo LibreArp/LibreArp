@@ -21,29 +21,7 @@
 
 #include "PatternEditor.h"
 #include "PatternEditorView.h"
-
-const juce::Colour BACKGROUND_COLOUR = juce::Colour(82, 78, 67);
-const juce::Colour GRIDLINES_COLOUR = juce::Colour(42, 40, 34);
-const juce::Colour POSITION_INDICATOR_COLOUR = juce::Colour(255, 255, 255);
-const juce::Colour LOOP_LINE_COLOUR = juce::Colour(155, 36, 36);
-
-const juce::Colour ZERO_LINE_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 0.1f);
-const juce::Colour ZERO_OCTAVE_COLOUR = juce::Colour((uint8_t) 171, 204, 41, 0.1f);
-const juce::Colour OCTAVE_LINE_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 1.0f);
-
-const juce::Colour BAR_SHADE_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 0.1f);
-
-const juce::Colour NOTE_FILL_COLOUR = juce::Colour(171, 204, 41);
-const juce::Colour NOTE_ACTIVE_FILL_COLOUR = juce::Colour(228, 255, 122);
-const juce::Colour NOTE_SELECTED_FILL_COLOUR = juce::Colour(245, 255, 209);
-const juce::Colour NOTE_SELECTED_ACTIVE_FILL_COLOUR = juce::Colour(255, 255, 255);
-const juce::Colour NOTE_BORDER_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 0.7f);
-const juce::Colour NOTE_VELOCITY_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 0.2f);
-
-const juce::Colour CURSOR_TIME_COLOUR = juce::Colour((uint8_t) 255, 255, 255, 0.7f);
-const juce::Colour CURSOR_NOTE_COLOUR = juce::Colour((uint8_t) 255, 255, 255, 0.05f);
-
-const juce::Colour SELECTION_BORDER_COLOUR = juce::Colour(255, 0, 0);
+#include "../style/Colours.h"
 
 const int NOTE_RESIZE_TOLERANCE = 8;
 const int LOOP_RESIZE_TOLERANCE = 5;
@@ -82,14 +60,14 @@ void PatternEditor::paint(juce::Graphics &g) {
     drawRegion.translate(-state.offsetX, -state.offsetY);
 
     // Draw background
-    g.setColour(BACKGROUND_COLOUR);
+    g.setColour(Style::EDITOR_BACKGROUND_COLOUR);
     g.fillRect(unoffsDrawRegion);
 
     // Draw bars
     if (processor.getTimeSigDenominator() > 0 && processor.getTimeSigDenominator() <= 32) {
         auto beat = (pixelsPerBeat * 4) / processor.getTimeSigDenominator();
         auto bar = beat * processor.getTimeSigNumerator();
-        g.setColour(BAR_SHADE_COLOUR);
+        g.setColour(Style::BAR_SHADE_COLOUR);
         int firstBarX = unoffsDrawRegion.getX() - unoffsDrawRegion.getX() % bar - state.offsetX % (bar * 2);
         for (int i = firstBarX; i < unoffsDrawRegion.getWidth(); i += bar * 2) {
             g.fillRect(i + bar, unoffsDrawRegion.getY(), bar, unoffsDrawRegion.getHeight());
@@ -100,20 +78,20 @@ void PatternEditor::paint(juce::Graphics &g) {
     auto numInputNotes = processor.getNumInputNotes();
     int noteZeroY = noteToY(0);
     if (numInputNotes > 0) {
-        g.setColour(ZERO_OCTAVE_COLOUR);
+        g.setColour(Style::ZERO_OCTAVE_COLOUR);
         auto height = numInputNotes * pixelsPerNote;
         auto rect = juce::Rectangle<int>(
                 unoffsDrawRegion.getX(), noteZeroY - height + pixelsPerNote, unoffsDrawRegion.getWidth(), height);
         g.fillRect(rect);
     } else {
-        g.setColour(ZERO_LINE_COLOUR);
+        g.setColour(Style::ZERO_LINE_COLOUR);
         auto rect = juce::Rectangle<int>(unoffsDrawRegion.getX(), noteZeroY, unoffsDrawRegion.getWidth(), pixelsPerNote);
         g.fillRect(rect);
     }
 
     // Draw gridlines
     // - Horizontal
-    g.setColour(GRIDLINES_COLOUR);
+    g.setColour(Style::GRIDLINES_COLOUR);
     int horizontalGridlineStart = (getHeight() / 2 - state.offsetY) % pixelsPerNote - pixelsPerNote / 2;
     for (int i = horizontalGridlineStart; i < getHeight(); i += pixelsPerNote) {
         g.fillRect(0, i, getWidth(), 2);
@@ -132,7 +110,7 @@ void PatternEditor::paint(juce::Graphics &g) {
 
     // Draw octaves
     if (numInputNotes > 0) {
-        g.setColour(OCTAVE_LINE_COLOUR);
+        g.setColour(Style::OCTAVE_LINE_COLOUR);
         auto pixelsPerOctave = pixelsPerNote * numInputNotes;
 
         int i = (getHeight() / 2 - state.offsetY) % pixelsPerOctave - pixelsPerNote / 2 + pixelsPerNote;
@@ -160,27 +138,27 @@ void PatternEditor::paint(juce::Graphics &g) {
             bool isPlaying = (position > 0 && position >= note.startPoint && position < note.endPoint);
 
             if (selectedNotes.find(i) == selectedNotes.end()) {
-                g.setColour(isPlaying ? NOTE_ACTIVE_FILL_COLOUR : NOTE_FILL_COLOUR);
+                g.setColour(isPlaying ? Style::NOTE_ACTIVE_FILL_COLOUR : Style::NOTE_FILL_COLOUR);
             } else {
-                g.setColour(isPlaying ? NOTE_SELECTED_ACTIVE_FILL_COLOUR : NOTE_SELECTED_FILL_COLOUR);
+                g.setColour(isPlaying ? Style::NOTE_SELECTED_ACTIVE_FILL_COLOUR : Style::NOTE_SELECTED_FILL_COLOUR);
             }
             g.fillRect(noteRect);
 
-            g.setColour(NOTE_VELOCITY_COLOUR);
+            g.setColour(Style::NOTE_VELOCITY_COLOUR);
             g.fillRect(noteRect.withTrimmedBottom(static_cast<int>(pixelsPerNote * note.data.velocity)));
 
-            g.setColour(NOTE_BORDER_COLOUR);
+            g.setColour(Style::NOTE_BORDER_COLOUR);
             g.drawRect(noteRect, 2);
         }
     }
 
     // Draw cursor indicator
-    g.setColour(CURSOR_TIME_COLOUR);
+    g.setColour(Style::CURSOR_TIME_COLOUR);
     auto cursorPulseX = pulseToX(cursorPulse);
     g.fillRect(cursorPulseX, 0, 1, getHeight());
 
     // Draw loop line
-    g.setColour(LOOP_LINE_COLOUR);
+    g.setColour(Style::LOOP_LINE_COLOUR);
     auto loopLine = pulseToX(pattern.loopLength);
     auto loopLineRect = juce::Rectangle<int>(loopLine, 0, 4, getHeight());
     if (loopLineRect.intersects(unoffsDrawRegion)){
@@ -191,7 +169,7 @@ void PatternEditor::paint(juce::Graphics &g) {
     if (lastPlayPositionX > 0) {
         auto positionRect = juce::Rectangle<int>(lastPlayPositionX - state.offsetX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
         if (positionRect.intersects(unoffsDrawRegion)) {
-            g.setColour(POSITION_INDICATOR_COLOUR);
+            g.setColour(Style::POSITION_INDICATOR_COLOUR);
             g.fillRect(positionRect);
         }
     }
@@ -199,7 +177,7 @@ void PatternEditor::paint(juce::Graphics &g) {
     // Draw selection
     if (selection.getWidth() != 0 && selection.getHeight() != 0) {
         if (selection.intersects(unoffsDrawRegion)) {
-            g.setColour(SELECTION_BORDER_COLOUR);
+            g.setColour(Style::SELECTION_BORDER_COLOUR);
             g.drawRect(selection, 3);
         }
     }
@@ -208,7 +186,7 @@ void PatternEditor::paint(juce::Graphics &g) {
     auto cursorNoteY = noteToY(cursorNote);
     auto cursorNoteRect = juce::Rectangle<int>(unoffsDrawRegion.getX(), cursorNoteY, unoffsDrawRegion.getWidth(), pixelsPerNote);
     if (cursorNoteRect.intersects(unoffsDrawRegion)) {
-        g.setColour(CURSOR_NOTE_COLOUR);
+        g.setColour(Style::CURSOR_NOTE_COLOUR);
         g.fillRect(cursorNoteRect);
     }
 }

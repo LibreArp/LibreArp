@@ -24,13 +24,6 @@ class LArpLookAndFeel : public juce::LookAndFeel_V4 {
 
 public:
 
-    static const juce::Colour MAIN_BACKGROUND_COLOUR;
-    static const juce::Colour HIGHLIGHT_BACKGROUND_COLOUR;
-
-    static const juce::Colour MAIN_FOREGROUND_COLOUR;
-    static const juce::Colour HIGHLIGHT_FOREGROUND_COLOUR;
-
-
     void drawTabButton(juce::TabBarButton &button, juce::Graphics &graphics, bool isMouseOver, bool isMouseDown) override;
 
     void drawTabAreaBehindFrontButton(juce::TabbedButtonBar &bar, juce::Graphics &g, int w, int h) override;
