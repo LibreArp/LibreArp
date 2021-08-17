@@ -17,13 +17,7 @@
 
 #include "BeatBar.h"
 #include "PatternEditorView.h"
-
-const juce::Colour BACKGROUND_COLOUR = juce::Colour(42, 40, 34);
-const juce::Colour BOTTOM_LINE_COLOUR = juce::Colour(0, 0, 0);
-const juce::Colour BEAT_LINE_COLOUR = juce::Colour(107, 104, 94);
-const juce::Colour BEAT_NUMBER_COLOUR = juce::Colour(107, 104, 94);
-const juce::Colour LOOP_LINE_COLOUR = juce::Colour(155, 36, 36);
-const juce::Colour LOOP_TEXT_COLOUR = juce::Colour((uint8_t) 155, 36, 36);
+#include "../style/Colours.h"
 
 const juce::String LOOP_TEXT = "loop"; // NOLINT
 
@@ -41,9 +35,9 @@ void BeatBar::paint(juce::Graphics &g) {
     auto pixelsPerBeat = state.pixelsPerBeat;
 
     // Draw background
-    g.setColour(BACKGROUND_COLOUR);
+    g.setColour(Style::BAR_BACKGROUND_COLOUR);
     g.fillRect(getLocalBounds());
-    g.setColour(BOTTOM_LINE_COLOUR);
+    g.setColour(Style::BOTTOM_LINE_COLOUR);
     g.fillRect(0, getHeight() - 1, getWidth(), 1);
 
     auto loopLine = static_cast<int>((pattern.loopLength / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1 - state.offsetX;
@@ -52,19 +46,19 @@ void BeatBar::paint(juce::Graphics &g) {
     g.setFont(20);
     int n = 1 + state.offsetX / pixelsPerBeat;
     for (float i = (1 - state.offsetX) % pixelsPerBeat; i < getWidth(); i += pixelsPerBeat, n++) {
-        g.setColour(BEAT_LINE_COLOUR);
+        g.setColour(Style::BEAT_LINE_COLOUR);
         g.fillRect(juce::roundToInt(i), 0, 4, getHeight());
 
-        g.setColour((i == loopLine) ? LOOP_TEXT_COLOUR : BEAT_NUMBER_COLOUR);
+        g.setColour((i == loopLine) ? Style::LOOP_TEXT_COLOUR : Style::BEAT_NUMBER_COLOUR);
         g.drawText(juce::String(n), static_cast<int>(i) + TEXT_OFFSET, 0, 32, getHeight(), juce::Justification::centredLeft);
     }
 
     // Draw loop line
     g.setFont(16);
-    g.setColour(LOOP_LINE_COLOUR);
+    g.setColour(Style::LOOP_LINE_COLOUR);
     g.fillRect(loopLine, 0, 4, getHeight());
 
-    g.setColour(LOOP_TEXT_COLOUR);
+    g.setColour(Style::LOOP_TEXT_COLOUR);
     auto loopTextWidth = g.getCurrentFont().getStringWidth(LOOP_TEXT);
     auto loopLineWithOffset = loopLine - loopTextWidth - TEXT_OFFSET;
     g.drawText(LOOP_TEXT, loopLineWithOffset, 0, loopTextWidth, getHeight(), juce::Justification::centredRight);

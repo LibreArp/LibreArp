@@ -18,6 +18,7 @@
 #include <sstream>
 #include "../LibreArp.h"
 #include "MainEditor.h"
+#include "style/Colours.h"
 
 
 MainEditor::MainEditor(LibreArp &p, EditorState &e)
@@ -59,7 +60,7 @@ MainEditor::~MainEditor() = default;
 
 //==============================================================================
 void MainEditor::paint(juce::Graphics &g) {
-    g.setColour(LArpLookAndFeel::MAIN_BACKGROUND_COLOUR);
+    g.setColour(Style::MAIN_BACKGROUND_COLOUR);
     g.fillRect(getLocalBounds());
 }
 
