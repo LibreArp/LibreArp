@@ -29,8 +29,9 @@ build-linux:
     - linux
   image: $CI_REGISTRY/$DOCKER_IMAGE_NAME_LINUX:latest
   after_script:
-    - cd LibreArp_artefacts/VST3
+    - cd build/LibreArp_artefacts/VST3
     - tar -czvf LibreArp.vst3.tar.gz LibreArp.vst3
+    - cd -
   artifacts:
     name: LibreArp-vst3-linux
 
