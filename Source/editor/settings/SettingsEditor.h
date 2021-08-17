@@ -43,6 +43,10 @@ private:
     void updateLayout();
 
     juce::ToggleButton updateCheckToggle;
+
+    juce::Slider guiScaleFactorSlider;
+    juce::Label guiScaleFactorLabel;
+
     LibreArp &processor;
 };
 

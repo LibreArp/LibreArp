@@ -76,6 +76,7 @@ void MainEditor::visibilityChanged() {
     handleUpdateCheck();
     updateUpdateButton();
     updateLayout();
+    setScaleFactor(processor.getGlobals().getGuiScaleFactor());
 }
 
 void MainEditor::resized() {

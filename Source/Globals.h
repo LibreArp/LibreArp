@@ -33,6 +33,7 @@ public:
     static const juce::Identifier TREEID_FOUND_UPDATE_ON_LAST_CHECK;
     static const juce::Identifier TREEID_MIN_SECS_BEFORE_UPDATE_CHECK;
     static const juce::Identifier TREEID_LAST_UPDATE_CHECK_TIME;
+    static const juce::Identifier TREEID_GUI_SCALE_FACTOR;
 
 
     explicit Globals();
@@ -116,6 +117,10 @@ public:
 
     void setLastUpdateCheckTime(int64_t lastUpdateCheckTime);
 
+    float getGuiScaleFactor() const;
+
+    void setGuiScaleFactor(float guiScaleFactor);
+
 private:
 
     /**
@@ -162,6 +167,11 @@ private:
      * The timestamp (in milliseconds) of the last update check.
      */
     int64_t lastUpdateCheckTime;
+
+    /**
+     * The scale factor of the GUI.
+     */
+    float guiScaleFactor;
 
     /**
      * Mutex for the globals.

@@ -24,6 +24,7 @@ const juce::Identifier Globals::TREEID_UPDATE_CHECK = "checkForUpdates"; // NOLI
 const juce::Identifier Globals::TREEID_FOUND_UPDATE_ON_LAST_CHECK = "foundUpdateOnLastCheck"; // NOLINT
 const juce::Identifier Globals::TREEID_MIN_SECS_BEFORE_UPDATE_CHECK = "minSecsBeforeUpdateCheck"; // NOLINT
 const juce::Identifier Globals::TREEID_LAST_UPDATE_CHECK_TIME = "lastUpdateCheckTime"; // NOLINT
+const juce::Identifier Globals::TREEID_GUI_SCALE_FACTOR = "guiScaleFactor"; // NOLINT
 
 Globals::Globals() :
         changed(false),
@@ -31,7 +32,8 @@ Globals::Globals() :
         checkForUpdatesEnabled(BuildConfig::DEFAULT_CHECK_FOR_UPDATES_ENABLED),
         foundUpdateOnLastCheck(false),
         minSecsBeforeUpdateCheck(BuildConfig::DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK),
-        lastUpdateCheckTime(0L)
+        lastUpdateCheckTime(0L),
+        guiScaleFactor(1.0f)
 {
 #if JUCE_OSX
     globalsDir = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
@@ -119,6 +121,7 @@ juce::ValueTree Globals::toValueTree() {
     tree.setProperty(TREEID_FOUND_UPDATE_ON_LAST_CHECK, this->foundUpdateOnLastCheck, nullptr);
     tree.setProperty(TREEID_MIN_SECS_BEFORE_UPDATE_CHECK, juce::int64(this->minSecsBeforeUpdateCheck), nullptr);
     tree.setProperty(TREEID_LAST_UPDATE_CHECK_TIME, juce::int64(this->lastUpdateCheckTime), nullptr);
+    tree.setProperty(TREEID_GUI_SCALE_FACTOR, this->guiScaleFactor, nullptr);
 
     return tree;
 }
@@ -145,6 +148,9 @@ void Globals::parseValueTree(const juce::ValueTree &tree) {
     }
     if (tree.hasProperty(TREEID_LAST_UPDATE_CHECK_TIME)) {
         this->lastUpdateCheckTime = juce::int64(tree.getProperty(TREEID_LAST_UPDATE_CHECK_TIME));
+    }
+    if (tree.hasProperty(TREEID_GUI_SCALE_FACTOR)) {
+        this->guiScaleFactor = tree.getProperty(TREEID_GUI_SCALE_FACTOR);
     }
 }
 
@@ -213,5 +219,16 @@ bool Globals::isFoundUpdateOnLastCheck() const {
 void Globals::setFoundUpdateOnLastCheck(bool foundUpdateOnLastCheck) {
     std::scoped_lock lock(mutex);
     Globals::foundUpdateOnLastCheck = foundUpdateOnLastCheck;
+    this->changed = true;
+}
+
+float Globals::getGuiScaleFactor() const {
+    std::scoped_lock lock(mutex);
+    return guiScaleFactor;
+}
+
+void Globals::setGuiScaleFactor(float guiScaleFactor) {
+    std::scoped_lock lock(mutex);
+    Globals::guiScaleFactor = guiScaleFactor;
     this->changed = true;
 }
