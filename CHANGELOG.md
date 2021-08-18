@@ -7,6 +7,16 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 
 ## Changelog
 
+### LibreArp 2.1
+
+* **NEW** Added a setting for GUI scale
+* **IMPROVE** The plugin now remembers the velocity of the last edited note
+* **IMPROVE** Changed the slogan on the *About* tab to match the one on the website and on GitLab
+* **IMPROVE (Linux)** `LibreArp.so` is now supplied in an archive with the required directory structure pre-created
+* **FIX** Fixed a pretty serious memory leak in handling Pattern editor's drag actions
+* **FIX** Renoise now correctly accepts our MIDI output
+
+
 ### LibreArp 2.0
 
 * **NEW** A new look-and-feel (based on a mock-up by [**Marek Jędrzejewski**](https://github.com/marekjedrzejewski))
