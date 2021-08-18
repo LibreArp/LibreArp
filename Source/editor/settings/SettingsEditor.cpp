@@ -24,6 +24,22 @@ SettingsEditor::SettingsEditor(LibreArp& p) : processor(p) {
         processor.getGlobals().setCheckForUpdatesEnabled(updateCheckToggle.getToggleState());
     };
     addAndMakeVisible(updateCheckToggle);
+
+    const juce::String guiScaleFactorTooltip = "The scaling factor of LibreArp's editor.";
+    guiScaleFactorSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
+    guiScaleFactorSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 32, 24);
+    guiScaleFactorSlider.setRange(1.0f, 3.0f, 0.25f);
+    guiScaleFactorSlider.setTooltip(guiScaleFactorTooltip);
+    guiScaleFactorSlider.onValueChange = [this] {
+        auto value = static_cast<float>(guiScaleFactorSlider.getValue());
+        processor.getGlobals().setGuiScaleFactor(value);
+        processor.getActiveEditor()->setScaleFactor(value);
+    };
+    addAndMakeVisible(guiScaleFactorSlider);
+
+    guiScaleFactorLabel.setText("GUI Scale", juce::NotificationType::dontSendNotification);
+    guiScaleFactorLabel.setTooltip(guiScaleFactorTooltip);
+    addAndMakeVisible(guiScaleFactorLabel);
 }
 
 void SettingsEditor::resized() {
@@ -48,4 +64,11 @@ void SettingsEditor::updateLayout() {
 
     auto area = getLocalBounds().reduced(8);
     updateCheckToggle.setBounds(area.removeFromTop(24));
+
+    area.removeFromTop(4);
+
+    auto scaleFactorArea = area.removeFromTop(24);
+    guiScaleFactorSlider.setValue(processor.getGlobals().getGuiScaleFactor());
+    guiScaleFactorSlider.setBounds(scaleFactorArea.removeFromLeft(96));
+    guiScaleFactorLabel.setBounds(scaleFactorArea);
 }

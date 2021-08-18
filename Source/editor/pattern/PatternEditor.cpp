@@ -36,7 +36,6 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
     setOpaque(true);
 
     cursorPulse = 0;
-    new(dragAction) DragAction(); // initialize a no-op drag action
     if (state.lastNoteLength < 1) {
         state.lastNoteLength = processor.getPattern().getTimebase() / state.divisor;
     }
@@ -202,15 +201,14 @@ void PatternEditor::mouseWheelMove(const juce::MouseEvent &event, const juce::Mo
         }
     } else if (event.mods.isAltDown()) {
         // Note velocity
-        if (this->dragAction != nullptr && (this->dragAction->type & DragAction::TYPE_MASK) == DragAction::TYPE_NOTE) {
-            auto *noteDragAction = (NoteDragAction *) this->dragAction;
+        if ((dragAction.type & DragAction::TYPE_MASK) == DragAction::TYPE_NOTE) {
             std::scoped_lock lock(this->processor.getPattern().getMutex());
-            for (auto &noteOffset : noteDragAction->noteOffsets) {
+            for (auto &noteOffset : dragAction.noteOffsets) {
                 auto &note = this->processor.getPattern().getNotes()[noteOffset.noteIndex];
                 note.data.velocity = juce::jmax(0.0, juce::jmin(note.data.velocity + wheel.deltaY * 0.1, 1.0));
             }
-            if (noteDragAction->noteOffsets.size() == 1) {
-                auto noteIndex = noteDragAction->noteOffsets[0].noteIndex;
+            if (dragAction.noteOffsets.size() == 1) {
+                auto noteIndex = dragAction.noteOffsets[0].noteIndex;
                 auto &note = this->processor.getPattern().getNotes()[noteIndex];
                 state.lastNoteVelocity = note.data.velocity;
                 state.lastNoteLength = note.endPoint - note.startPoint;
@@ -242,25 +240,25 @@ void PatternEditor::mouseMove(const juce::MouseEvent &event) {
             if (event.x <= (noteRect.getX() + NOTE_RESIZE_TOLERANCE)) {
                 mouseCursor = juce::MouseCursor::LeftEdgeResizeCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
-                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, notes, event);
+                    dragAction.noteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, notes, event);
                 } else {
-                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, selectedNotes, notes, event);
+                    dragAction.noteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, selectedNotes, notes, event);
                 }
                 return;
             } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - NOTE_RESIZE_TOLERANCE)) {
                 mouseCursor = juce::MouseCursor::RightEdgeResizeCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
-                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, notes, event);
+                    dragAction.noteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, notes, event);
                 } else {
-                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, selectedNotes, notes, event);
+                    dragAction.noteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, selectedNotes, notes, event);
                 }
                 return;
             } else {
                 mouseCursor = juce::MouseCursor::DraggingHandCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
-                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, notes, event);
+                    dragAction.noteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, notes, event);
                 } else {
-                    new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, selectedNotes, notes, event);
+                    dragAction.noteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, selectedNotes, notes, event);
                 }
                 return;
             }
@@ -270,11 +268,11 @@ void PatternEditor::mouseMove(const juce::MouseEvent &event) {
     auto loopRect = getRectangleForLoop();
     if (loopRect.contains(event.x, event.y)) {
         mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
-        new(dragAction) DragAction(DragAction::TYPE_LOOP_RESIZE);
+        dragAction.basicDragAction(DragAction::TYPE_LOOP_RESIZE);
         return;
     }
 
-    new(dragAction) DragAction();
+    dragAction.basicDragAction();
 }
 
 void PatternEditor::mouseDrag(const juce::MouseEvent &event) {
@@ -282,26 +280,24 @@ void PatternEditor::mouseDrag(const juce::MouseEvent &event) {
     defer d([this]() { updateMouseCursor(); });
 
     if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
-        if (this->dragAction != nullptr && this->dragAction->type != DragAction::TYPE_NONE) {
-            switch (this->dragAction->type) {
-                case DragAction::TYPE_LOOP_RESIZE:
-                    loopResize(event);
-                    return;
-                case DragAction::TYPE_NOTE_START_RESIZE:
-                    noteStartResize(event, (NoteDragAction *) (this->dragAction));
-                    return;
-                case DragAction::TYPE_NOTE_END_RESIZE:
-                    noteEndResize(event, (NoteDragAction *) (this->dragAction));
-                    return;
-                case DragAction::TYPE_NOTE_MOVE:
-                    noteMove(event, (NoteDragAction *) (this->dragAction));
-                    return;
-                case DragAction::TYPE_SELECTION_DRAG:
-                    select(event, (SelectionDragAction *) (this->dragAction));
-                    return;
-                default:
-                    return;
-            }
+        switch (dragAction.type) {
+            case DragAction::TYPE_LOOP_RESIZE:
+                loopResize(event);
+                return;
+            case DragAction::TYPE_NOTE_START_RESIZE:
+                noteStartResize(event);
+                return;
+            case DragAction::TYPE_NOTE_END_RESIZE:
+                noteEndResize(event);
+                return;
+            case DragAction::TYPE_NOTE_MOVE:
+                noteMove(event);
+                return;
+            case DragAction::TYPE_SELECTION_DRAG:
+                select(event);
+                return;
+            default:
+                return;
         }
     }
 
@@ -334,13 +330,13 @@ void PatternEditor::mouseAnyMove(const juce::MouseEvent &event) {
 
 void PatternEditor::mouseDown(const juce::MouseEvent &event) {
     if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
-        if (this->dragAction == nullptr || this->dragAction->type == DragAction::TYPE_NONE) {
+        if (dragAction.type == DragAction::TYPE_NONE) {
             if (event.mods.isCtrlDown()) {
                 if (!event.mods.isShiftDown()) {
                     selectedNotes.clear();
                 }
 
-                new(dragAction) SelectionDragAction(event.x, event.y);
+                dragAction.selectionDragAction(DragAction::TYPE_SELECTION_DRAG, event.x, event.y);
                 repaintNotes();
             } else {
                 selectedNotes.clear();
@@ -348,11 +344,11 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
                 repaintNotes();
             }
         } else {
-            switch(this->dragAction->type) {
+            switch(dragAction.type) {
                 case DragAction::TYPE_NOTE_MOVE: {
                     repaintNotes();
                         if (selectedNotes.empty()) {
-                            auto &offsets = ((NoteDragAction *) this->dragAction)->noteOffsets;
+                            auto &offsets = dragAction.noteOffsets;
                             if (offsets.size() == 1) {
                                 auto &note = processor.getPattern().getNotes()[offsets[0].noteIndex];
                                 state.lastNoteVelocity = note.data.velocity;
@@ -360,23 +356,24 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
                             }
                         }
                         if (event.mods.isShiftDown() && !event.mods.isCtrlDown() && !event.mods.isAltDown()) {
-                            noteDuplicate((NoteDragAction *) (this->dragAction));
+                            noteDuplicate();
                         }
                         if (event.mods.isCtrlDown() && !event.mods.isAltDown()) {
                             if (!event.mods.isShiftDown()) {
                                 selectedNotes.clear();
-                                selectedNotes.insert(((NoteDragAction *) dragAction)->initiatorIndex);
+                                selectedNotes.insert(dragAction.initiatorIndex);
                             } else {
-                                if (selectedNotes.find(((NoteDragAction *) dragAction)->initiatorIndex) == selectedNotes.end()) {
-                                    selectedNotes.insert(((NoteDragAction *) dragAction)->initiatorIndex);
+                                if (selectedNotes.find(dragAction.initiatorIndex) == selectedNotes.end()) {
+                                    selectedNotes.insert(dragAction.initiatorIndex);
                                 } else {
-                                    selectedNotes.erase(((NoteDragAction *) dragAction)->initiatorIndex);
+                                    selectedNotes.erase(dragAction.initiatorIndex);
                                 }
                             }
                             repaintNotes();
                         }
                     }
                     break;
+
                 default:
                     break;
             }
@@ -401,8 +398,8 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
         }
 
         if (event.mods.isAltDown() && !event.mods.isShiftDown() && !event.mods.isCtrlDown()) {
-            if (this->dragAction && this->dragAction->type == DragAction::TYPE_NOTE_MOVE) {
-                noteResetVelocity((NoteDragAction *) this->dragAction);
+            if (dragAction.type == DragAction::TYPE_NOTE_MOVE) {
+                noteResetVelocity();
                 return;
             }
         }
@@ -412,7 +409,7 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
 }
 
 void PatternEditor::mouseUp(const juce::MouseEvent &event) {
-    new(dragAction) DragAction();
+    dragAction.basicDragAction();
     repaint(selection);
     selection = juce::Rectangle<int>(0, 0, 0, 0);
     mouseAnyMove(event);
@@ -469,14 +466,14 @@ void PatternEditor::loopResize(const juce::MouseEvent &event) {
 }
 
 
-void PatternEditor::noteStartResize(const juce::MouseEvent &event, NoteDragAction *dragAction) {
+void PatternEditor::noteStartResize(const juce::MouseEvent& event) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     auto timebase = processor.getPattern().getTimebase();
     auto &notes = processor.getPattern().getNotes();
 
     repaintNotes();
-    for (auto &noteOffset : dragAction->noteOffsets) {
+    for (auto &noteOffset : dragAction.noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
         int64_t minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
         note.startPoint = juce::jmax((int64_t) 0, juce::jmin(xToPulse(event.x) + noteOffset.startOffset, note.endPoint - minSize));
@@ -489,14 +486,14 @@ void PatternEditor::noteStartResize(const juce::MouseEvent &event, NoteDragActio
     mouseCursor = juce::MouseCursor::LeftEdgeResizeCursor;
 }
 
-void PatternEditor::noteEndResize(const juce::MouseEvent &event, NoteDragAction *dragAction) {
+void PatternEditor::noteEndResize(const juce::MouseEvent& event) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     auto timebase = processor.getPattern().getTimebase();
     auto &notes = processor.getPattern().getNotes();
 
     repaintNotes();
-    for (auto &noteOffset : dragAction->noteOffsets) {
+    for (auto &noteOffset : dragAction.noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
         int64_t minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
         note.endPoint =
@@ -511,12 +508,12 @@ void PatternEditor::noteEndResize(const juce::MouseEvent &event, NoteDragAction 
     mouseCursor = juce::MouseCursor::RightEdgeResizeCursor;
 }
 
-void PatternEditor::noteMove(const juce::MouseEvent &event, PatternEditor::NoteDragAction *dragAction) {
+void PatternEditor::noteMove(const juce::MouseEvent& event) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     repaintNotes();
     auto &notes = processor.getPattern().getNotes();
-    for (auto &noteOffset : dragAction->noteOffsets) {
+    for (auto &noteOffset : dragAction.noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
         auto noteLength = note.endPoint - note.startPoint;
         auto wantedEnd = xToPulse(event.x) + noteOffset.endOffset;
@@ -539,29 +536,29 @@ void PatternEditor::noteMove(const juce::MouseEvent &event, PatternEditor::NoteD
     mouseCursor = juce::MouseCursor::DraggingHandCursor;
 }
 
-void PatternEditor::noteDuplicate(PatternEditor::NoteDragAction *dragAction) {
+void PatternEditor::noteDuplicate() {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     auto &notes = processor.getPattern().getNotes();
-    for (auto &noteOffset : dragAction->noteOffsets) {
+    for (auto &noteOffset : dragAction.noteOffsets) {
         processor.getPattern().getNotes().push_back(notes[noteOffset.noteIndex]);
     }
     processor.buildPattern();
     repaintNotes();
 }
 
-void PatternEditor::noteResetVelocity(PatternEditor::NoteDragAction* dragAction) {
+void PatternEditor::noteResetVelocity() {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     auto &notes = processor.getPattern().getNotes();
-    for (auto &noteOffset : dragAction->noteOffsets) {
+    for (auto &noteOffset : dragAction.noteOffsets) {
         notes[noteOffset.noteIndex].data.velocity = NoteData::DEFAULT_VELOCITY;
     }
-    if (!dragAction->noteOffsets.empty()) {
+    if (!dragAction.noteOffsets.empty()) {
         state.lastNoteVelocity = NoteData::DEFAULT_VELOCITY;
     }
-    if (dragAction->noteOffsets.size() == 1) {
-        auto noteIndex = dragAction->noteOffsets[0].noteIndex;
+    if (dragAction.noteOffsets.size() == 1) {
+        auto noteIndex = dragAction.noteOffsets[0].noteIndex;
         auto &note = this->processor.getPattern().getNotes()[noteIndex];
         state.lastNoteLength = note.endPoint - note.startPoint;
     }
@@ -594,9 +591,9 @@ void PatternEditor::noteCreate(const juce::MouseEvent &event) {
     mouseAnyMove(event);
 
     if (event.mods.isShiftDown()) {
-        new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, index, notes, event, false);
+        dragAction.noteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, index, notes, event, false);
     } else {
-        new(dragAction) NoteDragAction(this, DragAction::TYPE_NOTE_MOVE, index, notes, event);
+        dragAction.noteDragAction(this, DragAction::TYPE_NOTE_MOVE, index, notes, event);
     }
 }
 
@@ -614,7 +611,7 @@ void PatternEditor::noteDelete(const juce::MouseEvent &event) {
         if (noteRect.contains(event.x, event.y)) {
             notes.erase(it);
             erased = true;
-            new(dragAction) DragAction();
+            dragAction.basicDragAction();
             break;
         }
     }
@@ -651,7 +648,7 @@ void PatternEditor::deleteSelected() {
         notes.pop_back();
     }
     selectedNotes.clear();
-    new(dragAction) DragAction();
+    dragAction.basicDragAction();
     processor.buildPattern();
     repaintNotes();
 }
@@ -689,9 +686,9 @@ void PatternEditor::moveSelectedDown(bool octave) {
 }
 
 
-void PatternEditor::select(const juce::MouseEvent &event, PatternEditor::SelectionDragAction *dragAction) {
+void PatternEditor::select(const juce::MouseEvent& event) {
     repaint(selection);
-    selection = juce::Rectangle<int>(juce::Point<int>(event.x, event.y), juce::Point<int>(dragAction->startX, dragAction->startY));
+    selection = juce::Rectangle<int>(juce::Point<int>(event.x, event.y), juce::Point<int>(dragAction.startX, dragAction.startY));
     repaint(selection);
     repaintNotes();
 
@@ -831,52 +828,52 @@ int PatternEditor::noteToAbsY(int note) {
     return juce::roundToInt(std::floor((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote)) + 1;
 }
 
-
-PatternEditor::NoteDragAction::NoteOffset::NoteOffset(uint64_t i)
-        : noteIndex(i) {
-    this->startOffset = 0;
-    this->endOffset = 0;
-    this->noteOffset = 0;
+void PatternEditor::DragAction::basicDragAction(uint8_t type) {
+    jassert(type == DragAction::TYPE_NONE || (type & DragAction::TYPE_MASK) == DragAction::TYPE_LOOP);
+    this->type = type;
 }
 
-PatternEditor::DragAction::DragAction(uint8_t type)
-        : type(type) {
+void PatternEditor::DragAction::noteDragAction(PatternEditor *editor,
+                                               uint8_t type,
+                                               uint64_t index,
+                                               std::vector<ArpNote> &allNotes,
+                                               const juce::MouseEvent &event,
+                                               bool offset) {
+    jassert((type & DragAction::TYPE_MASK) == DragAction::TYPE_NOTE);
+    this->type = type;
+    this->initiatorIndex = index;
+    this->noteOffsets.clear();
+    this->noteOffsets.push_back((offset)
+            ? createOffset(editor, allNotes, index, event)
+            : createOffset(index));
 }
 
-PatternEditor::NoteDragAction::NoteDragAction(
-        PatternEditor *editor,
-        uint8_t type,
-        uint64_t index,
-        std::vector<ArpNote> &allNotes,
-        const juce::MouseEvent &event,
-        bool offset)
-        :
-        DragAction(type),
-        initiatorIndex(index) {
-
-    noteOffsets.push_back(
-            (offset) ? createOffset(editor, allNotes, index, event) : NoteOffset(index));
-}
-
-PatternEditor::NoteDragAction::NoteDragAction(
-        PatternEditor *editor,
-        uint8_t type,
-        uint64_t initiatorIndex,
-        std::set<uint64_t> &indices,
-        std::vector<ArpNote> &allNotes,
-        const juce::MouseEvent &event,
-        bool offset)
-        :
-        DragAction(type),
-        initiatorIndex(initiatorIndex) {
-
+void PatternEditor::DragAction::noteDragAction(PatternEditor* editor,
+                                               uint8_t type,
+                                               uint64_t initiatorIndex,
+                                               std::set<uint64_t>& indices,
+                                               std::vector<ArpNote>& allNotes,
+                                               const juce::MouseEvent& event,
+                                               bool offset) {
+    jassert((type & DragAction::TYPE_MASK) == DragAction::TYPE_NOTE);
+    this->type = type;
+    this->initiatorIndex = initiatorIndex;
+    this->noteOffsets.clear();
     for (auto index : indices) {
-        noteOffsets.push_back(
-                (offset) ? createOffset(editor, allNotes, index, event) : NoteOffset(index));
+        this->noteOffsets.push_back((offset)
+                ? createOffset(editor, allNotes, index, event)
+                : createOffset(index));
     }
 }
 
-PatternEditor::NoteDragAction::NoteOffset PatternEditor::NoteDragAction::createOffset(
+void PatternEditor::DragAction::selectionDragAction(uint8_t type, int startX, int startY) {
+    jassert((type & DragAction::TYPE_MASK) == DragAction::TYPE_SELECTION);
+    this->type = type;
+    this->startX = startX;
+    this->startY = startY;
+}
+
+PatternEditor::DragAction::NoteOffset PatternEditor::DragAction::createOffset(
         PatternEditor *editor,
         std::vector<ArpNote> &allNotes,
         uint64_t noteIndex,
@@ -885,7 +882,8 @@ PatternEditor::NoteDragAction::NoteOffset PatternEditor::NoteDragAction::createO
     auto pulse = editor->xToPulse(event.x);
 
     auto &note = allNotes[noteIndex];
-    auto offset = NoteOffset(noteIndex);
+    NoteOffset offset;
+    offset.noteIndex = noteIndex;
     offset.endOffset = note.endPoint - pulse;
     offset.startOffset = note.startPoint - pulse;
     offset.noteOffset = note.data.noteNumber - editor->yToNote(event.y);
@@ -893,7 +891,8 @@ PatternEditor::NoteDragAction::NoteOffset PatternEditor::NoteDragAction::createO
     return offset;
 }
 
-
-PatternEditor::SelectionDragAction::SelectionDragAction(int startX, int startY)
-        : DragAction(TYPE_SELECTION_DRAG), startX(startX), startY(startY) {
+PatternEditor::DragAction::NoteOffset PatternEditor::DragAction::createOffset(uint64_t noteIndex) {
+    NoteOffset offset;
+    offset.noteIndex = noteIndex;
+    return offset;
 }
