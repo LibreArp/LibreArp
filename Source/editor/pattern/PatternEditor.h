@@ -33,8 +33,35 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
     /**
      * The data class of a dragging action.
      */
-    class DragAction {
-    public:
+    struct DragAction {
+
+        /**
+         * The data class of offset of a note relative to the cursor.
+         */
+        struct NoteOffset {
+        public:
+            /**
+             * Index of the note in the pattern.
+             */
+            uint64_t noteIndex = 0;
+
+            /**
+             * The distance between the end of the note and the cursor.
+             */
+            int64_t endOffset = 0;
+
+            /**
+             * The distance between the start of the note and the cursor.
+             */
+            int64_t startOffset = 0;
+
+            /**
+             * The distance between the number of the note and the cursor.
+             */
+            int noteOffset = 0;
+
+        };
+
         static const uint8_t TYPE_MASK = 0xF0;
 
         static const uint8_t TYPE_NONE = 0x00;
@@ -55,98 +82,7 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
         /**
          * The type of the dragging action.
          */
-        uint8_t type;
-
-
-
-        /**
-         * Constructs a new drag action with the specified type.
-         *
-         * @param type the type of the drag action
-         */
-        explicit DragAction(uint8_t type = TYPE_NONE);
-    };
-
-    /**
-     * The data class of a note dragging action.
-     */
-    class NoteDragAction : public DragAction {
-    public:
-
-        /**
-         * The data class of offset of a note relative to the cursor.
-         */
-        class NoteOffset {
-        public:
-            /**
-             * Index of the note in the pattern.
-             */
-            uint64_t noteIndex;
-
-            /**
-             * The distance between the end of the note and the cursor.
-             */
-            int64_t endOffset;
-
-            /**
-             * The distance between the start of the note and the cursor.
-             */
-            int64_t startOffset;
-
-            /**
-             * The distance between the number of the note and the cursor.
-             */
-            int noteOffset;
-
-
-
-            /**
-             * Constructs a new note offset of the note with the specified index.
-             *
-             * @param i the index of the note
-             */
-            explicit NoteOffset(uint64_t i);
-        };
-
-
-
-        /**
-         * Constructs a new note drag action.
-         *
-         * @param editor a pointer to the editor
-         * @param type the type of the note drag
-         * @param index the index of the dragged note
-         * @param allNotes the vector containing all notes in the pattern
-         * @param event the mouse event
-         * @param offset whether offsets should be calculated
-         */
-        explicit NoteDragAction(
-                PatternEditor *editor,
-                uint8_t type,
-                uint64_t index,
-                std::vector<ArpNote> &allNotes,
-                const juce::MouseEvent &event,
-                bool offset = true);
-
-        /**
-         * Constructs a new note drag action.
-         *
-         * @param editor a pointer to the editor
-         * @param type the type of the note drag
-         * @param initiatorIndex the index of the initiator note
-         * @param indices a vector containing the indices of the dragged notes
-         * @param allNotes the vector containing all notes in the pattern
-         * @param event the mouse event
-         * @param offset whether offsets should be calculated
-         */
-        explicit NoteDragAction(
-                PatternEditor *editor,
-                uint8_t type,
-                uint64_t initiatorIndex,
-                std::set<uint64_t> &indices,
-                std::vector<ArpNote> &allNotes,
-                const juce::MouseEvent &event,
-                bool offset = true);
+        uint8_t type = TYPE_NONE;
 
         /**
          * The offsets of notes relative to the cursor.
@@ -158,7 +94,34 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
          */
         uint64_t initiatorIndex;
 
-    private:
+        /**
+         * The starting X coordinate of the cursor
+         */
+        int startX;
+
+        /**
+         * The starting Y coordinate of the cursor
+         */
+        int startY;
+
+        void basicDragAction(uint8_t type = TYPE_NONE);
+
+        void noteDragAction(PatternEditor *editor,
+                            uint8_t type,
+                            uint64_t index,
+                            std::vector<ArpNote> &allNotes,
+                            const juce::MouseEvent &event,
+                            bool offset = true);
+
+        void noteDragAction(PatternEditor *editor,
+                            uint8_t type,
+                            uint64_t initiatorIndex,
+                            std::set<uint64_t> &indices,
+                            std::vector<ArpNote> &allNotes,
+                            const juce::MouseEvent &event,
+                            bool offset = true);
+
+        void selectionDragAction(uint8_t type, int startX, int startY);
 
         /**
          * Calculates an offset.
@@ -171,31 +134,11 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
          * @return the calculated offset
          */
         static NoteOffset createOffset(PatternEditor *editor, std::vector<ArpNote> &allNotes, uint64_t noteIndex, const juce::MouseEvent &event);
-    };
-
-    /**
-     * The data class of a selection rectangle drag.
-     */
-    class SelectionDragAction : public DragAction {
-    public:
 
         /**
-         * Constructs a new selection drag action.
-         *
-         * @param startX the starting X coordinate of the cursor
-         * @param startY the starting Y coordinate of the cursor
+         * Creates a basic note offset.
          */
-        explicit SelectionDragAction(int startX, int startY);
-
-        /**
-         * the starting X coordinate of the cursor
-         */
-        int startX;
-
-        /**
-         * the starting Y coordinate of the cursor
-         */
-        int startY;
+        static NoteOffset createOffset(uint64_t noteIndex);
     };
 
 public:
@@ -274,16 +217,10 @@ private:
      */
     std::set<uint64_t> selectedNotes;
 
-
-    /**
-     * A memory buffer for drag action.
-     */
-    char dragActionBuffer[512];
-
     /**
      * Current drag action pointer. Points to the <code>dragActionBuffer</code>.
      */
-    DragAction *dragAction = (DragAction *) dragActionBuffer;
+    DragAction dragAction;
 
     /**
      * Last position of the playhead in the X coordinates of the editor since the last audioUpdate.
@@ -323,7 +260,7 @@ private:
      * @param event the mouse event
      * @param dragAction the drag action
      */
-    void noteStartResize(const juce::MouseEvent &event, NoteDragAction *dragAction);
+    void noteStartResize(const juce::MouseEvent& event);
 
     /**
      * Mouse note resize from right.
@@ -331,7 +268,7 @@ private:
      * @param event the mouse event
      * @param dragAction the drag action
      */
-    void noteEndResize(const juce::MouseEvent &event, NoteDragAction *dragAction);
+    void noteEndResize(const juce::MouseEvent& event);
 
     /**
      * Mouse note position move.
@@ -339,19 +276,19 @@ private:
      * @param event the mouse event
      * @param dragAction the drag action
      */
-    void noteMove(const juce::MouseEvent &event, NoteDragAction *dragAction);
+    void noteMove(const juce::MouseEvent& event);
 
     /**
      * Mouse note duplication.
      *
      * @param dragAction the drag action
      */
-    void noteDuplicate(NoteDragAction *dragAction);
+    void noteDuplicate();
 
     /**
      * Mouse note velocity reset.
      */
-    void noteResetVelocity(NoteDragAction *dragAction);
+    void noteResetVelocity();
 
     /**
      * Mouse note creation.
@@ -373,7 +310,7 @@ private:
      * @param event the mouse event
      * @param dragAction the drag action
      */
-    void select(const juce::MouseEvent &event, SelectionDragAction *dragAction);
+    void select(const juce::MouseEvent& event);
 
 
 
