@@ -50,6 +50,7 @@ public:
     static const juce::Identifier TREEID_NUM_INPUT_NOTES;
     static const juce::Identifier TREEID_OUTPUT_MIDI_CHANNEL;
     static const juce::Identifier TREEID_INPUT_MIDI_CHANNEL;
+    static const juce::Identifier TREEID_NON_PLAYING_MODE_OVERRIDE;
 
 
     LibreArp();
@@ -225,7 +226,7 @@ public:
      *
      * @param cpi the position information to fill
      */
-    void fillCurrentDebugPositionInfo(juce::AudioPlayHead::CurrentPositionInfo &cpi);
+    void fillCurrentNonPlayingPositionInfo(juce::AudioPlayHead::CurrentPositionInfo &cpi);
 
 
     /**
@@ -258,6 +259,15 @@ public:
      * are read if zero.
      */
     void setInputMidiChannel(int channel);
+
+    NonPlayingMode::Value getNonPlayingModeOverride() const;
+
+    void setNonPlayingModeOverride(NonPlayingMode::Value nonPlayingModeOverride);
+
+    /**
+     * Gets the current non-playing mode, taking the global and overridden one into account.
+     */
+    NonPlayingMode::Value getNonPlayingMode() const;
 
     Globals &getGlobals();
 
@@ -349,6 +359,10 @@ private:
     bool buildScheduled;
 
 
+    /**
+     * The number of input notes in the last block.
+     */
+    int lastNumInputNotes;
 
     /**
      * The set of currently fed input notes.
@@ -384,7 +398,7 @@ private:
     /**
      * The timestamp of the last debug playback reset.
      */
-    int64_t debugPlaybackResetTime;
+    int64_t silenceEndedTime;
 
 
     /**
@@ -396,6 +410,13 @@ private:
      * The MIDI channel input notes are read from. Notes from all channels are read if zero.
      */
     int inputMidiChannel;
+
+    /**
+     * Overridden non-playing mode.
+     *
+     * @see NonPlayingMode
+     */
+    NonPlayingMode::Value nonPlayingModeOverride;
 
     /**
      * The audio processor mutex.
@@ -412,7 +433,7 @@ private:
      *
      * @param inMidi the input MIDI messages
      */
-    void processInputMidi(juce::MidiBuffer &inMidi);
+    void processInputMidi(juce::MidiBuffer &inMidi, bool isPlaying);
 
     /**
      * Sends a noteOff for all currently playing output notes.

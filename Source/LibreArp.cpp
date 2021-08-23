@@ -26,6 +26,7 @@ const juce::Identifier LibreArp::TREEID_INPUT_VELOCITY = "usingInputVelocity"; /
 const juce::Identifier LibreArp::TREEID_NUM_INPUT_NOTES = "numInputNotes"; // NOLINT
 const juce::Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = "outputMidiChannel"; // NOLINT
 const juce::Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = "inputMidiChannel"; // NOLINT
+const juce::Identifier LibreArp::TREEID_NON_PLAYING_MODE_OVERRIDE = "nonPlayingModeOverride"; // NOLINT
 
 
 LibreArp::InputNote::InputNote(int note, double velocity) : note(note), velocity(velocity) {}
@@ -67,10 +68,11 @@ LibreArp::LibreArp()
     this->numInputNotes = 0;
     this->outputMidiChannel = 1;
     this->inputMidiChannel = 0;
+    this->nonPlayingModeOverride = NonPlayingMode::Value::NONE;
     this->timeSigNumerator = 4;
     this->timeSigDenominator = 4;
     this->debugPlaybackEnabled = false;
-    this->debugPlaybackResetTime = juce::Time::currentTimeMillis();
+    this->silenceEndedTime = juce::Time::currentTimeMillis();
     resetDebugPlayback();
 
     globals.markChanged();
@@ -187,15 +189,19 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
         buildScheduled = false;
     }
 
-    processInputMidi(midi);
-
     juce::AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
-    if (isDebugPlaybackEnabled() || juce::JUCEApplicationBase::isStandaloneApp()) {
-        fillCurrentDebugPositionInfo(cpi);
-    } else {
-        if (getPlayHead() != nullptr) {
-            getPlayHead()->getCurrentPosition(cpi);
-        }
+    if (getPlayHead() != nullptr) {
+        getPlayHead()->getCurrentPosition(cpi);
+    }
+
+    processInputMidi(midi, cpi.isPlaying);
+
+    if (lastNumInputNotes == 0 && inputNotes.size() > 0) {
+        silenceEndedTime = juce::Time::currentTimeMillis();
+    }
+
+    if (!cpi.isPlaying && getNonPlayingMode() == NonPlayingMode::Value::PATTERN) {
+        fillCurrentNonPlayingPositionInfo(cpi);
     }
 
     this->timeSigNumerator = cpi.timeSigNumerator;
@@ -286,6 +292,8 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
         this->lastPosition = 0;
         this->wasPlaying = false;
     }
+
+    this->lastNumInputNotes = this->inputNotes.size();
 }
 
 //==============================================================================
@@ -309,6 +317,7 @@ juce::ValueTree LibreArp::toValueTree() {
     tree.setProperty(TREEID_NUM_INPUT_NOTES, this->numInputNotes, nullptr);
     tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
     tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
+    tree.setProperty(TREEID_NON_PLAYING_MODE_OVERRIDE, NonPlayingMode::toJuceString(this->nonPlayingModeOverride), nullptr);
     return tree;
 }
 
@@ -333,29 +342,26 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
             if (editorTree.isValid()) {
                 this->editorState = EditorState::fromValueTree(editorTree);
             }
-
             if (tree.hasProperty(TREEID_LOOP_RESET)) {
                 this->loopReset = tree.getProperty(TREEID_LOOP_RESET);
             }
-
             if (tree.hasProperty(TREEID_OCTAVES)) {
                 *this->octaves = tree.getProperty(TREEID_OCTAVES);
             }
-
             if (tree.hasProperty(TREEID_INPUT_VELOCITY)) {
                 *this->usingInputVelocity = tree.getProperty(TREEID_INPUT_VELOCITY);
             }
-
             if (tree.hasProperty(TREEID_NUM_INPUT_NOTES)) {
                 this->numInputNotes = tree.getProperty(TREEID_NUM_INPUT_NOTES);
             }
-
             if (tree.hasProperty(TREEID_OUTPUT_MIDI_CHANNEL)) {
                 this->outputMidiChannel = tree.getProperty(TREEID_OUTPUT_MIDI_CHANNEL);
             }
-
             if (tree.hasProperty(TREEID_INPUT_MIDI_CHANNEL)) {
                 this->inputMidiChannel = tree.getProperty(TREEID_INPUT_MIDI_CHANNEL);
+            }
+            if (tree.hasProperty(TREEID_NON_PLAYING_MODE_OVERRIDE)) {
+                this->nonPlayingModeOverride = NonPlayingMode::of(tree.getProperty(TREEID_NON_PLAYING_MODE_OVERRIDE));
             }
 
             setPattern(loadedPattern);
@@ -447,7 +453,7 @@ void LibreArp::setDebugPlaybackEnabled(bool enabled) {
 }
 
 void LibreArp::resetDebugPlayback() {
-    this->debugPlaybackResetTime = juce::Time::currentTimeMillis();
+    this->silenceEndedTime = juce::Time::currentTimeMillis();
 
     this->inputNotes.clear();
     if (this->isDebugPlaybackEnabled()) {
@@ -457,7 +463,7 @@ void LibreArp::resetDebugPlayback() {
     }
 }
 
-void LibreArp::fillCurrentDebugPositionInfo(juce::AudioPlayHead::CurrentPositionInfo &cpi) {
+void LibreArp::fillCurrentNonPlayingPositionInfo(juce::AudioPlayHead::CurrentPositionInfo &cpi) {
     // Dummy data
     cpi.isLooping = false;
     cpi.isRecording = false;
@@ -465,16 +471,22 @@ void LibreArp::fillCurrentDebugPositionInfo(juce::AudioPlayHead::CurrentPosition
     cpi.frameRate = juce::AudioPlayHead::FrameRateType::fps24;
     cpi.ppqLoopStart = 0.0;
     cpi.ppqLoopEnd = 0.0;
-    cpi.ppqPositionOfLastBarStart = 0.0; // TODO (update: yea, who knows what past me wanted to do here *facepalm*)
+    cpi.ppqPositionOfLastBarStart = 0.0;
 
     // Metadata
-    cpi.bpm = 128.0;
-    cpi.timeSigNumerator = 3;
-    cpi.timeSigDenominator = 4;
-    cpi.isPlaying = true;
+    if (cpi.bpm <= 0.0) {
+        cpi.bpm = 128.0;
+    }
+    if (cpi.timeSigNumerator <= 0) {
+        cpi.timeSigNumerator = 3;
+    }
+    if (cpi.timeSigDenominator) {
+        cpi.timeSigDenominator = 4;
+    }
+    cpi.isPlaying = !inputNotes.isEmpty();
 
     // Time data
-    auto positionMillis = juce::Time::currentTimeMillis() - debugPlaybackResetTime;
+    auto positionMillis = juce::Time::currentTimeMillis() - silenceEndedTime;
     cpi.timeInSeconds = static_cast<double>(positionMillis) * 0.001;
     cpi.timeInSamples = static_cast<int64_t>(cpi.timeInSeconds * getSampleRate());
     cpi.ppqPosition = cpi.timeInSeconds * (cpi.bpm / 60);
@@ -504,6 +516,20 @@ void LibreArp::setInputMidiChannel(int channel) {
     this->inputNotes.clear();
 }
 
+NonPlayingMode::Value LibreArp::getNonPlayingModeOverride() const {
+    return nonPlayingModeOverride;
+}
+
+void LibreArp::setNonPlayingModeOverride(NonPlayingMode::Value nonPlayingModeOverride) {
+    this->nonPlayingModeOverride = nonPlayingModeOverride;
+}
+
+NonPlayingMode::Value LibreArp::getNonPlayingMode() const {
+    return (nonPlayingModeOverride == NonPlayingMode::Value::NONE)
+           ? globals.getNonPlayingMode()
+           : nonPlayingModeOverride;
+}
+
 
 Globals &LibreArp::getGlobals() {
     return this->globals;
@@ -520,7 +546,7 @@ Updater::UpdateInfo& LibreArp::getLastUpdateInfo() {
 }
 
 
-void LibreArp::processInputMidi(juce::MidiBuffer &inMidi) {
+void LibreArp::processInputMidi(juce::MidiBuffer &inMidi, bool isPlaying) {
     int sample;
     juce::MidiBuffer outMidi;
 
@@ -528,11 +554,16 @@ void LibreArp::processInputMidi(juce::MidiBuffer &inMidi) {
         juce::MidiMessage message = metadata.getMessage();
 
         if (inputMidiChannel == 0 || message.getChannel() == inputMidiChannel) {
+            bool processed = false;
             if (message.isNoteOn()) {
                 inputNotes.add(InputNote(message.getNoteNumber(), message.getVelocity() / 127.0));
+                processed = true;
             } else if (message.isNoteOff()) {
                 inputNotes.removeValue(InputNote(message.getNoteNumber()));
-            } else {
+                processed = true;
+            }
+
+            if (!processed || (!isPlaying && getNonPlayingMode() == NonPlayingMode::Value::PASSTHROUGH)) {
                 outMidi.addEvent(message, sample);
             }
         } else {

@@ -21,6 +21,27 @@
 #include <juce_core/juce_core.h>
 #include <juce_data_structures/juce_data_structures.h>
 
+namespace NonPlayingMode {
+    /**
+     * An enumeration defining the behaviour of the plugin when the DAW is not playing but there are input notes
+     * present.
+     */
+    enum class Value {
+        NONE = 1,
+        SILENCE,
+        PASSTHROUGH,
+        PATTERN,
+    };
+
+    juce::String toJuceString(Value mode);
+
+    juce::String getDisplayName(Value mode);
+
+    Value of(juce::var&& var);
+
+    Value of(juce::String&& string);
+};
+
 /**
  * A class managing global data (like global settings) of the plugin.
  */
@@ -34,6 +55,7 @@ public:
     static const juce::Identifier TREEID_MIN_SECS_BEFORE_UPDATE_CHECK;
     static const juce::Identifier TREEID_LAST_UPDATE_CHECK_TIME;
     static const juce::Identifier TREEID_GUI_SCALE_FACTOR;
+    static const juce::Identifier TREEID_NON_PLAYING_MODE;
 
 
     explicit Globals();
@@ -121,6 +143,10 @@ public:
 
     void setGuiScaleFactor(float guiScaleFactor);
 
+    NonPlayingMode::Value getNonPlayingMode() const;
+
+    void setNonPlayingMode(NonPlayingMode::Value nonPlayingMode);
+
 private:
 
     /**
@@ -172,6 +198,11 @@ private:
      * The scale factor of the GUI.
      */
     float guiScaleFactor;
+
+    /**
+     * Behaviour of the plugin when the host is not playing.
+     */
+    NonPlayingMode::Value nonPlayingMode;
 
     /**
      * Mutex for the globals.

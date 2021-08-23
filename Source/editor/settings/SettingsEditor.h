@@ -47,6 +47,9 @@ private:
     juce::Slider guiScaleFactorSlider;
     juce::Label guiScaleFactorLabel;
 
+    juce::ComboBox nonPlayingModeComboBox;
+    juce::Label nonPlayingModeLabel;
+
     LibreArp &processor;
 };
 

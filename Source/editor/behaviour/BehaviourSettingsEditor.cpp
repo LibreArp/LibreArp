@@ -49,12 +49,37 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
         processor.setUsingInputVelocity(usingInputVelocityToggle.getToggleState());
     };
 
+    const juce::String nonPlayingModeTooltip = "Affects how the plugin behaves when the host is not playing.";
+    {
+        using namespace NonPlayingMode;
+        nonPlayingModeComboBox.addItem(
+                "Default (Global)", static_cast<int>(Value::NONE));
+        nonPlayingModeComboBox.addItem(
+                NonPlayingMode::getDisplayName(Value::SILENCE), static_cast<int>(Value::SILENCE));
+        nonPlayingModeComboBox.addItem(
+                NonPlayingMode::getDisplayName(Value::PASSTHROUGH), static_cast<int>(Value::PASSTHROUGH));
+        nonPlayingModeComboBox.addItem(
+                NonPlayingMode::getDisplayName(Value::PATTERN), static_cast<int>(Value::PATTERN));
+    }
+    nonPlayingModeComboBox.setEditableText(false);
+    nonPlayingModeComboBox.setTooltip(nonPlayingModeTooltip);
+    nonPlayingModeComboBox.onChange = [this] {
+        auto index = nonPlayingModeComboBox.getSelectedItemIndex();
+        auto value = static_cast<NonPlayingMode::Value>(nonPlayingModeComboBox.getItemId(index));
+        processor.setNonPlayingModeOverride(value);
+    };
+
+    nonPlayingModeLabel.setText("Non-playing mode", juce::NotificationType::dontSendNotification);
+    nonPlayingModeLabel.setTooltip(nonPlayingModeTooltip);
+
     addAndMakeVisible(midiInChannelLabel);
     addAndMakeVisible(midiInChannelSlider);
     addAndMakeVisible(midiOutChannelLabel);
     addAndMakeVisible(midiOutChannelSlider);
     addAndMakeVisible(octavesToggle);
     addAndMakeVisible(usingInputVelocityToggle);
+    addAndMakeVisible(nonPlayingModeComboBox);
+    addAndMakeVisible(nonPlayingModeLabel);
 }
 
 void BehaviourSettingsEditor::resized() {
@@ -66,15 +91,24 @@ void BehaviourSettingsEditor::visibilityChanged() {
     updateLayout();
 }
 
+void BehaviourSettingsEditor::updateSettingsValues() {
+    midiInChannelSlider.setValue(processor.getInputMidiChannel(), juce::NotificationType::dontSendNotification);
+    midiOutChannelSlider.setValue(processor.getOutputMidiChannel(), juce::NotificationType::dontSendNotification);
+    octavesToggle.setToggleState(processor.isTransposingOctaves(), juce::NotificationType::dontSendNotification);
+    usingInputVelocityToggle.setToggleState(processor.isUsingInputVelocity(), juce::NotificationType::dontSendNotification);
+    nonPlayingModeComboBox.setSelectedId(static_cast<int>(processor.getNonPlayingModeOverride()));
+}
+
 void BehaviourSettingsEditor::updateLayout() {
     if (!isVisible()) {
         return;
     }
 
+    updateSettingsValues();
+
     auto area = getLocalBounds().reduced(8);
 
     auto midiInChannelArea = area.removeFromTop(24);
-    midiInChannelSlider.setValue(processor.getInputMidiChannel(), juce::NotificationType::dontSendNotification);
     midiInChannelSlider.updateText();
     midiInChannelSlider.setBounds(midiInChannelArea.removeFromLeft(96));
     midiInChannelLabel.setBounds(midiInChannelArea);
@@ -82,16 +116,19 @@ void BehaviourSettingsEditor::updateLayout() {
     area.removeFromTop(4);
 
     auto midiOutChannelArea = area.removeFromTop(24);
-    midiOutChannelSlider.setValue(processor.getOutputMidiChannel(), juce::NotificationType::dontSendNotification);
     midiOutChannelSlider.updateText();
     midiOutChannelSlider.setBounds(midiOutChannelArea.removeFromLeft(96));
     midiOutChannelLabel.setBounds(midiOutChannelArea);
 
     area.removeFromTop(8);
 
-    octavesToggle.setToggleState(processor.isTransposingOctaves(), juce::NotificationType::dontSendNotification);
     octavesToggle.setBounds(area.removeFromTop(24));
 
-    usingInputVelocityToggle.setToggleState(processor.isUsingInputVelocity(), juce::NotificationType::dontSendNotification);
     usingInputVelocityToggle.setBounds(area.removeFromTop(24));
+
+    area.removeFromTop(4);
+
+    auto nonPlayingModeArea = area.removeFromTop(24);
+    nonPlayingModeComboBox.setBounds(nonPlayingModeArea.removeFromLeft(128));
+    nonPlayingModeLabel.setBounds(nonPlayingModeArea);
 }
