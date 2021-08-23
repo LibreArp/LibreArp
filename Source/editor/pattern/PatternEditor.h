@@ -158,6 +158,10 @@ public:
     void mouseDrag(const juce::MouseEvent &event) override;
     void mouseDown(const juce::MouseEvent &event) override;
     void mouseUp(const juce::MouseEvent &event) override;
+
+    void mouseEnter(const juce::MouseEvent& event) override;
+
+    void mouseExit(const juce::MouseEvent& event) override;
     bool keyPressed(const juce::KeyPress &key) override;
 
     void audioUpdate() override;
@@ -197,6 +201,11 @@ private:
      * The note number that the mouse cursor is hovering.
      */
     int cursorNote;
+
+    /**
+     * Whether the mouse cursor is inside the pattern editor.
+     */
+    bool cursorActive = false;
 
 
 

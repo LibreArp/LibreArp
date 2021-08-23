@@ -152,9 +152,11 @@ void PatternEditor::paint(juce::Graphics &g) {
     }
 
     // Draw cursor indicator
-    g.setColour(Style::CURSOR_TIME_COLOUR);
-    auto cursorPulseX = pulseToX(cursorPulse);
-    g.fillRect(cursorPulseX, 0, 1, getHeight());
+    if (cursorActive) {
+        g.setColour(Style::CURSOR_TIME_COLOUR);
+        auto cursorPulseX = pulseToX(cursorPulse);
+        g.fillRect(cursorPulseX, 0, 1, getHeight());
+    }
 
     // Draw loop line
     g.setColour(Style::LOOP_LINE_COLOUR);
@@ -181,12 +183,13 @@ void PatternEditor::paint(juce::Graphics &g) {
         }
     }
 
-
-    auto cursorNoteY = noteToY(cursorNote);
-    auto cursorNoteRect = juce::Rectangle<int>(unoffsDrawRegion.getX(), cursorNoteY, unoffsDrawRegion.getWidth(), pixelsPerNote);
-    if (cursorNoteRect.intersects(unoffsDrawRegion)) {
-        g.setColour(Style::CURSOR_NOTE_COLOUR);
-        g.fillRect(cursorNoteRect);
+    if (cursorActive) {
+        auto cursorNoteY = noteToY(cursorNote);
+        auto cursorNoteRect = juce::Rectangle<int>(unoffsDrawRegion.getX(), cursorNoteY, unoffsDrawRegion.getWidth(), pixelsPerNote);
+        if (cursorNoteRect.intersects(unoffsDrawRegion)) {
+            g.setColour(Style::CURSOR_NOTE_COLOUR);
+            g.fillRect(cursorNoteRect);
+        }
     }
 }
 
@@ -418,6 +421,17 @@ void PatternEditor::mouseUp(const juce::MouseEvent &event) {
     updateMouseCursor();
 }
 
+void PatternEditor::mouseEnter(const juce::MouseEvent& event) {
+    Component::mouseEnter(event);
+    cursorActive = true;
+    repaint();
+}
+
+void PatternEditor::mouseExit(const juce::MouseEvent& event) {
+    Component::mouseExit(event);
+    cursorActive = false;
+    repaint();
+}
 
 bool PatternEditor::keyPressed(const juce::KeyPress &key) {
     if (key == juce::KeyPress::deleteKey || key == juce::KeyPress::numberPadDelete) {
