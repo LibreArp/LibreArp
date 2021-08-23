@@ -39,7 +39,7 @@ juce::String NonPlayingMode::getDisplayName(NonPlayingMode::Value mode) {
 }
 
 NonPlayingMode::Value NonPlayingMode::of(juce::var&& var) {
-    return NonPlayingMode::of(juce::String(var));
+    return NonPlayingMode::of((juce::String&&) var);
 }
 
 NonPlayingMode::Value NonPlayingMode::of(juce::String&& string) {
