@@ -40,7 +40,7 @@ LArpLookAndFeel::LArpLookAndFeel() {
     setColour(juce::TextEditor::backgroundColourId, Style::HIGHLIGHT_BACKGROUND_COLOUR);
     setColour(juce::TextEditor::textColourId, Style::MAIN_FOREGROUND_COLOUR);
     setColour(juce::TextEditor::highlightColourId, Style::HIGHLIGHT_FOREGROUND_COLOUR);
-    setColour(juce::TextEditor::highlightedTextColourId, juce::Colour(255, 255, 255));
+    setColour(juce::TextEditor::highlightedTextColourId, Style::HIGHLIGHT_TEXT_COLOUR);
 
     setColour(juce::ResizableWindow::backgroundColourId, Style::HIGHLIGHT_BACKGROUND_COLOUR);
 
@@ -70,7 +70,7 @@ LArpLookAndFeel::LArpLookAndFeel() {
 
     setColour(juce::PopupMenu::headerTextColourId, Style::MAIN_FOREGROUND_COLOUR);
     setColour(juce::PopupMenu::textColourId, Style::MAIN_FOREGROUND_COLOUR);
-    setColour(juce::PopupMenu::highlightedTextColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::PopupMenu::highlightedTextColourId, Style::HIGHLIGHT_TEXT_COLOUR);
     setColour(juce::PopupMenu::backgroundColourId, Style::MAIN_BACKGROUND_COLOUR);
     setColour(juce::PopupMenu::highlightedBackgroundColourId, Style::HIGHLIGHT_BACKGROUND_COLOUR);
 

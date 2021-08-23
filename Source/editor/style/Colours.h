@@ -52,4 +52,5 @@ namespace Style
     const juce::Colour HIGHLIGHT_BACKGROUND_COLOUR = juce::Colour(59, 56, 48);
     const juce::Colour MAIN_FOREGROUND_COLOUR = juce::Colour(166, 164, 155);
     const juce::Colour HIGHLIGHT_FOREGROUND_COLOUR = juce::Colour(171, 204, 41);
+    const juce::Colour HIGHLIGHT_TEXT_COLOUR = juce::Colour(255, 255, 255);
 }
