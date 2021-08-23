@@ -15,8 +15,6 @@
 // along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
-#include <new>
-
 #include "../../util/Defer.h"
 
 #include "PatternEditor.h"
@@ -32,7 +30,6 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec)
         state(e),
         view(ec)
 {
-    setSize(1, 1); // We have to set this, otherwise it won't render at all
     setOpaque(true);
 
     cursorPulse = 0;
