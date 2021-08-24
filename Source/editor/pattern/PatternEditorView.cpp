@@ -35,20 +35,24 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
 
     loadButton.setButtonText("Load pattern...");
     loadButton.onClick = [this] {
-        auto opened = presetChooser.browseForFileToOpen();
-        if (opened) {
-            processor.loadPatternFromFile(presetChooser.getResult());
-            repaint();
-        }
+        using Flags = juce::FileBrowserComponent::FileChooserFlags;
+        presetChooser.launchAsync(
+                Flags::openMode | Flags::canSelectFiles,
+                [this](auto& chooser) {
+                    processor.loadPatternFromFile(chooser.getResult());
+                    repaint();
+                });
     };
     addAndMakeVisible(loadButton);
 
     saveButton.setButtonText("Save pattern...");
     saveButton.onClick = [this] {
-        auto saved = presetChooser.browseForFileToSave(true);
-        if (saved) {
-            processor.getPattern().toFile(presetChooser.getResult());
-        }
+        using Flags = juce::FileBrowserComponent::FileChooserFlags;
+        presetChooser.launchAsync(
+                Flags::saveMode | Flags::canSelectFiles | Flags::warnAboutOverwriting,
+                [this](auto& chooser) {
+                    processor.getPattern().toFile(chooser.getResult());
+                });
     };
     addAndMakeVisible(saveButton);
 
