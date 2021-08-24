@@ -39,7 +39,6 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
          * The data class of offset of a note relative to the cursor.
          */
         struct NoteOffset {
-        public:
             /**
              * Index of the note in the pattern.
              */
@@ -59,7 +58,23 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
              * The distance between the number of the note and the cursor.
              */
             int noteOffset = 0;
+        };
 
+        struct SelectedNote {
+            /**
+             * Index of the note in the pattern.
+             */
+            uint64_t noteIndex = 0;
+
+            /**
+             * Start of the note relative to selection.
+             */
+            double relativeStart = 0.0;
+
+            /**
+             * End of the note relative to selection.
+             */
+             double relativeEnd = 0.0;
         };
 
         static const uint8_t TYPE_MASK = 0xF0;
@@ -77,6 +92,9 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
         static const uint8_t TYPE_SELECTION = 0x30;
         static const uint8_t TYPE_SELECTION_DRAG = 0x30;
 
+        static const uint8_t TYPE_STRETCH = 0x40;
+        static const uint8_t TYPE_STRETCH_START = 0x40;
+        static const uint8_t TYPE_STRETCH_END = 0x41;
 
 
         /**
@@ -88,6 +106,11 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
          * The offsets of notes relative to the cursor.
          */
         std::vector<NoteOffset> noteOffsets;
+
+        /**
+         * Positions of notes relative to the selection.
+         */
+        std::vector<SelectedNote> selectedNotes;
 
         /**
          * The index of the initiator note.
@@ -122,6 +145,10 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
                             bool offset = true);
 
         void selectionDragAction(uint8_t type, int startX, int startY);
+
+        void stretchDragAction(uint8_t type,
+                               std::set<uint64_t>& indices,
+                               std::vector<ArpNote>& allNotes);
 
         /**
          * Calculates an offset.
@@ -321,6 +348,12 @@ private:
      */
     void select(const juce::MouseEvent& event);
 
+    void selectionStartStretch(const juce::MouseEvent& event);
+
+    void selectionEndStretch(const juce::MouseEvent& event);
+
+    void selectionStretch(int64_t selectionStart, int64_t selectionEnd);
+
 
 
     /**
@@ -359,12 +392,23 @@ private:
     juce::Rectangle<int> getRectangleForNote(ArpNote &note);
 
     /**
-     * Gets the active rectangle in the canvas of the loop that reacts to mouse events.
-     * @return
+     * Gets the pulse border of selected notes and writes the result into `outStart` and `outEnd`. The border consists
+     * of the lowest `startPoint` and the highest `endPoint` of the selected notes.
+     *
+     * @return `true` if any notes are selected and the result variables have been written; otherwise `false`
      */
-    juce::Rectangle<int> getRectangleForLoop();
+    static bool getSelectionBorder(std::set<uint64_t>& indices,
+                                   std::vector<ArpNote>& allNotes,
+                                   int64_t& out_start,
+                                   int64_t& out_end);
 
-
+    /**
+     * Gets the pulse border of selected notes and writes the result into `outStart` and `outEnd`. The border consists
+     * of the lowest `startPoint` and the highest `endPoint` of the selected notes.
+     *
+     * @return `true` if any notes are selected and the result variables have been written; otherwise `false`
+     */
+    bool getSelectionBorder(int64_t& out_start, int64_t& out_end);
 
     /**
      * Snaps the specified pulse to the grid.

@@ -54,4 +54,7 @@ namespace Style
     const juce::Colour CURSOR_NOTE_COLOUR = juce::Colour((uint8_t) 255, 255, 255, 0.05f);
 
     const juce::Colour SELECTION_RECTANGLE_COLOUR = juce::Colour(255, 0, 0);
+
+    const juce::Colour SELECTED_TIME_BORDER_COLOUR = juce::Colour(171, 204, 41);
+    const juce::Colour SELECTED_TIME_BACKGROUND_COLOUR = juce::Colour((uint8_t) 171, 204, 41, 0.05f);
 }
