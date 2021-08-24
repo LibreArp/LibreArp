@@ -42,5 +42,8 @@ build-win:
   before_script:
     - choco install --yes --no-progress cmake --installargs 'ADD_CMAKE_TO_PATH=System'
     - $env:Path += ";C:\Program Files\CMake\bin\"
+  after_script:
+    - cd build\LibreArp_artefacts\Release\VST3
+    - Compress-Archive -Path LibreArp.vst3 -DestinationPath LibreArp.vst3.zip
   artifacts:
     name: LibreArp-vst3-windows
