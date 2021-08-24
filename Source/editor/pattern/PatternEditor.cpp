@@ -778,8 +778,8 @@ void PatternEditor::selectionStretch(int64_t selectionStart, int64_t selectionEn
     auto length = static_cast<double>(selectionEnd - selectionStart);
     for (auto selectedNote : dragAction.selectedNotes) {
         auto& note = notes[selectedNote.noteIndex];
-        note.startPoint = selectionStart + static_cast<int64_t>(floor(selectedNote.relativeStart * length));
-        note.endPoint = selectionStart + static_cast<int64_t>(floor(selectedNote.relativeEnd * length));
+        note.startPoint = selectionStart + static_cast<int64_t>(round(selectedNote.relativeStart * length));
+        note.endPoint = selectionStart + static_cast<int64_t>(round(selectedNote.relativeEnd * length));
     }
 
     processor.buildPattern();
