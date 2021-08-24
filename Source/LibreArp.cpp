@@ -567,6 +567,12 @@ void LibreArp::processInputMidi(juce::MidiBuffer &inMidi, bool isPlaying) {
                 outMidi.addEvent(message, sample);
             }
         } else {
+            if (message.isNoteOn()) {
+                setNotePlaying(message.getChannel(), message.getNoteNumber());
+            } else if (message.isNoteOff()) {
+                setNoteNotPlaying(message.getChannel(), message.getNoteNumber());
+            }
+
             outMidi.addEvent(message, sample);
         }
     }

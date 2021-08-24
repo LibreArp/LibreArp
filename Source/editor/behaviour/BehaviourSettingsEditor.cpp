@@ -27,7 +27,7 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     midiInChannelSlider.onValueChange = [this] {
         processor.setInputMidiChannel(static_cast<int>(midiInChannelSlider.getValue()));
     };
-    midiInChannelLabel.setText("MIDI Input Channel (do not change while playing)", juce::NotificationType::dontSendNotification);
+    midiInChannelLabel.setText("MIDI Input Channel", juce::NotificationType::dontSendNotification);
 
     midiOutChannelSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
     midiOutChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);

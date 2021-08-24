@@ -421,7 +421,7 @@ private:
     /**
      * The audio processor mutex.
      */
-    std::recursive_mutex mutex;
+    mutable std::recursive_mutex mutex;
 
     /**
      * Main LibreArp processing method.
