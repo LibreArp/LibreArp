@@ -26,7 +26,6 @@ const int TEXT_OFFSET = 6;
 BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec)
         : processor(p), state(e), view(ec) {
 
-    setSize(1, 1);
     setOpaque(true);
 }
 

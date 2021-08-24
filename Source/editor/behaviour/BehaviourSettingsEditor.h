@@ -42,6 +42,10 @@ private:
     juce::Slider midiOutChannelSlider;
     juce::Label midiOutChannelLabel;
 
+    juce::ComboBox nonPlayingModeComboBox;
+    juce::Label nonPlayingModeLabel;
+
+    void updateSettingsValues();
     void updateLayout();
 
 };

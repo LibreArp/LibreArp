@@ -18,6 +18,39 @@
 #include "Globals.h"
 #include "BuildConfig.h"
 
+juce::String NonPlayingMode::toJuceString(NonPlayingMode::Value mode) {
+    switch (mode) {
+        case NonPlayingMode::Value::NONE:         return "NONE";
+        case NonPlayingMode::Value::SILENCE:      return "SILENCE";
+        case NonPlayingMode::Value::PASSTHROUGH:  return "PASSTHROUGH";
+        case NonPlayingMode::Value::PATTERN:      return "PATTERN";
+    }
+    return "UNKNOWN";
+}
+
+juce::String NonPlayingMode::getDisplayName(NonPlayingMode::Value mode) {
+    switch (mode) {
+        case NonPlayingMode::Value::NONE:         return "None";
+        case NonPlayingMode::Value::SILENCE:      return "Silence";
+        case NonPlayingMode::Value::PASSTHROUGH:  return "Passthrough";
+        case NonPlayingMode::Value::PATTERN:      return "Pattern";
+    }
+    return "Unknown";
+}
+
+NonPlayingMode::Value NonPlayingMode::of(juce::var&& var) {
+    return NonPlayingMode::of((juce::String&&) var);
+}
+
+NonPlayingMode::Value NonPlayingMode::of(juce::String&& string) {
+    if (string == "NONE")         return NonPlayingMode::Value::NONE;
+    if (string == "SILENCE")      return NonPlayingMode::Value::SILENCE;
+    if (string == "PASSTHROUGH")  return NonPlayingMode::Value::PASSTHROUGH;
+    if (string == "PATTERN")      return NonPlayingMode::Value::PATTERN;
+
+    return NonPlayingMode::Value::NONE;
+}
+
 const juce::Identifier Globals::TREEID_SETTINGS = "globalSettings"; // NOLINT
 const juce::Identifier Globals::TREEID_ASKED_FOR_UPDATE_CHECK_CONSENT = "askedForUpdateCheckConsent"; // NOLINT
 const juce::Identifier Globals::TREEID_UPDATE_CHECK = "checkForUpdates"; // NOLINT
@@ -25,6 +58,7 @@ const juce::Identifier Globals::TREEID_FOUND_UPDATE_ON_LAST_CHECK = "foundUpdate
 const juce::Identifier Globals::TREEID_MIN_SECS_BEFORE_UPDATE_CHECK = "minSecsBeforeUpdateCheck"; // NOLINT
 const juce::Identifier Globals::TREEID_LAST_UPDATE_CHECK_TIME = "lastUpdateCheckTime"; // NOLINT
 const juce::Identifier Globals::TREEID_GUI_SCALE_FACTOR = "guiScaleFactor"; // NOLINT
+const juce::Identifier Globals::TREEID_NON_PLAYING_MODE = "nonPlayingMode"; // NOLINT
 
 Globals::Globals() :
         changed(false),
@@ -69,6 +103,8 @@ void Globals::reset() {
     minSecsBeforeUpdateCheck = BuildConfig::DEFAULT_MIN_SECS_BEFORE_UPDATE_CHECK;
     foundUpdateOnLastCheck = false;
     lastUpdateCheckTime = 0L;
+    guiScaleFactor = 1.0;
+    nonPlayingMode = NonPlayingMode::Value::PASSTHROUGH;
 }
 
 bool Globals::save() {
@@ -122,6 +158,7 @@ juce::ValueTree Globals::toValueTree() {
     tree.setProperty(TREEID_MIN_SECS_BEFORE_UPDATE_CHECK, juce::int64(this->minSecsBeforeUpdateCheck), nullptr);
     tree.setProperty(TREEID_LAST_UPDATE_CHECK_TIME, juce::int64(this->lastUpdateCheckTime), nullptr);
     tree.setProperty(TREEID_GUI_SCALE_FACTOR, this->guiScaleFactor, nullptr);
+    tree.setProperty(TREEID_NON_PLAYING_MODE, NonPlayingMode::toJuceString(this->nonPlayingMode), nullptr);
 
     return tree;
 }
@@ -151,6 +188,9 @@ void Globals::parseValueTree(const juce::ValueTree &tree) {
     }
     if (tree.hasProperty(TREEID_GUI_SCALE_FACTOR)) {
         this->guiScaleFactor = tree.getProperty(TREEID_GUI_SCALE_FACTOR);
+    }
+    if (tree.hasProperty(TREEID_NON_PLAYING_MODE)) {
+        this->nonPlayingMode = NonPlayingMode::of(tree.getProperty(TREEID_NON_PLAYING_MODE));
     }
 }
 
@@ -230,5 +270,16 @@ float Globals::getGuiScaleFactor() const {
 void Globals::setGuiScaleFactor(float guiScaleFactor) {
     std::scoped_lock lock(mutex);
     Globals::guiScaleFactor = guiScaleFactor;
+    this->changed = true;
+}
+
+NonPlayingMode::Value Globals::getNonPlayingMode() const {
+    std::scoped_lock lock(mutex);
+    return nonPlayingMode;
+}
+
+void Globals::setNonPlayingMode(NonPlayingMode::Value nonPlayingMode) {
+    std::scoped_lock lock(mutex);
+    Globals::nonPlayingMode = nonPlayingMode;
     this->changed = true;
 }

@@ -27,6 +27,8 @@ LArpLookAndFeel::LArpLookAndFeel() {
 
     setDefaultSansSerifTypeface(mainTypeface);
 
+    setColour(juce::ResizableWindow::backgroundColourId, Style::MAIN_BACKGROUND_COLOUR);
+
     setColour(juce::TooltipWindow::backgroundColourId, Style::MAIN_BACKGROUND_COLOUR);
     setColour(juce::TooltipWindow::outlineColourId, Style::MAIN_FOREGROUND_COLOUR);
     setColour(juce::TooltipWindow::textColourId, Style::MAIN_FOREGROUND_COLOUR);
@@ -38,7 +40,7 @@ LArpLookAndFeel::LArpLookAndFeel() {
     setColour(juce::TextEditor::backgroundColourId, Style::HIGHLIGHT_BACKGROUND_COLOUR);
     setColour(juce::TextEditor::textColourId, Style::MAIN_FOREGROUND_COLOUR);
     setColour(juce::TextEditor::highlightColourId, Style::HIGHLIGHT_FOREGROUND_COLOUR);
-    setColour(juce::TextEditor::highlightedTextColourId, juce::Colour(255, 255, 255));
+    setColour(juce::TextEditor::highlightedTextColourId, Style::HIGHLIGHT_TEXT_COLOUR);
 
     setColour(juce::ResizableWindow::backgroundColourId, Style::HIGHLIGHT_BACKGROUND_COLOUR);
 
@@ -58,6 +60,19 @@ LArpLookAndFeel::LArpLookAndFeel() {
     setColour(juce::Slider::textBoxTextColourId, Style::MAIN_FOREGROUND_COLOUR);
     setColour(juce::Slider::textBoxOutlineColourId, Style::MAIN_FOREGROUND_COLOUR);
     setColour(juce::Slider::textBoxBackgroundColourId, Style::MAIN_BACKGROUND_COLOUR);
+
+    setColour(juce::ComboBox::textColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::ComboBox::outlineColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::ComboBox::focusedOutlineColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::ComboBox::arrowColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::ComboBox::buttonColourId, Style::MAIN_BACKGROUND_COLOUR);
+    setColour(juce::ComboBox::backgroundColourId, Style::MAIN_BACKGROUND_COLOUR);
+
+    setColour(juce::PopupMenu::headerTextColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::PopupMenu::textColourId, Style::MAIN_FOREGROUND_COLOUR);
+    setColour(juce::PopupMenu::highlightedTextColourId, Style::HIGHLIGHT_TEXT_COLOUR);
+    setColour(juce::PopupMenu::backgroundColourId, Style::MAIN_BACKGROUND_COLOUR);
+    setColour(juce::PopupMenu::highlightedBackgroundColourId, Style::HIGHLIGHT_BACKGROUND_COLOUR);
 
     setColour(juce::ScrollBar::thumbColourId, Style::HIGHLIGHT_FOREGROUND_COLOUR);
     setColour(juce::ScrollBar::trackColourId, Style::MAIN_BACKGROUND_COLOUR);

@@ -40,6 +40,29 @@ SettingsEditor::SettingsEditor(LibreArp& p) : processor(p) {
     guiScaleFactorLabel.setText("GUI Scale", juce::NotificationType::dontSendNotification);
     guiScaleFactorLabel.setTooltip(guiScaleFactorTooltip);
     addAndMakeVisible(guiScaleFactorLabel);
+
+    const juce::String nonPlayingModeTooltip = "Affects how the plugin behaves when the host is not playing.";
+    {
+        using namespace NonPlayingMode;
+        nonPlayingModeComboBox.addItem(
+                NonPlayingMode::getDisplayName(Value::SILENCE), static_cast<int>(Value::SILENCE));
+        nonPlayingModeComboBox.addItem(
+                NonPlayingMode::getDisplayName(Value::PASSTHROUGH), static_cast<int>(Value::PASSTHROUGH));
+        nonPlayingModeComboBox.addItem(
+                NonPlayingMode::getDisplayName(Value::PATTERN), static_cast<int>(Value::PATTERN));
+    }
+    nonPlayingModeComboBox.setEditableText(false);
+    nonPlayingModeComboBox.setTooltip(nonPlayingModeTooltip);
+    nonPlayingModeComboBox.onChange = [this] {
+        auto index = nonPlayingModeComboBox.getSelectedItemIndex();
+        auto value = static_cast<NonPlayingMode::Value>(nonPlayingModeComboBox.getItemId(index));
+        processor.getGlobals().setNonPlayingMode(value);
+    };
+    addAndMakeVisible(nonPlayingModeComboBox);
+
+    nonPlayingModeLabel.setText("Global non-playing mode", juce::NotificationType::dontSendNotification);
+    nonPlayingModeLabel.setTooltip(nonPlayingModeTooltip);
+    addAndMakeVisible(nonPlayingModeLabel);
 }
 
 void SettingsEditor::resized() {
@@ -48,6 +71,8 @@ void SettingsEditor::resized() {
 
 void SettingsEditor::updateSettingsValues() {
     updateCheckToggle.setToggleState(processor.getGlobals().isCheckForUpdatesEnabled(), juce::NotificationType::dontSendNotification);
+    guiScaleFactorSlider.setValue(processor.getGlobals().getGuiScaleFactor());
+    nonPlayingModeComboBox.setSelectedId(static_cast<int>(processor.getGlobals().getNonPlayingMode()));
 }
 
 void SettingsEditor::visibilityChanged() {
@@ -68,7 +93,12 @@ void SettingsEditor::updateLayout() {
     area.removeFromTop(4);
 
     auto scaleFactorArea = area.removeFromTop(24);
-    guiScaleFactorSlider.setValue(processor.getGlobals().getGuiScaleFactor());
     guiScaleFactorSlider.setBounds(scaleFactorArea.removeFromLeft(96));
     guiScaleFactorLabel.setBounds(scaleFactorArea);
+
+    area.removeFromTop(4);
+
+    auto nonPlayingModeArea = area.removeFromTop(24);
+    nonPlayingModeComboBox.setBounds(nonPlayingModeArea.removeFromLeft(128));
+    nonPlayingModeLabel.setBounds(nonPlayingModeArea);
 }

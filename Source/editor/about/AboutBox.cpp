@@ -23,12 +23,12 @@ const int LICENSE_NOTICE_HEIGHT_ADDITION = 32;
 AboutBox::AboutBox() {
 
 #if JUCE_DEBUG == 1
-    nameAndVersionLabel.setText(JucePlugin_Name " (debug version)", juce::NotificationType::dontSendNotification);
+    nameAndVersionLabel.setText("LibreArp (debug)", juce::NotificationType::dontSendNotification);
 #else
-    nameAndVersionLabel.setText(JucePlugin_Name " " JucePlugin_VersionString, juce::NotificationType::dontSendNotification);
+    nameAndVersionLabel.setText("LibreArp", juce::NotificationType::dontSendNotification);
 #endif
 
-    nameAndVersionLabel.setFont(juce::Font(40));
+    nameAndVersionLabel.setFont(juce::Font(48));
     nameAndVersionLabel.setJustificationType(juce::Justification::centred);
     addAndMakeVisible(nameAndVersionLabel);
 
@@ -81,7 +81,9 @@ void AboutBox::updateLayout() {
 
     auto area = getLocalBounds();
 
+    area.removeFromTop(8);
     nameAndVersionLabel.setBounds(area.removeFromTop(64));
+    area.removeFromTop(8);
 
     for (auto &link : bottomLinks) {
         if (link == nullptr) {
