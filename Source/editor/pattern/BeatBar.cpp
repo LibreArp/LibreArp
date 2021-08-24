@@ -34,9 +34,9 @@ void BeatBar::paint(juce::Graphics &g) {
     auto pixelsPerBeat = state.pixelsPerBeat;
 
     // Draw background
-    g.setColour(Style::BAR_BACKGROUND_COLOUR);
+    g.setColour(Style::BEATBAR_BACKGROUND_COLOUR);
     g.fillRect(getLocalBounds());
-    g.setColour(Style::BOTTOM_LINE_COLOUR);
+    g.setColour(Style::BEATBAR_BORDER_COLOUR);
     g.fillRect(0, getHeight() - 1, getWidth(), 1);
 
     auto loopLine = static_cast<int>((pattern.loopLength / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1 - state.offsetX;
@@ -45,10 +45,10 @@ void BeatBar::paint(juce::Graphics &g) {
     g.setFont(20);
     int n = 1 + state.offsetX / pixelsPerBeat;
     for (float i = (1 - state.offsetX) % pixelsPerBeat; i < getWidth(); i += pixelsPerBeat, n++) {
-        g.setColour(Style::BEAT_LINE_COLOUR);
+        g.setColour(Style::BEATBAR_LINE_COLOUR);
         g.fillRect(juce::roundToInt(i), 0, 4, getHeight());
 
-        g.setColour((i == loopLine) ? Style::LOOP_TEXT_COLOUR : Style::BEAT_NUMBER_COLOUR);
+        g.setColour((i == loopLine) ? Style::LOOP_TEXT_COLOUR : Style::BEATBAR_NUMBER_COLOUR);
         g.drawText(juce::String(n), static_cast<int>(i) + TEXT_OFFSET, 0, 32, getHeight(), juce::Justification::centredLeft);
     }
 

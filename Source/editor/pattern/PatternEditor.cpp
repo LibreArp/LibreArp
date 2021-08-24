@@ -87,7 +87,7 @@ void PatternEditor::paint(juce::Graphics &g) {
 
     // Draw gridlines
     // - Horizontal
-    g.setColour(Style::GRIDLINES_COLOUR);
+    g.setColour(Style::EDITOR_GRIDLINES_COLOUR);
     int horizontalGridlineStart = (getHeight() / 2 - state.offsetY) % pixelsPerNote - pixelsPerNote / 2;
     for (int i = horizontalGridlineStart; i < getHeight(); i += pixelsPerNote) {
         g.fillRect(0, i, getWidth(), 2);
@@ -167,7 +167,7 @@ void PatternEditor::paint(juce::Graphics &g) {
     if (lastPlayPositionX > 0) {
         auto positionRect = juce::Rectangle<int>(lastPlayPositionX - state.offsetX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
         if (positionRect.intersects(unoffsDrawRegion)) {
-            g.setColour(Style::POSITION_INDICATOR_COLOUR);
+            g.setColour(Style::PLAYHEAD_POSITION_COLOUR);
             g.fillRect(positionRect);
         }
     }
@@ -175,7 +175,7 @@ void PatternEditor::paint(juce::Graphics &g) {
     // Draw selection
     if (selection.getWidth() != 0 && selection.getHeight() != 0) {
         if (selection.intersects(unoffsDrawRegion)) {
-            g.setColour(Style::SELECTION_BORDER_COLOUR);
+            g.setColour(Style::SELECTION_RECTANGLE_COLOUR);
             g.drawRect(selection, 3);
         }
     }
