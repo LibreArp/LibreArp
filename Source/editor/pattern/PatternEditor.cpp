@@ -380,12 +380,15 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
         if (dragAction.type == DragAction::TYPE_NONE) {
             if (event.mods.isCtrlDown()) {
                 if (!event.mods.isShiftDown()) {
+                    repaintSelectedNotes();
                     selectedNotes.clear();
                 }
 
                 dragAction.selectionDragAction(DragAction::TYPE_SELECTION_DRAG, event.x, event.y);
                 repaintNotes();
+                repaintSelectedNotes();
             } else {
+                repaintSelectedNotes();
                 selectedNotes.clear();
                 noteCreate(event);
                 repaintNotes();
@@ -393,6 +396,7 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
         } else {
             if (dragAction.type == DragAction::TYPE_NOTE_MOVE) {
                 repaintNotes();
+                repaintSelectedNotes();
 
                 // Pick clicked note properties
                 if (selectedNotes.empty()) {
@@ -411,6 +415,7 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
 
                 // Add/remove note from selection
                 if (event.mods.isCtrlDown() && !event.mods.isAltDown()) {
+                    repaintSelectedNotes();
                     if (!event.mods.isShiftDown()) {
                         selectedNotes.clear();
                         selectedNotes.insert(dragAction.initiatorIndex);
@@ -421,7 +426,7 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
                             selectedNotes.erase(dragAction.initiatorIndex);
                         }
                     }
-                    repaint();
+                    repaintSelectedNotes();
                 }
             }
         }
@@ -529,6 +534,9 @@ void PatternEditor::noteStartResize(const juce::MouseEvent& event) {
     auto timebase = processor.getPattern().getTimebase();
     auto &notes = processor.getPattern().getNotes();
 
+    // TODO repaint according to dragAction
+    repaintNotes();
+    repaintSelectedNotes();
     for (auto &noteOffset : dragAction.noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
         int64_t minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
@@ -538,7 +546,8 @@ void PatternEditor::noteStartResize(const juce::MouseEvent& event) {
     }
 
     processor.buildPattern();
-    repaint();
+    repaintNotes();
+    repaintSelectedNotes();
     mouseCursor = juce::MouseCursor::LeftEdgeResizeCursor;
 }
 
@@ -548,6 +557,9 @@ void PatternEditor::noteEndResize(const juce::MouseEvent& event) {
     auto timebase = processor.getPattern().getTimebase();
     auto &notes = processor.getPattern().getNotes();
 
+    // TODO repaint according to dragAction
+    repaintNotes();
+    repaintSelectedNotes();
     for (auto &noteOffset : dragAction.noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
         int64_t minSize = (snapEnabled) ? (timebase / state.divisor) : 1;
@@ -559,13 +571,17 @@ void PatternEditor::noteEndResize(const juce::MouseEvent& event) {
     }
 
     processor.buildPattern();
-    repaint();
+    repaintNotes();
+    repaintSelectedNotes();
     mouseCursor = juce::MouseCursor::RightEdgeResizeCursor;
 }
 
 void PatternEditor::noteMove(const juce::MouseEvent& event) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
+    // TODO repaint according to dragAction
+    repaintNotes();
+    repaintSelectedNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto &noteOffset : dragAction.noteOffsets) {
         auto &note = notes[noteOffset.noteIndex];
@@ -585,7 +601,8 @@ void PatternEditor::noteMove(const juce::MouseEvent& event) {
     }
 
     processor.buildPattern();
-    repaint();
+    repaintNotes();
+    repaintSelectedNotes();
 
     mouseCursor = juce::MouseCursor::DraggingHandCursor;
 }
@@ -672,7 +689,8 @@ void PatternEditor::noteDelete(const juce::MouseEvent &event) {
 
     if (erased) {
         processor.buildPattern();
-        repaint();
+        repaintNotes();
+        repaintSelectedNotes();
     }
 
     mouseAnyMove(event);
@@ -689,11 +707,12 @@ void PatternEditor::selectAll() {
 }
 
 void PatternEditor::deselectAll() {
+    repaintSelectedNotes();
     selectedNotes.clear();
-    repaint();
 }
 
 void PatternEditor::deleteSelected() {
+    repaintSelectedNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto it = selectedNotes.rbegin(); it != selectedNotes.rend(); it++) {
         auto index = *it;
@@ -703,13 +722,12 @@ void PatternEditor::deleteSelected() {
     selectedNotes.clear();
     dragAction.basicDragAction();
     processor.buildPattern();
-    repaint();
 }
 
 void PatternEditor::moveSelectedUp(bool octave) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
-    repaintNotes();
+    repaintSelectedNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto index : selectedNotes) {
         if (octave) {
@@ -719,13 +737,13 @@ void PatternEditor::moveSelectedUp(bool octave) {
         }
     }
     processor.buildPattern();
-    repaintNotes();
+    repaintSelectedNotes();
 }
 
 void PatternEditor::moveSelectedDown(bool octave) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
-    repaintNotes();
+    repaintSelectedNotes();
     auto &notes = processor.getPattern().getNotes();
     for (auto index : selectedNotes) {
         if (octave) {
@@ -735,12 +753,16 @@ void PatternEditor::moveSelectedDown(bool octave) {
         }
     }
     processor.buildPattern();
-    repaintNotes();
+    repaintSelectedNotes();
 }
 
 
 void PatternEditor::select(const juce::MouseEvent& event) {
+    repaint(selection);
+    repaintSelectedNotes();
     selection = juce::Rectangle<int>(juce::Point<int>(event.x, event.y), juce::Point<int>(dragAction.startX, dragAction.startY));
+    repaint(selection);
+    repaintSelectedNotes();
 
     if (!event.mods.isShiftDown()) {
         selectedNotes.clear();
@@ -754,7 +776,6 @@ void PatternEditor::select(const juce::MouseEvent& event) {
             selectedNotes.insert(i);
         }
     }
-    repaint();
 }
 
 
@@ -771,6 +792,7 @@ void PatternEditor::selectionEndStretch(const juce::MouseEvent& event) {
 }
 
 void PatternEditor::selectionStretch(int64_t selectionStart, int64_t selectionEnd) {
+    repaintSelectedNotes();
     auto& pattern = processor.getPattern();
     std::scoped_lock lock(pattern.getMutex());
     auto& notes = pattern.getNotes();
@@ -781,9 +803,8 @@ void PatternEditor::selectionStretch(int64_t selectionStart, int64_t selectionEn
         note.startPoint = selectionStart + static_cast<int64_t>(round(selectedNote.relativeStart * length));
         note.endPoint = selectionStart + static_cast<int64_t>(round(selectedNote.relativeEnd * length));
     }
-
+    repaintSelectedNotes();
     processor.buildPattern();
-    repaint();
 }
 
 
@@ -818,22 +839,42 @@ void PatternEditor::audioUpdate() {
 }
 
 void PatternEditor::repaintNotes() {
-    bool willRepaint = false;
-    auto notesRect = juce::Rectangle<int>::leftTopRightBottom(INT32_MAX, INT32_MAX, 0, 0);
+    std::scoped_lock lock(processor.getPattern().getMutex());
     auto &notes = processor.getPattern().getNotes();
-    for(size_t i = 0; i < notes.size(); i++) {
-        auto &note = notes[i];
+
+    if (notes.empty()) {
+        return;
+    }
+
+    auto notesRect = juce::Rectangle<int>::leftTopRightBottom(INT32_MAX, INT32_MAX, 0, 0);
+    for(auto &note : notes) {
         auto noteRect = getRectangleForNote(note);
         notesRect.setLeft(juce::jmin(notesRect.getX(), noteRect.getX()));
         notesRect.setTop(juce::jmin(notesRect.getY(), noteRect.getY()));
         notesRect.setRight(juce::jmax(notesRect.getRight(), noteRect.getRight()));
         notesRect.setBottom(juce::jmax(notesRect.getBottom(), noteRect.getBottom()));
-        willRepaint = true;
+    }
+}
+
+void PatternEditor::repaintSelectedNotes() {
+    std::scoped_lock lock(processor.getPattern().getMutex());
+
+    if (selectedNotes.empty()) {
+        return;
     }
 
-    if (willRepaint) {
-        repaint(notesRect);
+    auto& notes = processor.getPattern().getNotes();
+    int minX = INT32_MAX;
+    int maxX = INT32_MIN;
+    for (auto i : selectedNotes) {
+        auto& note = notes[i];
+        int startX = pulseToX(note.startPoint);
+        if (startX < minX) minX = startX;
+        int endX = pulseToX(note.endPoint);
+        if (endX > maxX) maxX = endX;
     }
+
+    repaint(juce::Rectangle<int>::leftTopRightBottom(minX - 2, 0, maxX + 2, getHeight()));
 }
 
 PatternEditorView* PatternEditor::getView() {

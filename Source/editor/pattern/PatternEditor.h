@@ -342,16 +342,22 @@ private:
 
     /**
      * Mouse notes selection.
-     *
-     * @param event the mouse event
-     * @param dragAction the drag action
      */
     void select(const juce::MouseEvent& event);
 
+    /**
+     * Mouse selection stretching, from the selection start.
+     */
     void selectionStartStretch(const juce::MouseEvent& event);
 
+    /**
+     * Mouse selection stretching, from the selection end.
+     */
     void selectionEndStretch(const juce::MouseEvent& event);
 
+    /**
+     * Selection stretching, with the specified pulses.
+     */
     void selectionStretch(int64_t selectionStart, int64_t selectionEnd);
 
 
@@ -456,7 +462,15 @@ private:
      */
     int noteToAbsY(int note);
 
+    /**
+     * Tells the renderer to repaint the bounding box of all notes.
+     */
     void repaintNotes();
+
+    /**
+     * Tells the renderer to repaint the bounding box of selected notes, as well as the selection border.
+     */
+    void repaintSelectedNotes();
 };
 
 
