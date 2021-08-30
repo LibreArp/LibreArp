@@ -284,6 +284,11 @@ private:
     void mouseAnyMove(const juce::MouseEvent &event);
 
     /**
+     * Sets the editor's current drag action according to the mouse position.
+     */
+    void mouseDetermineDragAction(const juce::MouseEvent &event);
+
+    /**
      * Mouse loop length resize.
      *
      * @param event the mouse event

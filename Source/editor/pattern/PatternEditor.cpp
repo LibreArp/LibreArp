@@ -240,12 +240,73 @@ void PatternEditor::mouseWheelMove(const juce::MouseEvent &event, const juce::Mo
 }
 
 void PatternEditor::mouseMove(const juce::MouseEvent &event) {
-    auto &pattern = processor.getPattern();
-    std::scoped_lock lock(pattern.getMutex());
+    mouseAnyMove(event);
+    mouseDetermineDragAction(event);
+    updateMouseCursor();
+}
 
+void PatternEditor::mouseDrag(const juce::MouseEvent &event) {
     mouseAnyMove(event);
     defer d([this]() { updateMouseCursor(); });
 
+    if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
+        switch (dragAction.type) {
+            case DragAction::TYPE_LOOP_RESIZE:
+                loopResize(event);
+                return;
+            case DragAction::TYPE_NOTE_START_RESIZE:
+                noteStartResize(event);
+                return;
+            case DragAction::TYPE_NOTE_END_RESIZE:
+                noteEndResize(event);
+                return;
+            case DragAction::TYPE_NOTE_MOVE:
+                noteMove(event);
+                return;
+            case DragAction::TYPE_SELECTION_DRAG:
+                select(event);
+                return;
+            case DragAction::TYPE_STRETCH_START:
+                selectionStartStretch(event);
+                return;
+            case DragAction::TYPE_STRETCH_END:
+                selectionEndStretch(event);
+                return;
+            default:
+                return;
+        }
+    }
+
+    if (!event.mods.isLeftButtonDown() && event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
+        noteDelete(event);
+        return;
+    }
+}
+
+void PatternEditor::updateMouseCursor() {
+    if (mouseCursor != getMouseCursor()) {
+        setMouseCursor(mouseCursor);
+    }
+}
+
+void PatternEditor::mouseAnyMove(const juce::MouseEvent &event) {
+    repaint(pulseToX(cursorPulse), 0, 1, getHeight());
+    repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
+
+    cursorPulse = xToPulse(event.x);
+    cursorNote = yToNote(event.y);
+
+    snapEnabled = !(event.mods.isAltDown() || (event.mods.isCtrlDown() && event.mods.isShiftDown()));
+
+    mouseCursor = juce::MouseCursor::NormalCursor;
+
+    repaint(pulseToX(cursorPulse), 0, 1, getHeight());
+    repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
+}
+
+void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
+    auto &pattern = processor.getPattern();
+    std::scoped_lock lock(pattern.getMutex());
     auto &notes = pattern.getNotes();
     for (uint64_t i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
@@ -314,65 +375,6 @@ void PatternEditor::mouseMove(const juce::MouseEvent &event) {
     }
 
     dragAction.basicDragAction();
-}
-
-void PatternEditor::mouseDrag(const juce::MouseEvent &event) {
-    mouseAnyMove(event);
-    defer d([this]() { updateMouseCursor(); });
-
-    if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
-        switch (dragAction.type) {
-            case DragAction::TYPE_LOOP_RESIZE:
-                loopResize(event);
-                return;
-            case DragAction::TYPE_NOTE_START_RESIZE:
-                noteStartResize(event);
-                return;
-            case DragAction::TYPE_NOTE_END_RESIZE:
-                noteEndResize(event);
-                return;
-            case DragAction::TYPE_NOTE_MOVE:
-                noteMove(event);
-                return;
-            case DragAction::TYPE_SELECTION_DRAG:
-                select(event);
-                return;
-            case DragAction::TYPE_STRETCH_START:
-                selectionStartStretch(event);
-                return;
-            case DragAction::TYPE_STRETCH_END:
-                selectionEndStretch(event);
-                return;
-            default:
-                return;
-        }
-    }
-
-    if (!event.mods.isLeftButtonDown() && event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
-        noteDelete(event);
-        return;
-    }
-}
-
-void PatternEditor::updateMouseCursor() {
-    if (mouseCursor != getMouseCursor()) {
-        setMouseCursor(mouseCursor);
-    }
-}
-
-void PatternEditor::mouseAnyMove(const juce::MouseEvent &event) {
-    repaint(pulseToX(cursorPulse), 0, 1, getHeight());
-    repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
-
-    cursorPulse = xToPulse(event.x);
-    cursorNote = yToNote(event.y);
-
-    snapEnabled = !(event.mods.isAltDown() || (event.mods.isCtrlDown() && event.mods.isShiftDown()));
-
-    mouseCursor = juce::MouseCursor::NormalCursor;
-
-    repaint(pulseToX(cursorPulse), 0, 1, getHeight());
-    repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
 }
 
 void PatternEditor::mouseDown(const juce::MouseEvent &event) {
@@ -460,12 +462,11 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
 }
 
 void PatternEditor::mouseUp(const juce::MouseEvent &event) {
-    dragAction.basicDragAction();
     repaint(selection);
     selection = juce::Rectangle<int>(0, 0, 0, 0);
     mouseAnyMove(event);
+    mouseDetermineDragAction(event);
     repaintNotes();
-    Component::mouseUp(event);
     updateMouseCursor();
 }
 
