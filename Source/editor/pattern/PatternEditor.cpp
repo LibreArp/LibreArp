@@ -855,6 +855,7 @@ void PatternEditor::repaintNotes() {
         notesRect.setRight(juce::jmax(notesRect.getRight(), noteRect.getRight()));
         notesRect.setBottom(juce::jmax(notesRect.getBottom(), noteRect.getBottom()));
     }
+    repaint(notesRect);
 }
 
 void PatternEditor::repaintSelectedNotes() {
