@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <sstream>
 #include <mutex>
 #include <bitset>
@@ -141,13 +142,6 @@ public:
      * @return the current pattern
      */
     ArpPattern &getPattern();
-
-    /**
-     * Gets the current pattern's XML.
-     *
-     * @return the current pattern's XML
-     */
-    juce::String getStateXml();
 
 
 
@@ -334,12 +328,12 @@ private:
     /**
      * The last position the processor has played, in pulses.
      */
-    int64_t lastPosition;
+    std::atomic<int64_t> lastPosition;
 
     /**
      * The amount of beats after which the loop should reset.
      */
-    double loopReset;
+    std::atomic<double> loopReset;
 
     /**
      * Whether the playhead was playing in the last block.
@@ -418,10 +412,10 @@ private:
      */
     NonPlayingMode::Value nonPlayingModeOverride;
 
-    /**
-     * The audio processor mutex.
-     */
-    mutable std::recursive_mutex mutex;
+//    /**
+//     * The audio processor mutex.
+//     */
+//    mutable std::recursive_mutex mutex;
 
     /**
      * Main LibreArp processing method.

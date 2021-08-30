@@ -142,6 +142,7 @@ std::recursive_mutex &ArpPattern::getMutex() {
 }
 
 ArpPattern& ArpPattern::operator=(const ArpPattern &pattern) noexcept {
+    std::scoped_lock lock(this->mutex);
     this->timebase = pattern.timebase;
     this->loopLength = pattern.loopLength;
     this->notes = pattern.notes;
