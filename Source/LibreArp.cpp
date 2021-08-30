@@ -149,7 +149,6 @@ bool LibreArp::isBusesLayoutSupported(const BusesLayout &layouts) const {
 }
 
 void LibreArp::processBlock(juce::AudioBuffer<float> &audio, juce::MidiBuffer &midi) {
-    std::scoped_lock lock(mutex);
     juce::ScopedNoDenormals noDenormals;
 
     auto totalNumInputChannels = getTotalNumInputChannels();
@@ -165,7 +164,6 @@ void LibreArp::processBlock(juce::AudioBuffer<float> &audio, juce::MidiBuffer &m
 }
 
 void LibreArp::processBlock(juce::AudioBuffer<double> &audio, juce::MidiBuffer &midi) {
-    std::scoped_lock lock(mutex);
     juce::ScopedNoDenormals noDenormals;
 
     auto totalNumInputChannels = getTotalNumInputChannels();
@@ -306,11 +304,10 @@ juce::AudioProcessorEditor *LibreArp::createEditor() {
 }
 
 juce::ValueTree LibreArp::toValueTree() {
-    std::scoped_lock lock(mutex);
     juce::ValueTree tree = juce::ValueTree(TREEID_LIBREARP);
     tree.appendChild(this->pattern.toValueTree(), nullptr);
     tree.appendChild(this->editorState.toValueTree(), nullptr);
-    tree.setProperty(TREEID_LOOP_RESET, this->loopReset, nullptr);
+    tree.setProperty(TREEID_LOOP_RESET, this->loopReset.load(), nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
     tree.setProperty(TREEID_OCTAVES, this->octaves->get(), nullptr);
     tree.setProperty(TREEID_INPUT_VELOCITY, this->usingInputVelocity->get(), nullptr);
@@ -327,8 +324,6 @@ void LibreArp::getStateInformation(juce::MemoryBlock &destData) {
 }
 
 void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
-    std::scoped_lock lock(mutex);
-
     if (sizeInBytes > 0) {
         juce::String xml = juce::MemoryInputStream(data, static_cast<size_t>(sizeInBytes), false).readString();
         std::unique_ptr<juce::XmlElement> doc = juce::XmlDocument::parse(xml);
@@ -370,8 +365,6 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
 }
 
 void LibreArp::setPattern(const ArpPattern &newPattern) {
-    std::scoped_lock lock(mutex);
-
     this->pattern = newPattern;
     buildPattern();
 }
@@ -388,21 +381,14 @@ ArpPattern &LibreArp::getPattern() {
     return this->pattern;
 }
 
-juce::String LibreArp::getStateXml() {
-    std::scoped_lock lock(mutex);
-    return this->toValueTree().toXmlString();
-}
-
 
 int64_t LibreArp::getLastPosition() {
-    std::scoped_lock lock(mutex);
     return this->lastPosition;
 }
 
 
 
 void LibreArp::setLoopReset(double beats) {
-    std::scoped_lock lock(mutex);
     this->loopReset = juce::jmax(0.0, beats);
 }
 
@@ -416,7 +402,6 @@ bool LibreArp::isTransposingOctaves() {
 }
 
 void LibreArp::setTransposingOctaves(bool value) {
-    std::scoped_lock lock(mutex);
     *this->octaves = value;
 }
 
@@ -425,7 +410,6 @@ bool LibreArp::isUsingInputVelocity() {
 }
 
 void LibreArp::setUsingInputVelocity(bool value) {
-    std::scoped_lock lock(mutex);
     *this->usingInputVelocity = value;
 }
 
