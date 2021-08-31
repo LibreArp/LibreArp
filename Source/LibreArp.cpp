@@ -58,22 +58,10 @@ LibreArp::LibreArp()
     //        - Renoise does not accept our MIDI output when there is no output channel
     : AudioProcessor(BusesProperties()
             .withInput("Input", juce::AudioChannelSet::mono(), true)
-            .withOutput("Output", juce::AudioChannelSet::mono(), true))
+            .withOutput("Output", juce::AudioChannelSet::mono(), true)),
+      silenceEndedTime(juce::Time::currentTimeMillis())
 {
-    this->lastPosition = 0;
-    this->wasPlaying = false;
-    this->buildScheduled = false;
-    this->stopScheduled = false;
-    this->loopReset = 0.0;
-    this->numInputNotes = 0;
-    this->outputMidiChannel = 1;
-    this->inputMidiChannel = 0;
-    this->nonPlayingModeOverride = NonPlayingMode::Value::NONE;
-    this->timeSigNumerator = 4;
-    this->timeSigDenominator = 4;
-    this->debugPlaybackEnabled = false;
     this->silenceEndedTime = juce::Time::currentTimeMillis();
-    resetDebugPlayback();
 
     globals.markChanged();
 
@@ -219,7 +207,7 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
         }
 
         if (inputNotes.size() != 0) {
-            numInputNotes = inputNotes.size();
+            octaveSize = inputNotes.size();
         }
 
         for(auto event : events.events) {
@@ -311,7 +299,7 @@ juce::ValueTree LibreArp::toValueTree() {
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
     tree.setProperty(TREEID_OCTAVES, this->octaves->get(), nullptr);
     tree.setProperty(TREEID_INPUT_VELOCITY, this->usingInputVelocity->get(), nullptr);
-    tree.setProperty(TREEID_NUM_INPUT_NOTES, this->numInputNotes, nullptr);
+    tree.setProperty(TREEID_NUM_INPUT_NOTES, this->octaveSize, nullptr);
     tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
     tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
     tree.setProperty(TREEID_NON_PLAYING_MODE_OVERRIDE, NonPlayingMode::toJuceString(this->nonPlayingModeOverride), nullptr);
@@ -347,7 +335,7 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
                 *this->usingInputVelocity = tree.getProperty(TREEID_INPUT_VELOCITY);
             }
             if (tree.hasProperty(TREEID_NUM_INPUT_NOTES)) {
-                this->numInputNotes = tree.getProperty(TREEID_NUM_INPUT_NOTES);
+                this->octaveSize = tree.getProperty(TREEID_NUM_INPUT_NOTES);
             }
             if (tree.hasProperty(TREEID_OUTPUT_MIDI_CHANNEL)) {
                 this->outputMidiChannel = tree.getProperty(TREEID_OUTPUT_MIDI_CHANNEL);
@@ -415,7 +403,7 @@ void LibreArp::setUsingInputVelocity(bool value) {
 
 
 int LibreArp::getNumInputNotes() const {
-    return this->numInputNotes;
+    return this->octaveSize;
 }
 
 int LibreArp::getTimeSigNumerator() const {
@@ -424,27 +412,6 @@ int LibreArp::getTimeSigNumerator() const {
 
 int LibreArp::getTimeSigDenominator() const {
     return this->timeSigDenominator;
-}
-
-
-bool LibreArp::isDebugPlaybackEnabled() const {
-    return this->debugPlaybackEnabled || juce::JUCEApplicationBase::isStandaloneApp();
-}
-
-void LibreArp::setDebugPlaybackEnabled(bool enabled) {
-    this->debugPlaybackEnabled = enabled;
-    resetDebugPlayback();
-}
-
-void LibreArp::resetDebugPlayback() {
-    this->silenceEndedTime = juce::Time::currentTimeMillis();
-
-    this->inputNotes.clear();
-    if (this->isDebugPlaybackEnabled()) {
-        inputNotes.add(InputNote(1));
-        inputNotes.add(InputNote(2));
-        inputNotes.add(InputNote(254));
-    }
 }
 
 void LibreArp::fillCurrentNonPlayingPositionInfo(juce::AudioPlayHead::CurrentPositionInfo &cpi) {
@@ -504,8 +471,8 @@ NonPlayingMode::Value LibreArp::getNonPlayingModeOverride() const {
     return nonPlayingModeOverride;
 }
 
-void LibreArp::setNonPlayingModeOverride(NonPlayingMode::Value nonPlayingModeOverride) {
-    this->nonPlayingModeOverride = nonPlayingModeOverride;
+void LibreArp::setNonPlayingModeOverride(NonPlayingMode::Value mode) {
+    this->nonPlayingModeOverride = mode;
 }
 
 NonPlayingMode::Value LibreArp::getNonPlayingMode() const {
@@ -642,6 +609,7 @@ int64_t LibreArp::nextTime(ArpBuiltEvents::Event& event, int64_t blockStartPosit
     return result;
 }
 
+[[maybe_unused]] // Used by JUCE plugin wrappers
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter() {
     return new LibreArp();
 }

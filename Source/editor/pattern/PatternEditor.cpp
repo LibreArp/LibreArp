@@ -97,7 +97,7 @@ void PatternEditor::paint(juce::Graphics &g) {
     }
 
     // - Vertical
-    float beatDiv = (pixelsPerBeat / static_cast<float>(state.divisor));
+    float beatDiv = (static_cast<float>(pixelsPerBeat) / static_cast<float>(state.divisor));
     int beatN = 0;
     for (auto i = static_cast<float>((-state.offsetX) % pixelsPerBeat); i < static_cast<float>(getWidth()); i += beatDiv, beatN++) {
         if (beatN % state.divisor == 0) {
@@ -903,11 +903,12 @@ void PatternEditor::repaintSelectedNotes() {
 juce::Rectangle<int> PatternEditor::getRectangleForNote(ArpNote &note) {
     auto pixelsPerNote = state.pixelsPerNote;
 
-    return juce::Rectangle<int>(
+    return {
             pulseToX(note.startPoint),
             noteToY(note.data.noteNumber),
             pulseToAbsX(note.endPoint - note.startPoint),
-            pixelsPerNote);
+            pixelsPerNote
+    };
 }
 
 bool PatternEditor::getNoteSelectionBorder(std::set<uint64_t>& indices,
@@ -948,8 +949,8 @@ int64_t PatternEditor::snapPulse(int64_t pulse, bool floor) {
     auto timebase = pattern.getTimebase();
     double doubleDivisor = state.divisor;
 
-    double base = (pulse * doubleDivisor) / timebase;
-    int64_t roundedBase = static_cast<int64_t>((floor) ? std::floor(base) : std::round(base));
+    double base = (static_cast<double>(pulse) * doubleDivisor) / timebase;
+    auto roundedBase = static_cast<int64_t>((floor) ? std::floor(base) : std::round(base));
 
     return roundedBase * (timebase / state.divisor);
 }
@@ -979,7 +980,7 @@ int PatternEditor::pulseToAbsX(int64_t pulse) {
     auto &pattern = processor.getPattern();
     auto pixelsPerBeat = state.pixelsPerBeat;
 
-    return juce::jmax(0, juce::roundToInt((pulse / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1);
+    return juce::jmax(0, juce::roundToInt((static_cast<double>(pulse) / static_cast<double>(pattern.getTimebase())) * pixelsPerBeat) + 1);
 }
 
 int PatternEditor::noteToY(int note) {
