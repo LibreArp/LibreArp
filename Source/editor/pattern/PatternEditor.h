@@ -148,7 +148,9 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
 
         void stretchDragAction(uint8_t type,
                                std::set<uint64_t>& indices,
-                               std::vector<ArpNote>& allNotes);
+                               std::vector<ArpNote>& allNotes,
+                               int64_t timeSelectionStart,
+                               int64_t timeSelectionEnd);
 
         /**
          * Calculates an offset.
@@ -192,13 +194,6 @@ public:
     bool keyPressed(const juce::KeyPress &key) override;
 
     void audioUpdate() override;
-
-    /**
-     * Gets the pointer to the parent editor view.
-     *
-     * @return the pointer to the parent editor view
-     */
-    PatternEditorView *getView();
 
 private:
 
@@ -252,6 +247,16 @@ private:
      * The set of currently selected notes.
      */
     std::set<uint64_t> selectedNotes;
+
+    /**
+     * The left border of the time selection.
+     */
+    int64_t timeSelectionStart;
+
+    /**
+     * The right border of the time selection.
+     */
+    int64_t timeSelectionEnd;
 
     /**
      * Current drag action pointer. Points to the <code>dragActionBuffer</code>.
@@ -408,10 +413,10 @@ private:
      *
      * @return `true` if any notes are selected and the result variables have been written; otherwise `false`
      */
-    static bool getSelectionBorder(std::set<uint64_t>& indices,
-                                   std::vector<ArpNote>& allNotes,
-                                   int64_t& out_start,
-                                   int64_t& out_end);
+    static bool getNoteSelectionBorder(std::set<uint64_t>& indices,
+                                       std::vector<ArpNote>& allNotes,
+                                       int64_t& out_start,
+                                       int64_t& out_end);
 
     /**
      * Gets the pulse border of selected notes and writes the result into `outStart` and `outEnd`. The border consists
@@ -419,7 +424,7 @@ private:
      *
      * @return `true` if any notes are selected and the result variables have been written; otherwise `false`
      */
-    bool getSelectionBorder(int64_t& out_start, int64_t& out_end);
+    bool getNoteSelectionBorder(int64_t& out_start, int64_t& out_end);
 
     /**
      * Snaps the specified pulse to the grid.
