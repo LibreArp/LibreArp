@@ -193,7 +193,7 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
     this->timeSigNumerator = cpi.timeSigNumerator;
     this->timeSigDenominator = cpi.timeSigDenominator;
 
-    if (cpi.isPlaying && !this->events.events.empty()) {
+    if (cpi.isPlaying && !this->events.events.empty() && this->events.loopLength > 0) {
         auto timebase = this->events.timebase;
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = getSampleRate() * pulseLength;

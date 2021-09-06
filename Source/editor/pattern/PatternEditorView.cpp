@@ -122,27 +122,6 @@ void PatternEditorView::resetPatternOffset() {
     beatBar.repaint();
 }
 
-
-int PatternEditorView::getRenderWidth() {
-    auto &pattern = processor.getPattern();
-    return static_cast<int>(
-            (3 + pattern.loopLength / static_cast<double>(pattern.getTimebase())) * state.pixelsPerBeat);
-}
-
-int PatternEditorView::getRenderHeight() {
-    auto &pattern = processor.getPattern();
-
-    int dist = 0;
-    for (auto &note : pattern.getNotes()) {
-        if (std::abs(note.data.noteNumber) > dist) {
-            dist = std::abs(note.data.noteNumber);
-        }
-    }
-    dist = 1 + (dist + 3) * 2;
-
-    return dist * state.pixelsPerNote;
-}
-
 void PatternEditorView::audioUpdate() {
     editor.audioUpdate();
 }

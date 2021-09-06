@@ -21,14 +21,17 @@
 const juce::Identifier ArpPattern::TREEID_PATTERN = juce::Identifier("pattern"); // NOLINT
 const juce::Identifier ArpPattern::TREEID_TIMEBASE = juce::Identifier("timebase"); // NOLINT
 const juce::Identifier ArpPattern::TREEID_LOOP_LENGTH = juce::Identifier("loopLength"); // NOLINT
+const juce::Identifier ArpPattern::TREEID_LOOP_START = juce::Identifier("loopStart"); // NOLINT
+const juce::Identifier ArpPattern::TREEID_LOOP_END = juce::Identifier("loopEnd"); // NOLINT
 const juce::Identifier ArpPattern::TREEID_NOTES = juce::Identifier("notes"); // NOLINT
 
-ArpPattern::ArpPattern(int timebase) : loopLength(timebase), timebase(timebase) {}
+ArpPattern::ArpPattern(int timebase) : loopEnd(timebase), timebase(timebase) {}
 
 ArpPattern::ArpPattern(ArpPattern &pattern) {
     std::scoped_lock lock(pattern.mutex);
     this->timebase = pattern.timebase;
-    this->loopLength = pattern.loopLength;
+    this->loopStart = pattern.loopStart;
+    this->loopEnd = pattern.loopEnd;
     this->notes = pattern.notes;
 }
 
@@ -52,20 +55,22 @@ ArpBuiltEvents ArpPattern::buildEvents() {
     ArpBuiltEvents result;
 
     result.timebase = this->timebase;
-    result.loopLength = this->loopLength;
+    result.loopLength = this->loopEnd - this->loopStart;
 
-    for (unsigned long i = 0; i < this->notes.size(); i++) {
-        auto &note = this->notes[i];
+    for (auto &note : this->notes) {
+        if (note.startPoint < this->loopStart || note.endPoint > this->loopEnd) {
+            continue; // Skip notes whose starts or ends are outside the loop
+        }
 
         auto dataIndex = result.data.size();
         result.data.push_back(ArpBuiltEvents::EventNoteData::of(note.data));
 
-        int64_t onTime = note.startPoint % loopLength;
+        int64_t onTime = (note.startPoint - this->loopStart) % result.loopLength;
         ArpBuiltEvents::Event &onEvent = eventMap[onTime];
         onEvent.time = onTime;
         onEvent.ons.insert(dataIndex);
 
-        int64_t offTime = note.endPoint % loopLength;
+        int64_t offTime = (note.endPoint - this->loopStart) % result.loopLength;
         ArpBuiltEvents::Event &offEvent = eventMap[offTime];
         offEvent.time = offTime;
         offEvent.offs.insert(dataIndex);
@@ -87,7 +92,8 @@ juce::ValueTree ArpPattern::toValueTree() {
     juce::ValueTree result = juce::ValueTree(TREEID_PATTERN);
 
     result.setProperty(TREEID_TIMEBASE, this->timebase, nullptr);
-    result.setProperty(TREEID_LOOP_LENGTH, juce::int64(this->loopLength), nullptr);
+    result.setProperty(TREEID_LOOP_START, juce::int64(this->loopStart), nullptr);
+    result.setProperty(TREEID_LOOP_END, juce::int64(this->loopEnd), nullptr);
 
     juce::ValueTree noteTree = result.getOrCreateChildWithName(TREEID_NOTES, nullptr);
     for (ArpNote note : this->notes) {
@@ -100,6 +106,10 @@ juce::ValueTree ArpPattern::toValueTree() {
 void ArpPattern::toFile(const juce::File &file) {
     auto tree = toValueTree();
     file.replaceWithText(tree.toXmlString());
+}
+
+int64_t ArpPattern::loopLength() const {
+    return loopEnd - loopStart;
 }
 
 
@@ -116,7 +126,15 @@ ArpPattern ArpPattern::fromValueTree(juce::ValueTree &tree) {
     }
 
     if (tree.hasProperty(TREEID_LOOP_LENGTH)) {
-        result.loopLength = juce::int64(tree.getProperty(TREEID_LOOP_LENGTH));
+        // Compatibility with old versions that do not have the loop start/end range
+        result.loopStart = 0;
+        result.loopEnd = juce::int64(tree.getProperty(TREEID_LOOP_LENGTH));
+    }
+    if (tree.hasProperty(TREEID_LOOP_START)) {
+        result.loopStart = juce::int64(tree.getProperty(TREEID_LOOP_START));
+    }
+    if (tree.hasProperty(TREEID_LOOP_END)) {
+        result.loopEnd = juce::int64(tree.getProperty(TREEID_LOOP_END));
     }
 
     juce::ValueTree notesTree = tree.getChildWithName(TREEID_NOTES);
@@ -144,7 +162,8 @@ std::recursive_mutex &ArpPattern::getMutex() {
 ArpPattern& ArpPattern::operator=(const ArpPattern &pattern) noexcept {
     std::scoped_lock lock(this->mutex);
     this->timebase = pattern.timebase;
-    this->loopLength = pattern.loopLength;
+    this->loopStart = pattern.loopStart;
+    this->loopEnd = pattern.loopEnd;
     this->notes = pattern.notes;
     return *this;
 }

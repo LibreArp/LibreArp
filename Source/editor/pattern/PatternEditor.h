@@ -82,7 +82,8 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
         static const uint8_t TYPE_NONE = 0x00;
 
         static const uint8_t TYPE_LOOP = 0x10;
-        static const uint8_t TYPE_LOOP_RESIZE = 0x10;
+        static const uint8_t TYPE_LOOP_START_RESIZE = 0x10;
+        static const uint8_t TYPE_LOOP_END_RESIZE = 0x11;
 
         static const uint8_t TYPE_NOTE = 0x20;
         static const uint8_t TYPE_NOTE_MOVE = 0x20;
@@ -294,11 +295,18 @@ private:
     void mouseDetermineDragAction(const juce::MouseEvent &event);
 
     /**
-     * Mouse loop length resize.
+     * Mouse loop end resize.
      *
      * @param event the mouse event
      */
-    void loopResize(const juce::MouseEvent &event);
+    void loopStartResize(const juce::MouseEvent &event);
+
+    /**
+     * Mouse loop end resize.
+     *
+     * @param event the mouse event
+     */
+    void loopEndResize(const juce::MouseEvent &event);
 
     /**
      * Mouse note resize from left.

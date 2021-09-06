@@ -33,15 +33,16 @@ public:
     static const juce::Identifier TREEID_PATTERN;
     static const juce::Identifier TREEID_TIMEBASE;
     static const juce::Identifier TREEID_LOOP_LENGTH;
+    static const juce::Identifier TREEID_LOOP_START;
+    static const juce::Identifier TREEID_LOOP_END;
     static const juce::Identifier TREEID_NOTES;
 
     static constexpr int DEFAULT_TIMEBASE = 96;
 
 
-    /**
-     * The length of the loop.
-     */
-    int64_t loopLength;
+    int64_t loopStart = 0;
+
+    int64_t loopEnd = 0;
 
 
     /**
@@ -105,6 +106,11 @@ public:
      * @param file the file where the pattern is to be saved
      */
     void toFile(const juce::File &file);
+
+    /**
+     * @return the loop length of this pattern.
+     */
+    int64_t loopLength() const;
 
     /**
      * Deserializes the specified ValueTree into the pattern it represents.
