@@ -42,9 +42,10 @@ void BeatBar::paint(juce::Graphics &g) {
     auto loopStartLine = static_cast<int>((pattern.loopStart / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1 - state.offsetX;
     auto loopEndLine = static_cast<int>((pattern.loopEnd / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1 - state.offsetX;
 
-    // Draw loop background
-    g.setColour(Style::LOOP_BACKGROUND_COLOUR);
-    g.fillRect(loopStartLine, 0, loopEndLine - loopStartLine, getHeight());
+    // Draw outside-the-loop area
+    g.setColour(Style::LOOP_OUTSIDE_COLOUR);
+    if (loopStartLine > 0) g.fillRect(0, 0, loopStartLine, getHeight());
+    if (loopEndLine < getWidth()) g.fillRect(loopEndLine, 0, getWidth() - loopEndLine, getHeight());
 
     // Draw beat lines
     g.setFont(20);
@@ -61,12 +62,6 @@ void BeatBar::paint(juce::Graphics &g) {
     g.setColour(Style::LOOP_LINE_COLOUR);
     g.fillRect(loopStartLine, 0, 4, getHeight());
     g.fillRect(loopEndLine, 0, 4, getHeight());
-
-    g.setFont(16);
-    g.setColour(Style::LOOP_TEXT_COLOUR);
-    auto loopTextWidth = g.getCurrentFont().getStringWidth(LOOP_TEXT);
-    auto loopEndLineWithOffset = loopEndLine - loopTextWidth - TEXT_OFFSET;
-    g.drawText(LOOP_TEXT, loopEndLineWithOffset, 0, loopTextWidth, getHeight(), juce::Justification::centredRight);
 }
 
 void BeatBar::mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) {

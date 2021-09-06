@@ -58,9 +58,6 @@ void PatternEditor::paint(juce::Graphics &g) {
     auto drawRegion = unoffsDrawRegion;
     drawRegion.translate(-state.offsetX, -state.offsetY);
 
-    auto loopStartLine = pulseToX(pattern.loopStart);
-    auto loopEndLine = pulseToX(pattern.loopEnd);
-
     // Draw background
     g.setColour(Style::EDITOR_BACKGROUND_COLOUR);
     g.fillRect(unoffsDrawRegion);
@@ -75,10 +72,6 @@ void PatternEditor::paint(juce::Graphics &g) {
             g.fillRect(i + bar, unoffsDrawRegion.getY(), bar, unoffsDrawRegion.getHeight());
         }
     }
-
-    // Draw loop background
-    g.setColour(Style::LOOP_BACKGROUND_COLOUR);
-    g.fillRect(loopStartLine, 0, loopEndLine - loopStartLine, getHeight());
 
     // Draw octave 0
     auto numInputNotes = processor.getNumInputNotes();
@@ -181,6 +174,12 @@ void PatternEditor::paint(juce::Graphics &g) {
     }
 
     // Draw loop lines
+    auto loopStartLine = pulseToX(pattern.loopStart);
+    auto loopEndLine = pulseToX(pattern.loopEnd);
+    g.setColour(Style::LOOP_OUTSIDE_COLOUR);
+    if (loopStartLine > 0) g.fillRect(0, 0, loopStartLine, getHeight());
+    if (loopEndLine < getWidth()) g.fillRect(loopEndLine, 0, getWidth() - loopEndLine, getHeight());
+
     g.setColour(Style::LOOP_LINE_COLOUR);
     g.fillRect(loopStartLine, 0, 4, getHeight());
     g.fillRect(loopEndLine, 0, 4, getHeight());

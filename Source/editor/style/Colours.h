@@ -31,8 +31,7 @@ namespace Style
     const juce::Colour BEATBAR_NUMBER_COLOUR = BEATBAR_LINE_COLOUR;
 
     const juce::Colour LOOP_LINE_COLOUR = juce::Colour(155, 36, 36);
-    const juce::Colour LOOP_BACKGROUND_COLOUR = juce::Colour((uint8_t) 155, 36, 36, 0.05f);
-    const juce::Colour LOOP_TEXT_COLOUR = LOOP_LINE_COLOUR;
+    const juce::Colour LOOP_OUTSIDE_COLOUR = juce::Colour((uint8_t) 0, 0, 0, 0.3f);
 
     const juce::Colour EDITOR_BACKGROUND_COLOUR = juce::Colour(82, 78, 67);
     const juce::Colour EDITOR_GRIDLINES_COLOUR = juce::Colour(42, 40, 34);
