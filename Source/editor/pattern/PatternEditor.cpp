@@ -552,7 +552,7 @@ void PatternEditor::loopStartResize(const juce::MouseEvent &event) {
     std::scoped_lock lock(processor.getPattern().getMutex());
 
     auto &pattern = processor.getPattern();
-    pattern.loopStart = juce::jmin(pattern.loopEnd, juce::jmax(0L, xToPulse(event.x)));
+    pattern.loopStart = juce::jmin(pattern.loopEnd, juce::jmax(int64_t(0), xToPulse(event.x)));
     processor.buildPattern();
     view->repaint();
     mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
