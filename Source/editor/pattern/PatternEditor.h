@@ -28,7 +28,11 @@ class PatternEditorView;
 /**
  * The pattern editor component class.
  */
-class PatternEditor : public juce::Component, public AudioUpdatable {
+class PatternEditor :
+        public juce::Component,
+        public juce::SettableTooltipClient,
+        public AudioUpdatable
+{
 
     /**
      * The data class of a dragging action.
