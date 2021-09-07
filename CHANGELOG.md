@@ -7,6 +7,24 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 
 ## Changelog
 
+### LibreArp 2.2
+
+* **NEW** The loop is now a freely movable region
+  * The loop is allowed to start at an arbitrary time point
+  * Notes can now exist outside the loop region - they are disabled if that is the case
+* **NEW** Selection can now be stretched using the new green time selection borders
+  * Useful for quick pattern rescaling, creation of triplets, quintuplets and more
+* **NEW** *Behaviour modes* for when the host is not playing a track (*Silence*, *Passthrough*, *Pattern*)
+  * Default is *Passthrough*
+* **NEW** The pattern editor now provides some basic tooltips when hovering different elements
+* **IMPROVE** Note highlight is now hidden when the mouse cursor leaves the editor
+* **IMPROVE (Windows)** `LibreArp.vst3` is now supplied in an archive with the recommended directory structure pre-created
+* **FIX** Output notes are no longer held indefinitely when the *MIDI Input Channel* is changed while playing
+* **FIX** Fixed editor unresponsiveness during playback
+* **FIX** Drag action type is now properly recognized when the mouse button is released
+  * Fixes unwanted notes created by clicking right after releasing the mouse button without movement
+* **FIX (LV2)** The editor is resizeable again using the reintroduced resizer corner
+
 ### LibreArp 2.1
 
 * **NEW** Added a setting for GUI scale

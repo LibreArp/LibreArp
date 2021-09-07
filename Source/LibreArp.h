@@ -197,24 +197,6 @@ public:
      */
     int getTimeSigDenominator() const;
 
-
-    /**
-     * @return <code>true</code> if debug playback is enabled, otherwise <code>false</code>
-     */
-    bool isDebugPlaybackEnabled() const;
-
-    /**
-     * Enables or disables debug playback and resets the debug playhead.
-     *
-     * @param enabled whether debug playback is enabled
-     */
-    void setDebugPlaybackEnabled(bool enabled);
-
-    /**
-     * Resets the debug playback.
-     */
-    void resetDebugPlayback();
-
     /**
      * Fills in current debug playback position information.
      *
@@ -328,35 +310,35 @@ private:
     /**
      * The last position the processor has played, in pulses.
      */
-    std::atomic<int64_t> lastPosition;
+    std::atomic<int64_t> lastPosition = 0;
 
     /**
      * The amount of beats after which the loop should reset.
      */
-    std::atomic<double> loopReset;
+    std::atomic<double> loopReset = 0.0;
 
     /**
      * Whether the playhead was playing in the last block.
      */
-    bool wasPlaying;
+    bool wasPlaying = false;
 
 
 
     /**
      * Whether stopAll was called.
      */
-    bool stopScheduled;
+    bool stopScheduled = false;
 
     /**
      * Whether buildPattern was called.
      */
-    bool buildScheduled;
+    bool buildScheduled = false;
 
 
     /**
      * The number of input notes in the last block.
      */
-    int lastNumInputNotes;
+    int lastNumInputNotes = 0;
 
     /**
      * The set of currently fed input notes.
@@ -371,23 +353,17 @@ private:
     /**
      * The last active number of input notes.
      */
-    int numInputNotes;
+    int octaveSize = 0;
 
     /**
      * Time signature numerator.
      */
-    int timeSigNumerator;
+    int timeSigNumerator = 4;
 
     /**
      * Time signature denominator.
      */
-    int timeSigDenominator;
-
-
-    /**
-     * Whether debug playback is enabled.
-     */
-    bool debugPlaybackEnabled;
+    int timeSigDenominator = 4;
 
     /**
      * The timestamp of the last debug playback reset.
@@ -398,24 +374,19 @@ private:
     /**
      * The MIDI channel output notes are sent to.
      */
-    int outputMidiChannel;
+    int outputMidiChannel = 1;
 
     /**
      * The MIDI channel input notes are read from. Notes from all channels are read if zero.
      */
-    int inputMidiChannel;
+    int inputMidiChannel = 0;
 
     /**
      * Overridden non-playing mode.
      *
      * @see NonPlayingMode
      */
-    NonPlayingMode::Value nonPlayingModeOverride;
-
-//    /**
-//     * The audio processor mutex.
-//     */
-//    mutable std::recursive_mutex mutex;
+    NonPlayingMode::Value nonPlayingModeOverride = NonPlayingMode::Value::NONE;
 
     /**
      * Main LibreArp processing method.

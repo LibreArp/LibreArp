@@ -28,7 +28,11 @@ class PatternEditorView;
 /**
  * The pattern editor component class.
  */
-class PatternEditor : public juce::Component, public AudioUpdatable {
+class PatternEditor :
+        public juce::Component,
+        public juce::SettableTooltipClient,
+        public AudioUpdatable
+{
 
     /**
      * The data class of a dragging action.
@@ -82,7 +86,8 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
         static const uint8_t TYPE_NONE = 0x00;
 
         static const uint8_t TYPE_LOOP = 0x10;
-        static const uint8_t TYPE_LOOP_RESIZE = 0x10;
+        static const uint8_t TYPE_LOOP_START_RESIZE = 0x10;
+        static const uint8_t TYPE_LOOP_END_RESIZE = 0x11;
 
         static const uint8_t TYPE_NOTE = 0x20;
         static const uint8_t TYPE_NOTE_MOVE = 0x20;
@@ -148,7 +153,9 @@ class PatternEditor : public juce::Component, public AudioUpdatable {
 
         void stretchDragAction(uint8_t type,
                                std::set<uint64_t>& indices,
-                               std::vector<ArpNote>& allNotes);
+                               std::vector<ArpNote>& allNotes,
+                               int64_t timeSelectionStart,
+                               int64_t timeSelectionEnd);
 
         /**
          * Calculates an offset.
@@ -192,13 +199,6 @@ public:
     bool keyPressed(const juce::KeyPress &key) override;
 
     void audioUpdate() override;
-
-    /**
-     * Gets the pointer to the parent editor view.
-     *
-     * @return the pointer to the parent editor view
-     */
-    PatternEditorView *getView();
 
 private:
 
@@ -254,6 +254,16 @@ private:
     std::set<uint64_t> selectedNotes;
 
     /**
+     * The left border of the time selection.
+     */
+    int64_t timeSelectionStart;
+
+    /**
+     * The right border of the time selection.
+     */
+    int64_t timeSelectionEnd;
+
+    /**
      * Current drag action pointer. Points to the <code>dragActionBuffer</code>.
      */
     DragAction dragAction;
@@ -289,11 +299,18 @@ private:
     void mouseDetermineDragAction(const juce::MouseEvent &event);
 
     /**
-     * Mouse loop length resize.
+     * Mouse loop end resize.
      *
      * @param event the mouse event
      */
-    void loopResize(const juce::MouseEvent &event);
+    void loopStartResize(const juce::MouseEvent &event);
+
+    /**
+     * Mouse loop end resize.
+     *
+     * @param event the mouse event
+     */
+    void loopEndResize(const juce::MouseEvent &event);
 
     /**
      * Mouse note resize from left.
@@ -408,10 +425,10 @@ private:
      *
      * @return `true` if any notes are selected and the result variables have been written; otherwise `false`
      */
-    static bool getSelectionBorder(std::set<uint64_t>& indices,
-                                   std::vector<ArpNote>& allNotes,
-                                   int64_t& out_start,
-                                   int64_t& out_end);
+    static bool getNoteSelectionBorder(std::set<uint64_t>& indices,
+                                       std::vector<ArpNote>& allNotes,
+                                       int64_t& out_start,
+                                       int64_t& out_end);
 
     /**
      * Gets the pulse border of selected notes and writes the result into `outStart` and `outEnd`. The border consists
@@ -419,7 +436,7 @@ private:
      *
      * @return `true` if any notes are selected and the result variables have been written; otherwise `false`
      */
-    bool getSelectionBorder(int64_t& out_start, int64_t& out_end);
+    bool getNoteSelectionBorder(int64_t& out_start, int64_t& out_end);
 
     /**
      * Snaps the specified pulse to the grid.

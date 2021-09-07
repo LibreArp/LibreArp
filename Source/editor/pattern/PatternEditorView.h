@@ -37,9 +37,6 @@ public:
     void scrollPattern(float deltaX, float deltaY);
     void resetPatternOffset();
 
-    int getRenderWidth();
-    int getRenderHeight();
-
     void audioUpdate() override;
 
 private:
