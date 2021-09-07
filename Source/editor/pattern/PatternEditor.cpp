@@ -468,8 +468,23 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
                     if (!event.mods.isShiftDown()) {
                         selectedNotes.clear();
                         selectedNotes.insert(dragAction.initiatorIndex);
+
+                        std::scoped_lock lock(processor.getPattern().getMutex());
+                        auto &note = processor.getPattern().getNotes()[dragAction.initiatorIndex];
+                        timeSelectionStart = note.startPoint;
+                        timeSelectionEnd = note.endPoint;
                     } else {
                         if (selectedNotes.find(dragAction.initiatorIndex) == selectedNotes.end()) {
+                            std::scoped_lock lock(processor.getPattern().getMutex());
+                            auto &note = processor.getPattern().getNotes()[dragAction.initiatorIndex];
+
+                            if (selectedNotes.empty()) {
+                                timeSelectionStart = note.startPoint;
+                                timeSelectionEnd = note.endPoint;
+                            } else {
+                                if (timeSelectionStart > note.startPoint) timeSelectionStart = note.startPoint;
+                                if (timeSelectionEnd < note.endPoint) timeSelectionEnd = note.endPoint;
+                            }
                             selectedNotes.insert(dragAction.initiatorIndex);
                         } else {
                             selectedNotes.erase(dragAction.initiatorIndex);
