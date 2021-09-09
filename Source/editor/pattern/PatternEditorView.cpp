@@ -29,8 +29,8 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
                   "Pattern preset",
                   processor.getGlobals().getPatternPresetsDir(),
                   "*.lapreset"),
-          editor(p, state, this),
-          beatBar(p, state, this)
+          editor(p, state, *this),
+          beatBar(p, state, *this)
 {
 
     loadButton.setButtonText("Load pattern...");

@@ -68,10 +68,15 @@ target_sources(LibreArp
         Source/editor/behaviour/BehaviourSettingsEditor.cpp Source/editor/behaviour/BehaviourSettingsEditor.h
 
         Source/editor/pattern/BeatBar.cpp Source/editor/pattern/BeatBar.h
+        Source/editor/pattern/LoopEditor.h
         Source/editor/pattern/PatternEditor.cpp Source/editor/pattern/PatternEditor.h
         Source/editor/pattern/PatternEditorView.cpp Source/editor/pattern/PatternEditorView.h
+        Source/editor/pattern/PulseConvertor.h
 
         Source/editor/settings/SettingsEditor.cpp Source/editor/settings/SettingsEditor.h
+
+        Source/editor/style/Colours.h
+        Source/editor/style/DragActionTolerances.h
 
         Source/editor/EditorState.cpp Source/editor/EditorState.h
         Source/editor/LArpLookAndFeel.cpp Source/editor/LArpLookAndFeel.h

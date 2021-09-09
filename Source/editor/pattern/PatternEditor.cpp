@@ -20,12 +20,10 @@
 #include "PatternEditor.h"
 #include "PatternEditorView.h"
 #include "../style/Colours.h"
-
-const int NOTE_RESIZE_TOLERANCE = 8;
-const int LINE_RESIZE_TOLERANCE = 5;
+#include "../style/DragActionTolerances.h"
 
 
-PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec) :
+PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView &ec) :
         processor(p),
         state(e),
         view(ec)
@@ -229,9 +227,9 @@ void PatternEditor::mouseWheelMove(const juce::MouseEvent &event, const juce::Mo
     if (event.mods.isCtrlDown()) {
         // Zooming
         if (event.mods.isShiftDown()) {
-            view->zoomPattern(0, wheel.deltaY);
+            view.zoomPattern(0, wheel.deltaY);
         } else {
-            view->zoomPattern(wheel.deltaY, 0);
+            view.zoomPattern(wheel.deltaY, 0);
         }
     } else if (event.mods.isAltDown()) {
         // Note velocity
@@ -252,9 +250,9 @@ void PatternEditor::mouseWheelMove(const juce::MouseEvent &event, const juce::Mo
     } else {
         // Scrolling
         if (event.mods.isShiftDown()) {
-            view->scrollPattern(wheel.deltaY, wheel.deltaX);
+            view.scrollPattern(wheel.deltaY, wheel.deltaX);
         } else {
-            view->scrollPattern(wheel.deltaX, wheel.deltaY);
+            view.scrollPattern(wheel.deltaX, wheel.deltaY);
         }
     }
 }
@@ -337,7 +335,7 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
         auto &note = notes[i];
         auto noteRect = getRectangleForNote(note);
         if (noteRect.contains(event.x, event.y)) {
-            if (event.x <= (noteRect.getX() + NOTE_RESIZE_TOLERANCE)) {
+            if (event.x <= (noteRect.getX() + Style::NOTE_RESIZE_TOLERANCE)) {
                 mouseCursor = juce::MouseCursor::LeftEdgeResizeCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, notes, event);
@@ -347,7 +345,7 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
                     setTooltip("Drag to change the selected notes' size");
                 }
                 return;
-            } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - NOTE_RESIZE_TOLERANCE)) {
+            } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - Style::NOTE_RESIZE_TOLERANCE)) {
                 mouseCursor = juce::MouseCursor::RightEdgeResizeCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, notes, event);
@@ -374,8 +372,8 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
     {
         if (!selectedNotes.empty()) {
             auto startX = pulseToX(timeSelectionStart);
-            auto startMinX = startX - LINE_RESIZE_TOLERANCE;
-            auto startMaxX = startX + LINE_RESIZE_TOLERANCE;
+            auto startMinX = startX - Style::LINE_RESIZE_TOLERANCE;
+            auto startMaxX = startX + Style::LINE_RESIZE_TOLERANCE;
             if (event.x >= startMinX && event.x <= startMaxX) {
                 setTooltip("Drag to stretch the selection");
                 mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
@@ -385,8 +383,8 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
             }
 
             auto endX = pulseToX(timeSelectionEnd);
-            auto endMinX = endX - LINE_RESIZE_TOLERANCE;
-            auto endMaxX = endX + LINE_RESIZE_TOLERANCE;
+            auto endMinX = endX - Style::LINE_RESIZE_TOLERANCE;
+            auto endMaxX = endX + Style::LINE_RESIZE_TOLERANCE;
             if (event.x >= endMinX && event.x <= endMaxX) {
                 setTooltip("Drag to stretch the selection");
                 mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
@@ -399,8 +397,8 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
 
     {
         auto loopStartLine = pulseToX(processor.getPattern().loopStart);
-        auto loopMinX = loopStartLine - LINE_RESIZE_TOLERANCE;
-        auto loopMaxX = loopStartLine + LINE_RESIZE_TOLERANCE;
+        auto loopMinX = loopStartLine - Style::LINE_RESIZE_TOLERANCE;
+        auto loopMaxX = loopStartLine + Style::LINE_RESIZE_TOLERANCE;
         if (event.x >= loopMinX && event.x <= loopMaxX) {
             setTooltip("Drag to resize the loop");
             mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
@@ -411,8 +409,8 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
 
     {
         auto loopEndLine = pulseToX(processor.getPattern().loopEnd);
-        auto loopMinX = loopEndLine - LINE_RESIZE_TOLERANCE;
-        auto loopMaxX = loopEndLine + LINE_RESIZE_TOLERANCE;
+        auto loopMinX = loopEndLine - Style::LINE_RESIZE_TOLERANCE;
+        auto loopMaxX = loopEndLine + Style::LINE_RESIZE_TOLERANCE;
         if (event.x >= loopMinX && event.x <= loopMaxX) {
             setTooltip("Drag to resize the loop");
             mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
@@ -508,7 +506,7 @@ void PatternEditor::mouseDown(const juce::MouseEvent &event) {
 
     if (!event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && event.mods.isMiddleButtonDown()) {
         if (!event.mods.isAltDown() && !event.mods.isShiftDown() && !event.mods.isCtrlDown()) {
-            view->resetPatternOffset();
+            view.resetPatternOffset();
             return;
         }
 
@@ -571,27 +569,6 @@ bool PatternEditor::keyPressed(const juce::KeyPress &key) {
     }
 
     return false;
-}
-
-
-void PatternEditor::loopStartResize(const juce::MouseEvent &event) {
-    std::scoped_lock lock(processor.getPattern().getMutex());
-
-    auto &pattern = processor.getPattern();
-    pattern.loopStart = juce::jmin(pattern.loopEnd, juce::jmax(int64_t(0), xToPulse(event.x)));
-    processor.buildPattern();
-    view->repaint();
-    mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
-}
-
-void PatternEditor::loopEndResize(const juce::MouseEvent &event) {
-    std::scoped_lock lock(processor.getPattern().getMutex());
-
-    auto &pattern = processor.getPattern();
-    pattern.loopEnd = juce::jmax(pattern.loopStart, xToPulse(event.x));
-    processor.buildPattern();
-    view->repaint();
-    mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
 }
 
 
@@ -725,8 +702,6 @@ void PatternEditor::noteCreate(const juce::MouseEvent &event) {
     processor.buildPattern();
     repaintNotes();
 
-    mouseAnyMove(event);
-
     if (event.mods.isShiftDown()) {
         dragAction.noteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, index, notes, event, false);
     } else {
@@ -759,7 +734,6 @@ void PatternEditor::noteDelete(const juce::MouseEvent &event) {
         repaintSelectedNotes();
     }
 
-    mouseAnyMove(event);
     updateMouseCursor();
 }
 
@@ -1000,58 +974,6 @@ bool PatternEditor::getNoteSelectionBorder(int64_t& out_start, int64_t& out_end)
     auto& pattern = processor.getPattern();
     std::scoped_lock lock(pattern.getMutex());
     return getNoteSelectionBorder(selectedNotes, pattern.getNotes(), out_start, out_end);
-}
-
-int64_t PatternEditor::snapPulse(int64_t pulse, bool floor) {
-    if (!snapEnabled) {
-        return pulse;
-    }
-
-    auto &pattern = processor.getPattern();
-    auto timebase = pattern.getTimebase();
-    double doubleDivisor = state.divisor;
-
-    double base = (static_cast<double>(pulse) * doubleDivisor) / timebase;
-    auto roundedBase = static_cast<int64_t>((floor) ? std::floor(base) : std::round(base));
-
-    return roundedBase * (timebase / state.divisor);
-}
-
-
-int64_t PatternEditor::xToPulse(int x, bool snap, bool floor) {
-    auto &pattern = processor.getPattern();
-    auto timebase = pattern.getTimebase();
-    double pixelsPerBeat = state.pixelsPerBeat;
-
-    auto pulse = static_cast<int64_t>(
-            std::round(((x + state.offsetX) / pixelsPerBeat) * timebase));
-
-    return juce::jmax(static_cast<int64_t>(0), (snap) ? snapPulse(pulse, floor) : pulse);
-}
-
-int PatternEditor::yToNote(int y) {
-    double pixelsPerNote = state.pixelsPerNote;
-    return static_cast<int>(std::ceil(((getHeight() / 2.0) - (y + state.offsetY)) / pixelsPerNote - 0.5));
-}
-
-int PatternEditor::pulseToX(int64_t pulse) {
-    return pulseToAbsX(pulse) - state.offsetX;
-}
-
-int PatternEditor::pulseToAbsX(int64_t pulse) {
-    auto &pattern = processor.getPattern();
-    auto pixelsPerBeat = state.pixelsPerBeat;
-
-    return juce::jmax(0, juce::roundToInt((static_cast<double>(pulse) / static_cast<double>(pattern.getTimebase())) * pixelsPerBeat) + 1);
-}
-
-int PatternEditor::noteToY(int note) {
-    return noteToAbsY(note) - state.offsetY;
-}
-
-int PatternEditor::noteToAbsY(int note) {
-    double pixelsPerNote = state.pixelsPerNote;
-    return juce::roundToInt(std::floor((getHeight() / 2.0) - (note + 0.5) * pixelsPerNote)) + 1;
 }
 
 void PatternEditor::DragAction::basicDragAction(uint8_t type) {
