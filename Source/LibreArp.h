@@ -298,12 +298,12 @@ private:
     /**
      * Whether the plugin should transpose octaves upon "note overflow".
      */
-    juce::AudioParameterBool *octaves;
+    juce::AudioParameterBool octaves;
 
     /**
      * Whether the plugin is using the velocity of input notes.
      */
-    juce::AudioParameterBool *usingInputVelocity;
+    juce::AudioParameterBool usingInputVelocity;
 
 
 

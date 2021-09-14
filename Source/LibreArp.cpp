@@ -51,31 +51,29 @@ bool operator==(const LibreArp::InputNote &a, const LibreArp::InputNote &b) {
     return a.note == b.note;
 }
 
-
+// NOTE: The plugin technically should not need any audio channels, but there are two things:
+//        - ever since migration to JUCE 6, without any channels, it reported numSamples of 0
+//        - Renoise does not accept our MIDI output when there is no output channel
 LibreArp::LibreArp()
-    // NOTE: The plugin technically does not need any audio channels, but there are two things:
-    //        - ever since migration to JUCE 6, without any channels, it reported numSamples of 0
-    //        - Renoise does not accept our MIDI output when there is no output channel
-    : AudioProcessor(BusesProperties()
-            .withInput("Input", juce::AudioChannelSet::mono(), true)
-            .withOutput("Output", juce::AudioChannelSet::mono(), true)),
-      silenceEndedTime(juce::Time::currentTimeMillis())
+        : AudioProcessor(BusesProperties()
+                                 .withInput("Input", juce::AudioChannelSet::mono(), true)
+                                 .withOutput("Output", juce::AudioChannelSet::mono(), true)),
+          octaves(
+                  "octaves",
+                  "Octaves",
+                  true,
+                  "Overflow octave transposition"),
+          usingInputVelocity(
+                  "usingInputVelocity",
+                  "Input velocity",
+                  true,
+                  "Use input note velocity"),
+          silenceEndedTime(juce::Time::currentTimeMillis())
 {
-    this->silenceEndedTime = juce::Time::currentTimeMillis();
+    addParameter(&octaves);
+    addParameter(&usingInputVelocity);
 
     globals.markChanged();
-
-    addParameter(octaves = new juce::AudioParameterBool(
-            "octaves",
-            "Octaves",
-            true,
-            "Overflow octave transposition"));
-
-    addParameter(usingInputVelocity = new juce::AudioParameterBool(
-            "usingInputVelocity",
-            "Input velocity",
-            true,
-            "Use input note velocity"));
 }
 
 LibreArp::~LibreArp() = default;
@@ -240,10 +238,10 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
                             }
 
                             auto note = inputNotes[index].note;
-                            auto velocity = (usingInputVelocity->get()) ?
+                            auto velocity = (usingInputVelocity.get()) ?
                                     inputNotes[index].velocity * data.velocity * 1.25 :
                                     data.velocity;
-                            if (octaves->get()) {
+                            if (octaves.get()) {
                                 auto octave = data.noteNumber / inputNotes.size();
                                 if (data.noteNumber < 0) {
                                     octave--;
@@ -297,8 +295,8 @@ juce::ValueTree LibreArp::toValueTree() {
     tree.appendChild(this->editorState.toValueTree(), nullptr);
     tree.setProperty(TREEID_LOOP_RESET, this->loopReset.load(), nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
-    tree.setProperty(TREEID_OCTAVES, this->octaves->get(), nullptr);
-    tree.setProperty(TREEID_INPUT_VELOCITY, this->usingInputVelocity->get(), nullptr);
+    tree.setProperty(TREEID_OCTAVES, this->octaves.get(), nullptr);
+    tree.setProperty(TREEID_INPUT_VELOCITY, this->usingInputVelocity.get(), nullptr);
     tree.setProperty(TREEID_NUM_INPUT_NOTES, this->octaveSize, nullptr);
     tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
     tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
@@ -329,10 +327,10 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
                 this->loopReset = tree.getProperty(TREEID_LOOP_RESET);
             }
             if (tree.hasProperty(TREEID_OCTAVES)) {
-                *this->octaves = tree.getProperty(TREEID_OCTAVES);
+                this->octaves = tree.getProperty(TREEID_OCTAVES);
             }
             if (tree.hasProperty(TREEID_INPUT_VELOCITY)) {
-                *this->usingInputVelocity = tree.getProperty(TREEID_INPUT_VELOCITY);
+                this->usingInputVelocity = tree.getProperty(TREEID_INPUT_VELOCITY);
             }
             if (tree.hasProperty(TREEID_NUM_INPUT_NOTES)) {
                 this->octaveSize = tree.getProperty(TREEID_NUM_INPUT_NOTES);
@@ -386,19 +384,19 @@ double LibreArp::getLoopReset() const {
 
 
 bool LibreArp::isTransposingOctaves() {
-    return this->octaves->get();
+    return this->octaves.get();
 }
 
 void LibreArp::setTransposingOctaves(bool value) {
-    *this->octaves = value;
+    this->octaves = value;
 }
 
 bool LibreArp::isUsingInputVelocity() {
-    return this->usingInputVelocity->get();
+    return this->usingInputVelocity.get();
 }
 
 void LibreArp::setUsingInputVelocity(bool value) {
-    *this->usingInputVelocity = value;
+    this->usingInputVelocity = value;
 }
 
 
