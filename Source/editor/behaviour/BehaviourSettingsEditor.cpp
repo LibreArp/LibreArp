@@ -41,6 +41,13 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     octavesToggle.setTooltip("Enables transposition by octaves when hitting notes that are out of bounds");
     octavesToggle.onStateChange = [this] {
         processor.setTransposingOctaves(octavesToggle.getToggleState());
+        smartOctavesToggle.setEnabled(octavesToggle.getToggleState());
+    };
+
+    smartOctavesToggle.setButtonText("Smart octaves");
+    smartOctavesToggle.setTooltip("Enables transposition by the number of octaves spanned by the input notes");
+    smartOctavesToggle.onStateChange = [this] {
+        processor.setUsingSmartOctaves(smartOctavesToggle.getToggleState());
     };
 
     usingInputVelocityToggle.setButtonText("Use input note velocity");
@@ -77,6 +84,7 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     addAndMakeVisible(midiOutChannelLabel);
     addAndMakeVisible(midiOutChannelSlider);
     addAndMakeVisible(octavesToggle);
+    addAndMakeVisible(smartOctavesToggle);
     addAndMakeVisible(usingInputVelocityToggle);
     addAndMakeVisible(nonPlayingModeComboBox);
     addAndMakeVisible(nonPlayingModeLabel);
@@ -95,6 +103,8 @@ void BehaviourSettingsEditor::updateSettingsValues() {
     midiInChannelSlider.setValue(processor.getInputMidiChannel(), juce::NotificationType::dontSendNotification);
     midiOutChannelSlider.setValue(processor.getOutputMidiChannel(), juce::NotificationType::dontSendNotification);
     octavesToggle.setToggleState(processor.isTransposingOctaves(), juce::NotificationType::dontSendNotification);
+    smartOctavesToggle.setToggleState(processor.isUsingSmartOctaves(), juce::NotificationType::dontSendNotification);
+    smartOctavesToggle.setEnabled(processor.isTransposingOctaves());
     usingInputVelocityToggle.setToggleState(processor.isUsingInputVelocity(), juce::NotificationType::dontSendNotification);
     nonPlayingModeComboBox.setSelectedId(static_cast<int>(processor.getNonPlayingModeOverride()));
 }
@@ -123,7 +133,7 @@ void BehaviourSettingsEditor::updateLayout() {
     area.removeFromTop(8);
 
     octavesToggle.setBounds(area.removeFromTop(24));
-
+    smartOctavesToggle.setBounds(area.removeFromTop(24));
     usingInputVelocityToggle.setBounds(area.removeFromTop(24));
 
     area.removeFromTop(4);

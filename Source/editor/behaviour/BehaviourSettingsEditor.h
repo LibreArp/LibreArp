@@ -34,6 +34,7 @@ private:
     LibreArp &processor;
 
     juce::ToggleButton octavesToggle;
+    juce::ToggleButton smartOctavesToggle;
     juce::ToggleButton usingInputVelocityToggle;
 
     juce::Slider midiInChannelSlider;

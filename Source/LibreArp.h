@@ -47,6 +47,7 @@ public:
     static const juce::Identifier TREEID_LOOP_RESET;
     static const juce::Identifier TREEID_PATTERN_XML;
     static const juce::Identifier TREEID_OCTAVES;
+    static const juce::Identifier TREEID_SMART_OCTAVES;
     static const juce::Identifier TREEID_INPUT_VELOCITY;
     static const juce::Identifier TREEID_NUM_INPUT_NOTES;
     static const juce::Identifier TREEID_OUTPUT_MIDI_CHANNEL;
@@ -170,6 +171,10 @@ public:
     bool isTransposingOctaves();
 
     void setTransposingOctaves(bool value);
+
+    bool isUsingSmartOctaves();
+
+    void setUsingSmartOctaves(bool value);
 
     bool isUsingInputVelocity();
 
@@ -301,6 +306,11 @@ private:
     juce::AudioParameterBool octaves;
 
     /**
+     * Whether the plugin should transpose by multiple octaves when the input spans multiple octaves.
+     */
+    juce::AudioParameterBool smartOctaves;
+
+    /**
      * Whether the plugin is using the velocity of input notes.
      */
     juce::AudioParameterBool usingInputVelocity;
@@ -369,6 +379,8 @@ private:
      * The timestamp of the last debug playback reset.
      */
     int64_t silenceEndedTime;
+
+    int smartOctaveNumber = 1;
 
 
     /**

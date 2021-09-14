@@ -22,11 +22,14 @@ const juce::Identifier LibreArp::TREEID_LIBREARP = "libreArpPlugin"; // NOLINT
 const juce::Identifier LibreArp::TREEID_LOOP_RESET = "loopReset"; // NOLINT
 const juce::Identifier LibreArp::TREEID_PATTERN_XML = "patternXml"; // NOLINT
 const juce::Identifier LibreArp::TREEID_OCTAVES = "octaves"; // NOLINT
+const juce::Identifier LibreArp::TREEID_SMART_OCTAVES = "smartOctaves"; // NOLINT
 const juce::Identifier LibreArp::TREEID_INPUT_VELOCITY = "usingInputVelocity"; // NOLINT
 const juce::Identifier LibreArp::TREEID_NUM_INPUT_NOTES = "numInputNotes"; // NOLINT
 const juce::Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = "outputMidiChannel"; // NOLINT
 const juce::Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = "inputMidiChannel"; // NOLINT
 const juce::Identifier LibreArp::TREEID_NON_PLAYING_MODE_OVERRIDE = "nonPlayingModeOverride"; // NOLINT
+
+static const int NOTES_IN_OCTAVE = 12;
 
 
 LibreArp::InputNote::InputNote(int note, double velocity) : note(note), velocity(velocity) {}
@@ -63,6 +66,11 @@ LibreArp::LibreArp()
                   "Octaves",
                   true,
                   "Overflow octave transposition"),
+          smartOctaves(
+                  "smartOctaves",
+                  "Smart octaves",
+                  true,
+                  "Transpose by the number of octaves spanned by the input notes"),
           usingInputVelocity(
                   "usingInputVelocity",
                   "Input velocity",
@@ -71,6 +79,7 @@ LibreArp::LibreArp()
           silenceEndedTime(juce::Time::currentTimeMillis())
 {
     addParameter(&octaves);
+    addParameter(&smartOctaves);
     addParameter(&usingInputVelocity);
 
     globals.markChanged();
@@ -241,12 +250,14 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
                             auto velocity = (usingInputVelocity.get()) ?
                                     inputNotes[index].velocity * data.velocity * 1.25 :
                                     data.velocity;
-                            if (octaves.get()) {
+                            if (octaves) {
                                 auto octave = data.noteNumber / inputNotes.size();
                                 if (data.noteNumber < 0) {
                                     octave--;
                                 }
-                                note += octave * 12;
+                                note += (smartOctaves)
+                                        ? octave * smartOctaveNumber * NOTES_IN_OCTAVE
+                                        : octave * NOTES_IN_OCTAVE;
                             }
 
                             if (juce::isPositiveAndBelow(note, 128) && data.lastNote.noteNumber != note) {
@@ -296,6 +307,7 @@ juce::ValueTree LibreArp::toValueTree() {
     tree.setProperty(TREEID_LOOP_RESET, this->loopReset.load(), nullptr);
     tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
     tree.setProperty(TREEID_OCTAVES, this->octaves.get(), nullptr);
+    tree.setProperty(TREEID_SMART_OCTAVES, this->smartOctaves.get(), nullptr);
     tree.setProperty(TREEID_INPUT_VELOCITY, this->usingInputVelocity.get(), nullptr);
     tree.setProperty(TREEID_NUM_INPUT_NOTES, this->octaveSize, nullptr);
     tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
@@ -328,6 +340,12 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
             }
             if (tree.hasProperty(TREEID_OCTAVES)) {
                 this->octaves = tree.getProperty(TREEID_OCTAVES);
+            }
+            if (tree.hasProperty(TREEID_SMART_OCTAVES)) {
+                this->smartOctaves = tree.getProperty(TREEID_SMART_OCTAVES);
+            } else {
+                // Backwards compatibility: do not change behaviour of old instances
+                this->smartOctaves = false;
             }
             if (tree.hasProperty(TREEID_INPUT_VELOCITY)) {
                 this->usingInputVelocity = tree.getProperty(TREEID_INPUT_VELOCITY);
@@ -384,15 +402,23 @@ double LibreArp::getLoopReset() const {
 
 
 bool LibreArp::isTransposingOctaves() {
-    return this->octaves.get();
+    return this->octaves;
 }
 
 void LibreArp::setTransposingOctaves(bool value) {
     this->octaves = value;
 }
 
+bool LibreArp::isUsingSmartOctaves() {
+    return this->smartOctaves;
+}
+
+void LibreArp::setUsingSmartOctaves(bool value) {
+    this->smartOctaves = value;
+}
+
 bool LibreArp::isUsingInputVelocity() {
-    return this->usingInputVelocity.get();
+    return this->usingInputVelocity;
 }
 
 void LibreArp::setUsingInputVelocity(bool value) {
@@ -496,6 +522,7 @@ Updater::UpdateInfo& LibreArp::getLastUpdateInfo() {
 
 
 void LibreArp::processInputMidi(juce::MidiBuffer &inMidi, bool isPlaying) {
+    bool inputNotesChanged = false;
     int sample;
     juce::MidiBuffer outMidi;
 
@@ -507,9 +534,11 @@ void LibreArp::processInputMidi(juce::MidiBuffer &inMidi, bool isPlaying) {
             if (message.isNoteOn()) {
                 inputNotes.add(InputNote(message.getNoteNumber(), message.getVelocity() / 127.0));
                 processed = true;
+                inputNotesChanged = true;
             } else if (message.isNoteOff()) {
                 inputNotes.removeValue(InputNote(message.getNoteNumber()));
                 processed = true;
+                inputNotesChanged = true;
             }
 
             if (!processed || (!isPlaying && getNonPlayingMode() == NonPlayingMode::Value::PASSTHROUGH)) {
@@ -524,6 +553,10 @@ void LibreArp::processInputMidi(juce::MidiBuffer &inMidi, bool isPlaying) {
 
             outMidi.addEvent(message, sample);
         }
+    }
+
+    if (inputNotesChanged && !inputNotes.isEmpty()) {
+        smartOctaveNumber = 1 + (inputNotes.getLast().note - inputNotes.getFirst().note) / NOTES_IN_OCTAVE;
     }
 
     inMidi.swapWith(outMidi);
