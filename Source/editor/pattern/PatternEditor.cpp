@@ -131,7 +131,7 @@ void PatternEditor::paint(juce::Graphics &g) {
 
     // Draw notes
     auto &notes = pattern.getNotes();
-    for (unsigned long i = 0; i < notes.size(); i++) {
+    for (size_t i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
         juce::Rectangle<int> noteRect = getRectangleForNote(note);
 

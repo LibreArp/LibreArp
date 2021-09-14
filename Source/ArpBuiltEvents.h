@@ -52,12 +52,12 @@ public:
         /**
          * The indices of on-data.
          */
-        std::set<unsigned long> ons;
+        std::set<size_t> ons;
 
         /**
          * The indices of off-data.
          */
-        std::set<unsigned long> offs;
+        std::set<size_t> offs;
     };
 
 
