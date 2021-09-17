@@ -39,8 +39,11 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
         presetChooser.launchAsync(
                 Flags::openMode | Flags::canSelectFiles,
                 [this](auto& chooser) {
-                    processor.loadPatternFromFile(chooser.getResult());
-                    repaint();
+                    auto results = chooser.getResults();
+                    if (!results.isEmpty() && results[0].existsAsFile()) {
+                        processor.loadPatternFromFile(results[0]);
+                        repaint();
+                    }
                 });
     };
     addAndMakeVisible(loadButton);
@@ -51,7 +54,10 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
         presetChooser.launchAsync(
                 Flags::saveMode | Flags::canSelectFiles | Flags::warnAboutOverwriting,
                 [this](auto& chooser) {
-                    processor.getPattern().toFile(chooser.getResult());
+                    auto results = chooser.getResults();
+                    if (!results.isEmpty()) {
+                        processor.getPattern().toFile(results[0]);
+                    }
                 });
     };
     addAndMakeVisible(saveButton);
