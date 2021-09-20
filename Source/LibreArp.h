@@ -49,6 +49,7 @@ public:
     static const juce::Identifier TREEID_OCTAVES;
     static const juce::Identifier TREEID_SMART_OCTAVES;
     static const juce::Identifier TREEID_INPUT_VELOCITY;
+    static const juce::Identifier TREEID_SWING;
     static const juce::Identifier TREEID_NUM_INPUT_NOTES;
     static const juce::Identifier TREEID_OUTPUT_MIDI_CHANNEL;
     static const juce::Identifier TREEID_INPUT_MIDI_CHANNEL;
@@ -241,6 +242,16 @@ public:
      */
     void setInputMidiChannel(int channel);
 
+    /**
+     * Gets the current swing amount value.
+     */
+    float getSwing() const;
+
+    /**
+     * Sets the current swing amount value. Should be `0.0` to `1.0`.
+     */
+    void setSwing(float value);
+
     NonPlayingMode::Value getNonPlayingModeOverride() const;
 
     void setNonPlayingModeOverride(NonPlayingMode::Value nonPlayingModeOverride);
@@ -315,6 +326,16 @@ private:
      */
     juce::AudioParameterBool usingInputVelocity;
 
+
+    /**
+     * The amount of realtime swing applied to the arp pattern.
+     */
+    juce::AudioParameterFloat swing;
+
+    /**
+     * The value of `swing` in the last processed block.
+     */
+    float lastSwing = 0.0f;
 
 
     /**
@@ -443,6 +464,11 @@ private:
      * @return the next time of the event
      */
     int64_t nextTime(ArpBuiltEvents::Event& event, int64_t blockStartPosition, int64_t blockEndPosition) const;
+
+    /**
+     * Calculates a new position value with swing applied.
+     */
+    double applySwing(double position, float swingAmount) const;
 };
 
 bool operator> (const LibreArp::InputNote &a, const LibreArp::InputNote &b);

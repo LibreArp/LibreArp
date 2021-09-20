@@ -55,6 +55,9 @@ private:
     juce::Slider loopResetSlider;
     juce::Label loopResetSliderLabel;
 
+    juce::Slider swingSlider;
+    juce::Label swingSliderLabel;
+
     PatternEditor editor;
     BeatBar beatBar;
 

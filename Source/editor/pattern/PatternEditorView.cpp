@@ -93,6 +93,26 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     snapSliderLabel.setText("Snap:", juce::NotificationType::dontSendNotification);
     snapSliderLabel.setJustificationType(juce::Justification::centredRight);
     addAndMakeVisible(snapSliderLabel);
+
+    swingSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
+    swingSlider.setRange(0.0, 1.0);
+    swingSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, true, 32, 24);
+    swingSlider.textFromValueFunction = [] (double value) {
+        std::stringstream sstream;
+        sstream.setf(std::ios::fixed);
+        sstream.precision(2);
+        sstream << value;
+        return sstream.str();
+    };
+    swingSlider.setValue(processor.getSwing());
+    swingSlider.onValueChange = [this] {
+        processor.setSwing(static_cast<float>(swingSlider.getValue()));
+    };
+    addAndMakeVisible(swingSlider);
+
+    swingSliderLabel.setText("Swing:", juce::NotificationType::dontSendNotification);
+    swingSliderLabel.setJustificationType(juce::Justification::centredRight);
+    addAndMakeVisible(swingSliderLabel);
 }
 
 void PatternEditorView::resized() {
@@ -143,6 +163,8 @@ void PatternEditorView::updateLayout() {
     loopResetSliderLabel.setBounds(
             toolBarArea.removeFromLeft(8 + loopResetSliderLabel.getFont().getStringWidth(loopResetSliderLabel.getText())));
     loopResetSlider.setBounds(toolBarArea.removeFromLeft(96));
+    swingSliderLabel.setBounds(toolBarArea.removeFromLeft(24 + swingSliderLabel.getFont().getStringWidth(swingSliderLabel.getText())));
+    swingSlider.setBounds(toolBarArea.removeFromLeft(128));
     snapSlider.setBounds(toolBarArea.removeFromRight(96));
     snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
 
@@ -156,4 +178,6 @@ void PatternEditorView::updateLayout() {
 
     beatBar.setBounds(area.removeFromTop(20));
     editor.setBounds(area);
+
+    swingSlider.setValue(processor.getSwing());
 }

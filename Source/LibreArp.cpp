@@ -24,6 +24,7 @@ const juce::Identifier LibreArp::TREEID_PATTERN_XML = "patternXml"; // NOLINT
 const juce::Identifier LibreArp::TREEID_OCTAVES = "octaves"; // NOLINT
 const juce::Identifier LibreArp::TREEID_SMART_OCTAVES = "smartOctaves"; // NOLINT
 const juce::Identifier LibreArp::TREEID_INPUT_VELOCITY = "usingInputVelocity"; // NOLINT
+const juce::Identifier LibreArp::TREEID_SWING = "swing"; // NOLINT
 const juce::Identifier LibreArp::TREEID_NUM_INPUT_NOTES = "numInputNotes"; // NOLINT
 const juce::Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = "outputMidiChannel"; // NOLINT
 const juce::Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = "inputMidiChannel"; // NOLINT
@@ -76,11 +77,18 @@ LibreArp::LibreArp()
                   "Input velocity",
                   true,
                   "Use input note velocity"),
+          swing(
+                  "swing",
+                  "Swing",
+                  0.0f,
+                  1.0f,
+                  0.0f),
           silenceEndedTime(juce::Time::currentTimeMillis())
 {
     addParameter(&octaves);
     addParameter(&smartOctaves);
     addParameter(&usingInputVelocity);
+    addParameter(&swing);
 
     globals.markChanged();
 }
@@ -205,8 +213,11 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = getSampleRate() * pulseLength;
 
-        auto blockStartPosition = static_cast<int64_t>(std::floor(cpi.ppqPosition * timebase));
-        auto blockEndPosition = blockStartPosition + static_cast<int64_t>(std::ceil(numSamples / pulseSamples));
+        auto baseBlockStartPosition = cpi.ppqPosition * timebase;
+        auto baseBlockEndPosition = baseBlockStartPosition + numSamples / pulseSamples;
+
+        auto blockStartPosition = static_cast<int64_t>(std::floor(applySwing(baseBlockStartPosition, lastSwing)));
+        auto blockEndPosition = static_cast<int64_t>(std::ceil(applySwing(baseBlockEndPosition, swing)));
 
         if (stopScheduled) {
             this->stopAll(midi);
@@ -289,6 +300,7 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
     }
 
     this->lastNumInputNotes = this->inputNotes.size();
+    this->lastSwing = this->swing;
 }
 
 //==============================================================================
@@ -309,6 +321,7 @@ juce::ValueTree LibreArp::toValueTree() {
     tree.setProperty(TREEID_OCTAVES, this->octaves.get(), nullptr);
     tree.setProperty(TREEID_SMART_OCTAVES, this->smartOctaves.get(), nullptr);
     tree.setProperty(TREEID_INPUT_VELOCITY, this->usingInputVelocity.get(), nullptr);
+    tree.setProperty(TREEID_SWING, this->swing.get(), nullptr);
     tree.setProperty(TREEID_NUM_INPUT_NOTES, this->octaveSize, nullptr);
     tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
     tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
@@ -349,6 +362,10 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
             }
             if (tree.hasProperty(TREEID_INPUT_VELOCITY)) {
                 this->usingInputVelocity = tree.getProperty(TREEID_INPUT_VELOCITY);
+            }
+            if (tree.hasProperty(TREEID_SWING)) {
+                this->swing = tree.getProperty(TREEID_SWING);
+                this->lastSwing = this->swing;
             }
             if (tree.hasProperty(TREEID_NUM_INPUT_NOTES)) {
                 this->octaveSize = tree.getProperty(TREEID_NUM_INPUT_NOTES);
@@ -489,6 +506,14 @@ void LibreArp::setInputMidiChannel(int channel) {
     this->inputMidiChannel = channel;
     this->stopAll();
     this->inputNotes.clear();
+}
+
+float LibreArp::getSwing() const {
+    return this->swing;
+}
+
+void LibreArp::setSwing(float value) {
+    this->swing = value;
 }
 
 NonPlayingMode::Value LibreArp::getNonPlayingModeOverride() const {
@@ -638,6 +663,16 @@ int64_t LibreArp::nextTime(ArpBuiltEvents::Event& event, int64_t blockStartPosit
     }
 
     return result;
+}
+
+double LibreArp::applySwing(double position, float swingAmount) const {
+    if (swingAmount == 0.0) {
+        // The resulting modifier would be zero, anyway, so no need to calculate.
+        return position;
+    }
+
+    double swingFreq = (4 * M_PI) / events.timebase;
+    return position - sin(position * swingFreq) * (swingAmount / swingFreq);
 }
 
 [[maybe_unused]] // Used by JUCE plugin wrappers
