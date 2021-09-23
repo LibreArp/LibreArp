@@ -17,6 +17,7 @@
 
 #include "LibreArp.h"
 #include "editor/MainEditor.h"
+#include "util/MathConsts.h"
 
 const juce::Identifier LibreArp::TREEID_LIBREARP = "libreArpPlugin"; // NOLINT
 const juce::Identifier LibreArp::TREEID_LOOP_RESET = "loopReset"; // NOLINT
@@ -671,7 +672,7 @@ double LibreArp::applySwing(double position, float swingAmount) const {
         return position;
     }
 
-    double swingFreq = (4 * M_PI) / events.timebase;
+    double swingFreq = (4 * X_PI) / events.timebase;
     return position - sin(position * swingFreq) * (swingAmount / swingFreq);
 }
 

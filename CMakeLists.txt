@@ -83,6 +83,7 @@ target_sources(LibreArp
         Source/editor/MainEditor.cpp Source/editor/MainEditor.h
 
         Source/util/Defer.h
+        Source/util/MathConsts.h
 
         Source/ArpBuiltEvents.cpp Source/ArpBuiltEvents.h
         Source/ArpNote.cpp Source/ArpNote.h
