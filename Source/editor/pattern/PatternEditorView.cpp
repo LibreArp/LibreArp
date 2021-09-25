@@ -96,13 +96,14 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
 
     swingSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
     swingSlider.setRange(0.0, 1.0);
-    swingSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, true, 32, 24);
+    swingSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 42, 24);
     swingSlider.textFromValueFunction = [] (double value) {
         std::stringstream sstream;
-        sstream.setf(std::ios::fixed);
-        sstream.precision(2);
-        sstream << value;
+        sstream << static_cast<int>(round(value * 100.0)) << " %";
         return sstream.str();
+    };
+    swingSlider.valueFromTextFunction = [] (const juce::String& text) {
+        return text.getDoubleValue() / 100.0;
     };
     swingSlider.setValue(processor.getSwing());
     swingSlider.onValueChange = [this] {
@@ -170,11 +171,14 @@ void PatternEditorView::updateLayout() {
     auto area = getLocalBounds().reduced(8);
 
     auto toolBarArea = area.removeFromTop(24);
+
     loopResetSliderLabel.setBounds(
             toolBarArea.removeFromLeft(8 + loopResetSliderLabel.getFont().getStringWidth(loopResetSliderLabel.getText())));
     loopResetSlider.setBounds(toolBarArea.removeFromLeft(96));
-    swingSliderLabel.setBounds(toolBarArea.removeFromLeft(24 + swingSliderLabel.getFont().getStringWidth(swingSliderLabel.getText())));
+    toolBarArea.removeFromLeft(16);
+    swingSliderLabel.setBounds(toolBarArea.removeFromLeft(8 + swingSliderLabel.getFont().getStringWidth(swingSliderLabel.getText())));
     swingSlider.setBounds(toolBarArea.removeFromLeft(128));
+
     snapSlider.setBounds(toolBarArea.removeFromRight(96));
     snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
 
