@@ -61,6 +61,7 @@ private:
     PatternEditor editor;
     BeatBar beatBar;
 
+    void updateParameterValues();
     void updateLayout();
 };
 

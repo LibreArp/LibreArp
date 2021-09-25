@@ -21,13 +21,15 @@
 
 #include "../../LibreArp.h"
 
-class BehaviourSettingsEditor : public juce::Component {
+class BehaviourSettingsEditor : public juce::Component, public AudioUpdatable {
 public:
 
     explicit BehaviourSettingsEditor(LibreArp &p);
 
     void resized() override;
     void visibilityChanged() override;
+
+    void audioUpdate() override;
 
 private:
 

@@ -99,6 +99,12 @@ void BehaviourSettingsEditor::visibilityChanged() {
     updateLayout();
 }
 
+void BehaviourSettingsEditor::audioUpdate() {
+    if (isVisible()) {
+        updateSettingsValues();
+    }
+}
+
 void BehaviourSettingsEditor::updateSettingsValues() {
     midiInChannelSlider.setValue(processor.getInputMidiChannel(), juce::NotificationType::dontSendNotification);
     midiOutChannelSlider.setValue(processor.getOutputMidiChannel(), juce::NotificationType::dontSendNotification);

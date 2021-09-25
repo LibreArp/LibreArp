@@ -150,12 +150,22 @@ void PatternEditorView::resetPatternOffset() {
 
 void PatternEditorView::audioUpdate() {
     editor.audioUpdate();
+
+    if (isVisible()) {
+        updateParameterValues();
+    }
+}
+
+void PatternEditorView::updateParameterValues() {
+    swingSlider.setValue(processor.getSwing(), juce::NotificationType::dontSendNotification);
 }
 
 void PatternEditorView::updateLayout() {
     if (!isVisible()) {
         return;
     }
+
+    updateParameterValues();
 
     auto area = getLocalBounds().reduced(8);
 
@@ -178,6 +188,4 @@ void PatternEditorView::updateLayout() {
 
     beatBar.setBounds(area.removeFromTop(20));
     editor.setBounds(area);
-
-    swingSlider.setValue(processor.getSwing());
 }

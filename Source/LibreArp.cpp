@@ -285,14 +285,13 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
             }
         }
 
-        updateEditor();
-
         this->lastPosition = blockEndPosition;
         this->wasPlaying = true;
+        updateEditor();
     } else {
-        if (this->wasPlaying) {
-            updateEditor();
+        updateEditor();
 
+        if (this->wasPlaying) {
             this->stopAll(midi);
         }
 

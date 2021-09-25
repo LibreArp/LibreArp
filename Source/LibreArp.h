@@ -267,6 +267,10 @@ public:
 
     Updater::UpdateInfo &getLastUpdateInfo();
 
+    /**
+     * Whether the playhead was playing in the last block.
+     */
+    bool wasPlaying = false;
 
 
 private:
@@ -347,11 +351,6 @@ private:
      * The amount of beats after which the loop should reset.
      */
     std::atomic<double> loopReset = 0.0;
-
-    /**
-     * Whether the playhead was playing in the last block.
-     */
-    bool wasPlaying = false;
 
 
 

@@ -857,6 +857,10 @@ void PatternEditor::selectionStretch(int64_t selectionStart, int64_t selectionEn
 
 
 void PatternEditor::audioUpdate() {
+    if (!processor.wasPlaying) {
+        return;
+    }
+
     int oldPosition = lastPlayPositionX;
     int newPosition;
 
