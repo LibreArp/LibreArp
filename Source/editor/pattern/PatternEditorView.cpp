@@ -105,7 +105,7 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     swingSlider.valueFromTextFunction = [] (const juce::String& text) {
         return text.getDoubleValue() / 100.0;
     };
-    swingSlider.setValue(processor.getSwing());
+    swingSlider.setValue(0.555);
     swingSlider.onValueChange = [this] {
         processor.setSwing(static_cast<float>(swingSlider.getValue()));
     };
@@ -158,6 +158,8 @@ void PatternEditorView::audioUpdate() {
 }
 
 void PatternEditorView::updateParameterValues() {
+    loopResetSlider.setValue(processor.getLoopReset(), juce::NotificationType::dontSendNotification);
+    snapSlider.setValue(state.divisor, juce::NotificationType::dontSendNotification);
     swingSlider.setValue(processor.getSwing(), juce::NotificationType::dontSendNotification);
 }
 
