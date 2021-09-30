@@ -191,6 +191,7 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
         buildScheduled = false;
     }
 
+    // Input data processing
     juce::AudioPlayHead::CurrentPositionInfo cpi; // NOLINT
     if (getPlayHead() != nullptr) {
         getPlayHead()->getCurrentPosition(cpi);
@@ -209,14 +210,15 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
     this->timeSigNumerator = cpi.timeSigNumerator;
     this->timeSigDenominator = cpi.timeSigDenominator;
 
+    // Output generation
     if (cpi.isPlaying && !this->events.events.empty() && this->events.loopLength > 0) {
         auto timebase = this->events.timebase;
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = getSampleRate() * pulseLength;
 
+        // Current position in pattern-space
         auto baseBlockStartPosition = cpi.ppqPosition * timebase;
         auto baseBlockEndPosition = baseBlockStartPosition + numSamples / pulseSamples;
-
         auto blockStartPosition = static_cast<int64_t>(std::floor(applySwing(baseBlockStartPosition, lastSwing)));
         auto blockEndPosition = static_cast<int64_t>(std::ceil(applySwing(baseBlockEndPosition, swing)));
 
@@ -240,46 +242,50 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
                     offset = 0;
                 }
 
-                if (offset >= 0) {
-                    for (auto i : event.offs) {
-                        auto &data = events.data[i];
-                        if (data.lastNote.noteNumber >= 0) {
-                            midi.addEvent(juce::MidiMessage::noteOff(data.lastNote.outChannel, data.lastNote.noteNumber), offset);
-                            setNoteNotPlaying(data.lastNote.outChannel, data.lastNote.noteNumber);
-                            data.lastNote = ArpBuiltEvents::PlayingNote(-1, -1);
-                        }
+                if (offset < 0) continue; // The event is outside of the current block
+
+                // Generate note-off MIDI events
+                for (auto i : event.offs) {
+                    auto &data = events.data[i];
+                    if (data.lastNote.noteNumber >= 0) {
+                        midi.addEvent(juce::MidiMessage::noteOff(data.lastNote.outChannel, data.lastNote.noteNumber), offset);
+                        setNoteNotPlaying(data.lastNote.outChannel, data.lastNote.noteNumber);
+                        data.lastNote = ArpBuiltEvents::PlayingNote(-1, -1);
+                    }
+                }
+
+                if (inputNotes.isEmpty()) continue;
+
+                // Generate note-on MIDI events
+                for (auto i : event.ons) {
+                    auto &data = events.data[i];
+                    auto index = data.noteNumber % inputNotes.size();
+                    while (index < 0) {
+                        index += inputNotes.size();
                     }
 
-                    if (!inputNotes.isEmpty()) {
-                        for (auto i : event.ons) {
-                            auto &data = events.data[i];
-                            auto index = data.noteNumber % inputNotes.size();
-                            while (index < 0) {
-                                index += inputNotes.size();
-                            }
+                    auto note = inputNotes[index].note;
+                    auto velocity = (usingInputVelocity.get())
+                            ? inputNotes[index].velocity * data.velocity * 1.25
+                            : data.velocity;
 
-                            auto note = inputNotes[index].note;
-                            auto velocity = (usingInputVelocity.get()) ?
-                                    inputNotes[index].velocity * data.velocity * 1.25 :
-                                    data.velocity;
-                            if (octaves) {
-                                auto octave = data.noteNumber / inputNotes.size();
-                                if (data.noteNumber < 0) {
-                                    octave--;
-                                }
-                                note += (smartOctaves)
-                                        ? octave * smartOctaveNumber * NOTES_IN_OCTAVE
-                                        : octave * NOTES_IN_OCTAVE;
-                            }
-
-                            if (juce::isPositiveAndBelow(note, 128) && data.lastNote.noteNumber != note) {
-                                data.lastNote = ArpBuiltEvents::PlayingNote(note, outputMidiChannel);
-                                midi.addEvent(
-                                        juce::MidiMessage::noteOn(
-                                                data.lastNote.outChannel, data.lastNote.noteNumber, static_cast<float>(velocity)), offset);
-                                setNotePlaying(data.lastNote.outChannel, data.lastNote.noteNumber);
-                            }
+                    // Transposition
+                    if (octaves) {
+                        auto octave = data.noteNumber / inputNotes.size();
+                        if (data.noteNumber < 0) {
+                            octave--;
                         }
+                        note += (smartOctaves)
+                                ? octave * smartOctaveNumber * NOTES_IN_OCTAVE
+                                : octave * NOTES_IN_OCTAVE;
+                    }
+
+                    if (juce::isPositiveAndBelow(note, 128) && data.lastNote.noteNumber != note) {
+                        data.lastNote = ArpBuiltEvents::PlayingNote(note, outputMidiChannel);
+                        midi.addEvent(
+                                juce::MidiMessage::noteOn(
+                                        data.lastNote.outChannel, data.lastNote.noteNumber, static_cast<float>(velocity)), offset);
+                        setNotePlaying(data.lastNote.outChannel, data.lastNote.noteNumber);
                     }
                 }
             }
@@ -310,23 +316,6 @@ bool LibreArp::hasEditor() const {
 
 juce::AudioProcessorEditor *LibreArp::createEditor() {
     return new MainEditor(*this, editorState);
-}
-
-juce::ValueTree LibreArp::toValueTree() {
-    juce::ValueTree tree = juce::ValueTree(TREEID_LIBREARP);
-    tree.appendChild(this->pattern.toValueTree(), nullptr);
-    tree.appendChild(this->editorState.toValueTree(), nullptr);
-    tree.setProperty(TREEID_LOOP_RESET, this->loopReset.load(), nullptr);
-    tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
-    tree.setProperty(TREEID_OCTAVES, this->octaves.get(), nullptr);
-    tree.setProperty(TREEID_SMART_OCTAVES, this->smartOctaves.get(), nullptr);
-    tree.setProperty(TREEID_INPUT_VELOCITY, this->usingInputVelocity.get(), nullptr);
-    tree.setProperty(TREEID_SWING, this->swing.get(), nullptr);
-    tree.setProperty(TREEID_NUM_INPUT_NOTES, this->octaveSize, nullptr);
-    tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
-    tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
-    tree.setProperty(TREEID_NON_PLAYING_MODE_OVERRIDE, NonPlayingMode::toJuceString(this->nonPlayingModeOverride), nullptr);
-    return tree;
 }
 
 void LibreArp::getStateInformation(juce::MemoryBlock &destData) {
@@ -383,6 +372,23 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
             setPattern(loadedPattern);
         }
     }
+}
+
+juce::ValueTree LibreArp::toValueTree() {
+    juce::ValueTree tree = juce::ValueTree(TREEID_LIBREARP);
+    tree.appendChild(this->pattern.toValueTree(), nullptr);
+    tree.appendChild(this->editorState.toValueTree(), nullptr);
+    tree.setProperty(TREEID_LOOP_RESET, this->loopReset.load(), nullptr);
+    tree.setProperty(TREEID_PATTERN_XML, this->patternXml, nullptr);
+    tree.setProperty(TREEID_OCTAVES, this->octaves.get(), nullptr);
+    tree.setProperty(TREEID_SMART_OCTAVES, this->smartOctaves.get(), nullptr);
+    tree.setProperty(TREEID_INPUT_VELOCITY, this->usingInputVelocity.get(), nullptr);
+    tree.setProperty(TREEID_SWING, this->swing.get(), nullptr);
+    tree.setProperty(TREEID_NUM_INPUT_NOTES, this->octaveSize, nullptr);
+    tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
+    tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
+    tree.setProperty(TREEID_NON_PLAYING_MODE_OVERRIDE, NonPlayingMode::toJuceString(this->nonPlayingModeOverride), nullptr);
+    return tree;
 }
 
 void LibreArp::setPattern(const ArpPattern &newPattern) {
@@ -642,7 +648,6 @@ void LibreArp::updateEditor() {
         editor->triggerAsyncUpdate();
     }
 }
-
 
 
 int64_t LibreArp::nextTime(ArpBuiltEvents::Event& event, int64_t blockStartPosition, int64_t blockEndPosition) const {

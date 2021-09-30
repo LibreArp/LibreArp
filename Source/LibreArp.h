@@ -57,46 +57,27 @@ public:
 
 
     LibreArp();
-
     ~LibreArp() override;
 
-
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
-
     void releaseResources() override;
-
     bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
-
     void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
     void processBlock(juce::AudioBuffer<double> &, juce::MidiBuffer &) override;
-
-
     juce::AudioProcessorEditor *createEditor() override;
-
     bool hasEditor() const override;
-
-
     const juce::String getName() const override;
-
     bool acceptsMidi() const override;
-
     bool producesMidi() const override;
-
     bool isMidiEffect() const override;
-
     double getTailLengthSeconds() const override;
-
-
     int getNumPrograms() override;
-
     int getCurrentProgram() override;
-
     void setCurrentProgram(int index) override;
-
     const juce::String getProgramName(int index) override;
-
     void changeProgramName(int index, const juce::String &newName) override;
-
+    void getStateInformation(juce::MemoryBlock &destData) override;
+    void setStateInformation(const void *data, int sizeInBytes) override;
 
     /**
      * Serializes this processor into a ValueTree.
@@ -105,18 +86,10 @@ public:
      */
     juce::ValueTree toValueTree();
 
-    void getStateInformation(juce::MemoryBlock &destData) override;
-
-    void setStateInformation(const void *data, int sizeInBytes) override;
-
-
-
     /**
      * Schedules a stop of all currently playing notes. The stop will occur on the next block process.
      */
     void stopAll();
-
-
 
     /**
      * Sets the pattern to play.
@@ -132,7 +105,6 @@ public:
      */
     void loadPatternFromFile(const juce::File &file);
 
-
     /**
      * Schedules a pattern build for the processing of the next block.
      */
@@ -144,8 +116,6 @@ public:
      * @return the current pattern
      */
     ArpPattern &getPattern();
-
-
 
     /**
      * Gets the last position the processor has played, in pulses.
@@ -168,7 +138,6 @@ public:
      */
     double getLoopReset() const;
 
-
     bool isTransposingOctaves();
 
     void setTransposingOctaves(bool value);
@@ -180,7 +149,6 @@ public:
     bool isUsingInputVelocity();
 
     void setUsingInputVelocity(bool value);
-
 
     /**
      * Gets the last active number of input notes.
@@ -224,7 +192,6 @@ public:
      * @param channel the MIDI channel output notes are sent into. An integer from range 1-16.
      */
     void setOutputMidiChannel(int channel);
-
 
 
     /**
@@ -296,8 +263,6 @@ private:
      */
     EditorState editorState;
 
-
-
     /**
      * The current pattern.
      */
@@ -312,8 +277,6 @@ private:
      * The current pattern, built for playback.
      */
     ArpBuiltEvents events;
-
-
 
     /**
      * Whether the plugin should transpose octaves upon "note overflow".
@@ -330,7 +293,6 @@ private:
      */
     juce::AudioParameterBool usingInputVelocity;
 
-
     /**
      * The amount of realtime swing applied to the arp pattern.
      */
@@ -340,7 +302,6 @@ private:
      * The value of `swing` in the last processed block.
      */
     float lastSwing = 0.0f;
-
 
     /**
      * The last position the processor has played, in pulses.
@@ -352,8 +313,6 @@ private:
      */
     std::atomic<double> loopReset = 0.0;
 
-
-
     /**
      * Whether stopAll was called.
      */
@@ -363,7 +322,6 @@ private:
      * Whether buildPattern was called.
      */
     bool buildScheduled = false;
-
 
     /**
      * The number of input notes in the last block.
@@ -400,8 +358,10 @@ private:
      */
     int64_t silenceEndedTime;
 
+    /**
+     * Number of octaves spanned by the current input - rounded up.
+     */
     int smartOctaveNumber = 1;
-
 
     /**
      * The MIDI channel output notes are sent to.
@@ -439,6 +399,9 @@ private:
      */
     void stopAll(juce::MidiBuffer &midi);
 
+    /**
+     * Calculates the index of the bit representing the specified note.
+     */
     static int noteBitsetPosition(int channel, int noteNumber);
 
     bool isNotePlaying(int channel, int noteNumber);
@@ -448,11 +411,9 @@ private:
     void setNoteNotPlaying(int channel, int noteNumber);
 
     /**
-     * Sends an update to the editor.
+     * Sends an asynchronous update to the editor.
      */
     void updateEditor();
-
-
 
     /**
      * Calculates the next time of the specified event.
