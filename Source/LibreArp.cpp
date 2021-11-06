@@ -270,12 +270,12 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
                             : data.velocity;
 
                     // Transposition
-                    if (octaves) {
+                    if (*octaves) {
                         auto octave = data.noteNumber / inputNotes.size();
                         if (data.noteNumber < 0) {
                             octave--;
                         }
-                        note += (smartOctaves)
+                        note += (*smartOctaves)
                                 ? octave * smartOctaveNumber * NOTES_IN_OCTAVE
                                 : octave * NOTES_IN_OCTAVE;
                     }
@@ -425,7 +425,7 @@ double LibreArp::getLoopReset() const {
 
 
 bool LibreArp::isTransposingOctaves() {
-    return this->octaves;
+    return *this->octaves;
 }
 
 void LibreArp::setTransposingOctaves(bool value) {
@@ -433,7 +433,7 @@ void LibreArp::setTransposingOctaves(bool value) {
 }
 
 bool LibreArp::isUsingSmartOctaves() {
-    return this->smartOctaves;
+    return *this->smartOctaves;
 }
 
 void LibreArp::setUsingSmartOctaves(bool value) {
@@ -441,7 +441,7 @@ void LibreArp::setUsingSmartOctaves(bool value) {
 }
 
 bool LibreArp::isUsingInputVelocity() {
-    return this->usingInputVelocity;
+    return *this->usingInputVelocity;
 }
 
 void LibreArp::setUsingInputVelocity(bool value) {
