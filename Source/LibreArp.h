@@ -281,22 +281,22 @@ private:
     /**
      * Whether the plugin should transpose octaves upon "note overflow".
      */
-    juce::AudioParameterBool octaves;
+    juce::AudioParameterBool* octaves;
 
     /**
      * Whether the plugin should transpose by multiple octaves when the input spans multiple octaves.
      */
-    juce::AudioParameterBool smartOctaves;
+    juce::AudioParameterBool* smartOctaves;
 
     /**
      * Whether the plugin is using the velocity of input notes.
      */
-    juce::AudioParameterBool usingInputVelocity;
+    juce::AudioParameterBool* usingInputVelocity;
 
     /**
      * The amount of realtime swing applied to the arp pattern.
      */
-    juce::AudioParameterFloat swing;
+    juce::AudioParameterFloat* swing;
 
     /**
      * The value of `swing` in the last processed block.
