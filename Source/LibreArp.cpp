@@ -32,6 +32,7 @@ const juce::Identifier LibreArp::TREEID_NUM_INPUT_NOTES = "numInputNotes"; // NO
 const juce::Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = "outputMidiChannel"; // NOLINT
 const juce::Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = "inputMidiChannel"; // NOLINT
 const juce::Identifier LibreArp::TREEID_NON_PLAYING_MODE_OVERRIDE = "nonPlayingModeOverride"; // NOLINT
+const juce::Identifier LibreArp::TREEID_BYPASS = "bypass"; // NOLINT
 
 static const int NOTES_IN_OCTAVE = 12;
 
@@ -71,6 +72,11 @@ LibreArp::LibreArp()
     //       about this and puts them in a std::unique_ptr to be 'managed', instead of us being able to put them
     //       inside of the processor directly and passing JUCE just a pointer to that... doing that will cause a nasty
     //       SIGSEGV when the plugin is unloaded from the host.
+    addParameter(bypass = new juce::AudioParameterBool(
+            "bypass",
+            "Bypass",
+            false,
+            "Whether the plugin is being bypassed"));
     addParameter(octaves = new juce::AudioParameterBool(
             "octaves",
             "Octaves",
@@ -230,7 +236,7 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
     this->timeSigDenominator = cpi.timeSigDenominator;
 
     // Output generation
-    if (cpi.isPlaying && !this->events.events.empty() && this->events.loopLength > 0) {
+    if (!*bypass && cpi.isPlaying && !this->events.events.empty() && this->events.loopLength > 0) {
         auto timebase = this->events.timebase;
         auto pulseLength = 60.0 / (cpi.bpm * timebase);
         auto pulseSamples = getSampleRate() * pulseLength;
@@ -413,6 +419,9 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
             if (tree.hasProperty(TREEID_NON_PLAYING_MODE_OVERRIDE)) {
                 this->nonPlayingModeOverride = NonPlayingMode::of(tree.getProperty(TREEID_NON_PLAYING_MODE_OVERRIDE));
             }
+            if (tree.hasProperty(TREEID_BYPASS)) {
+                *this->bypass = tree.getProperty(TREEID_BYPASS);
+            }
 
             setPattern(loadedPattern);
         }
@@ -435,6 +444,7 @@ juce::ValueTree LibreArp::toValueTree() {
     tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
     tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
     tree.setProperty(TREEID_NON_PLAYING_MODE_OVERRIDE, NonPlayingMode::toJuceString(this->nonPlayingModeOverride), nullptr);
+    tree.setProperty(TREEID_BYPASS, this->bypass->get(), nullptr);
     return tree;
 }
 
@@ -550,6 +560,14 @@ void LibreArp::setOutputMidiChannel(int channel) {
 
 
 
+bool LibreArp::getBypass() const {
+    return *this->bypass;
+}
+
+void LibreArp::setBypass(bool value) {
+    *this->bypass = value;
+}
+
 int LibreArp::getInputMidiChannel() const {
     return this->inputMidiChannel;
 }
@@ -635,7 +653,7 @@ void LibreArp::processInputMidi(juce::MidiBuffer &inMidi, bool isPlaying) {
                 inputNotesChanged = true;
             }
 
-            if (!processed || (!isPlaying && getNonPlayingMode() == NonPlayingMode::Value::PASSTHROUGH)) {
+            if (!processed || *bypass || (!isPlaying && getNonPlayingMode() == NonPlayingMode::Value::PASSTHROUGH)) {
                 outMidi.addEvent(message, sample);
             }
         } else {

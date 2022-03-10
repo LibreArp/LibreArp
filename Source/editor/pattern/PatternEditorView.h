@@ -48,6 +48,7 @@ private:
 
     juce::TextButton saveButton;
     juce::TextButton loadButton;
+    juce::ToggleButton bypassToggle;
 
     juce::Slider snapSlider;
     juce::Label snapSliderLabel;

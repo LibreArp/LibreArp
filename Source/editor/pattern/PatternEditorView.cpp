@@ -62,6 +62,12 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     };
     addAndMakeVisible(saveButton);
 
+    bypassToggle.setButtonText("Bypass");
+    bypassToggle.onStateChange = [this] {
+        processor.setBypass(bypassToggle.getToggleState());
+    };
+    addAndMakeVisible(bypassToggle);
+
     addAndMakeVisible(beatBar);
     addAndMakeVisible(editor);
 
@@ -161,6 +167,7 @@ void PatternEditorView::updateParameterValues() {
     loopResetSlider.setValue(processor.getLoopReset(), juce::NotificationType::dontSendNotification);
     snapSlider.setValue(state.divisor, juce::NotificationType::dontSendNotification);
     swingSlider.setValue(processor.getSwing(), juce::NotificationType::dontSendNotification);
+    bypassToggle.setToggleState(processor.getBypass(), juce::NotificationType::dontSendNotification);
 }
 
 void PatternEditorView::updateLayout() {
@@ -189,6 +196,7 @@ void PatternEditorView::updateLayout() {
     auto bottomButtonArea = area.removeFromBottom(24);
     loadButton.setBounds(bottomButtonArea.removeFromLeft(100));
     saveButton.setBounds(bottomButtonArea.removeFromLeft(100));
+    bypassToggle.setBounds(bottomButtonArea.removeFromRight(80));
 
     area.removeFromBottom(8);
 

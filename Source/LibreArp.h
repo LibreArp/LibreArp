@@ -56,6 +56,7 @@ public:
     static const juce::Identifier TREEID_OUTPUT_MIDI_CHANNEL;
     static const juce::Identifier TREEID_INPUT_MIDI_CHANNEL;
     static const juce::Identifier TREEID_NON_PLAYING_MODE_OVERRIDE;
+    static const juce::Identifier TREEID_BYPASS;
 
     enum ExtraNotesSelectionMode : int {
         FROM_BOTTOM = 0,
@@ -185,6 +186,10 @@ public:
     void fillCurrentNonPlayingPositionInfo(juce::AudioPlayHead::CurrentPositionInfo &cpi);
 
 
+    bool getBypass() const;
+
+    void setBypass(bool value);
+
     /**
      * Gets the MIDI channel output notes are sent into.
      *
@@ -291,6 +296,11 @@ private:
      * The current pattern, built for playback.
      */
     ArpBuiltEvents events;
+
+    /**
+     * Whether the plugin is being bypassed.
+     */
+    juce::AudioParameterBool* bypass;
 
     /**
      * Whether the plugin should transpose octaves upon "note overflow".
