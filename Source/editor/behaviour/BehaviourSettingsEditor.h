@@ -48,6 +48,12 @@ private:
     juce::ComboBox nonPlayingModeComboBox;
     juce::Label nonPlayingModeLabel;
 
+    juce::Slider maxChordSizeSlider;
+    juce::Label maxChordSizeLabel;
+
+    juce::ComboBox extraNotesSelectionModeComboBox;
+    juce::Label extraNotesSelectionModeLabel;
+
     void updateSettingsValues();
     void updateLayout();
 

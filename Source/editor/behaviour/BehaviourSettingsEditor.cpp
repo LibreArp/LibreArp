@@ -79,6 +79,37 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     nonPlayingModeLabel.setText("Non-playing mode", juce::NotificationType::dontSendNotification);
     nonPlayingModeLabel.setTooltip(nonPlayingModeTooltip);
 
+    const juce::String maxChordSizeTooltip = "Sets the number of input notes taken into account by the arpeggiator. "
+        "When set to 'Auto', the number of notes is derived from the actual number of input notes.";
+    maxChordSizeSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
+    maxChordSizeSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    maxChordSizeSlider.setTooltip(maxChordSizeTooltip);
+    maxChordSizeSlider.setRange(0, 128, 1);
+    maxChordSizeSlider.textFromValueFunction = [](auto value) {
+        return (value == 0) ? juce::String("Auto") : juce::String(value);
+    };
+    maxChordSizeSlider.onValueChange = [this] {
+        processor.setMaxChordSize(static_cast<int>(maxChordSizeSlider.getValue()));
+    };
+
+    maxChordSizeLabel.setText("Chord size", juce::NotificationType::dontSendNotification);
+    maxChordSizeLabel.setTooltip(maxChordSizeTooltip);
+
+    const juce::String extraNotesSelectionModeTooltip = "Sets the way notes should be selected when the Chord size "
+        "is smaller than the actual number of input notes.";
+    extraNotesSelectionModeComboBox.addItem("From bottom", static_cast<int>(LibreArp::ExtraNotesSelectionMode::FROM_BOTTOM) + 1);
+    extraNotesSelectionModeComboBox.addItem("From top", static_cast<int>(LibreArp::ExtraNotesSelectionMode::FROM_TOP) + 1);
+    extraNotesSelectionModeComboBox.setEditableText(false);
+    extraNotesSelectionModeComboBox.setTooltip(extraNotesSelectionModeTooltip);
+    extraNotesSelectionModeComboBox.onChange = [this] {
+        auto index = extraNotesSelectionModeComboBox.getSelectedItemIndex();
+        auto value = static_cast<LibreArp::ExtraNotesSelectionMode>(extraNotesSelectionModeComboBox.getItemId(index) - 1);
+        processor.setExtraNotesSelectionMode(value);
+    };
+
+    extraNotesSelectionModeLabel.setText("Note selection mode", juce::NotificationType::dontSendNotification);
+    extraNotesSelectionModeLabel.setTooltip(extraNotesSelectionModeTooltip);
+
     addAndMakeVisible(midiInChannelLabel);
     addAndMakeVisible(midiInChannelSlider);
     addAndMakeVisible(midiOutChannelLabel);
@@ -88,6 +119,10 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     addAndMakeVisible(usingInputVelocityToggle);
     addAndMakeVisible(nonPlayingModeComboBox);
     addAndMakeVisible(nonPlayingModeLabel);
+    addAndMakeVisible(maxChordSizeSlider);
+    addAndMakeVisible(maxChordSizeLabel);
+    addAndMakeVisible(extraNotesSelectionModeComboBox);
+    addAndMakeVisible(extraNotesSelectionModeLabel);
 }
 
 void BehaviourSettingsEditor::resized() {
@@ -113,6 +148,8 @@ void BehaviourSettingsEditor::updateSettingsValues() {
     smartOctavesToggle.setEnabled(processor.isTransposingOctaves());
     usingInputVelocityToggle.setToggleState(processor.isUsingInputVelocity(), juce::NotificationType::dontSendNotification);
     nonPlayingModeComboBox.setSelectedId(static_cast<int>(processor.getNonPlayingModeOverride()));
+    maxChordSizeSlider.setValue(processor.getMaxChordSize());
+    extraNotesSelectionModeComboBox.setSelectedId(static_cast<int>(processor.getExtraNotesSelectionMode() + 1));
 }
 
 void BehaviourSettingsEditor::updateLayout() {
@@ -147,4 +184,16 @@ void BehaviourSettingsEditor::updateLayout() {
     auto nonPlayingModeArea = area.removeFromTop(24);
     nonPlayingModeComboBox.setBounds(nonPlayingModeArea.removeFromLeft(128));
     nonPlayingModeLabel.setBounds(nonPlayingModeArea);
+
+    area.removeFromTop(8);
+
+    auto maxChordSizeArea = area.removeFromTop(24);
+    maxChordSizeSlider.setBounds(maxChordSizeArea.removeFromLeft(96));
+    maxChordSizeLabel.setBounds(maxChordSizeArea);
+
+    area.removeFromTop(4);
+
+    auto extraNotesSelectionModeArea = area.removeFromTop(24);
+    extraNotesSelectionModeComboBox.setBounds(extraNotesSelectionModeArea.removeFromLeft(128));
+    extraNotesSelectionModeLabel.setBounds(extraNotesSelectionModeArea);
 }

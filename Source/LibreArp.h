@@ -50,11 +50,17 @@ public:
     static const juce::Identifier TREEID_SMART_OCTAVES;
     static const juce::Identifier TREEID_INPUT_VELOCITY;
     static const juce::Identifier TREEID_SWING;
+    static const juce::Identifier TREEID_MAX_CHORD_SIZE;
+    static const juce::Identifier TREEID_EXTRA_NOTES_SELECTION_MODE;
     static const juce::Identifier TREEID_NUM_INPUT_NOTES;
     static const juce::Identifier TREEID_OUTPUT_MIDI_CHANNEL;
     static const juce::Identifier TREEID_INPUT_MIDI_CHANNEL;
     static const juce::Identifier TREEID_NON_PLAYING_MODE_OVERRIDE;
 
+    enum ExtraNotesSelectionMode : int {
+        FROM_BOTTOM = 0,
+        FROM_TOP = 1,
+    };
 
     LibreArp();
     ~LibreArp() override;
@@ -223,6 +229,14 @@ public:
 
     void setNonPlayingModeOverride(NonPlayingMode::Value nonPlayingModeOverride);
 
+    int getMaxChordSize() const;
+
+    void setMaxChordSize(int size);
+
+    ExtraNotesSelectionMode getExtraNotesSelectionMode() const;
+
+    void setExtraNotesSelectionMode(ExtraNotesSelectionMode mode);
+
     /**
      * Gets the current non-playing mode, taking the global and overridden one into account.
      */
@@ -297,6 +311,16 @@ private:
      * The amount of realtime swing applied to the arp pattern.
      */
     juce::AudioParameterFloat* swing;
+
+    /**
+     * The maximum amount of notes the plugin will take into account.
+     */
+    juce::AudioParameterInt* maxChordSize;
+
+    /**
+     * Determines how the plugin will choose input notes when there are more than `maxChordSize`.
+     */
+    juce::AudioParameterChoice* extraNotesSelectionMode;
 
     /**
      * The value of `swing` in the last processed block.

@@ -26,6 +26,8 @@ const juce::Identifier LibreArp::TREEID_OCTAVES = "octaves"; // NOLINT
 const juce::Identifier LibreArp::TREEID_SMART_OCTAVES = "smartOctaves"; // NOLINT
 const juce::Identifier LibreArp::TREEID_INPUT_VELOCITY = "usingInputVelocity"; // NOLINT
 const juce::Identifier LibreArp::TREEID_SWING = "swing"; // NOLINT
+const juce::Identifier LibreArp::TREEID_MAX_CHORD_SIZE = "maxChordSize"; // NOLINT
+const juce::Identifier LibreArp::TREEID_EXTRA_NOTES_SELECTION_MODE = "extraNotesSelectionMode"; // NOLINT
 const juce::Identifier LibreArp::TREEID_NUM_INPUT_NOTES = "numInputNotes"; // NOLINT
 const juce::Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = "outputMidiChannel"; // NOLINT
 const juce::Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = "inputMidiChannel"; // NOLINT
@@ -70,26 +72,43 @@ LibreArp::LibreArp()
     //       inside of the processor directly and passing JUCE just a pointer to that... doing that will cause a nasty
     //       SIGSEGV when the plugin is unloaded from the host.
     addParameter(octaves = new juce::AudioParameterBool(
-                  "octaves",
-                  "Octaves",
-                  true,
-                  "Overflow octave transposition"));
+            "octaves",
+            "Octaves",
+            true,
+            "Overflow octave transposition"));
     addParameter(smartOctaves = new juce::AudioParameterBool(
-                  "smartOctaves",
-                  "Smart octaves",
-                  true,
-                  "Transpose by the number of octaves spanned by the input notes"));
+            "smartOctaves",
+            "Smart octaves",
+            true,
+            "Transpose by the number of octaves spanned by the input notes"));
     addParameter(usingInputVelocity = new juce::AudioParameterBool(
-                  "usingInputVelocity",
-                  "Input velocity",
-                  true,
-                  "Use input note velocity"));
+            "usingInputVelocity",
+            "Input velocity",
+            true,
+            "Use input note velocity"));
     addParameter(swing = new juce::AudioParameterFloat(
-                  "swing",
-                  "Swing",
-                  0.0f,
-                  1.0f,
-                  0.0f));
+            "swing",
+            "Swing",
+            0.0f, 1.0f, 0.0f));
+    addParameter(maxChordSize = new juce::AudioParameterInt(
+            "maxChordSize",
+            "Chord size",
+            0, 16, 0,
+            "The maximum amount of input notes taken into account",
+            [] (int value, int) {
+                if (value == 0)
+                    return std::string("Auto");
+
+                std::stringstream ss;
+                ss << value;
+                return ss.str();
+            }));
+    addParameter(extraNotesSelectionMode = new juce::AudioParameterChoice(
+            "extraNotesSelectionMode",
+            "Note selection mode",
+            { "From bottom", "From top" },
+            ExtraNotesSelectionMode::FROM_BOTTOM,
+            "Determines how notes should be selected when there are more than Chord size"));
 
     globals.markChanged();
 }
@@ -227,9 +246,10 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
             stopScheduled = false;
         }
 
-        if (inputNotes.size() != 0) {
+        if (maxChordSize->get() != 0)
+            octaveSize = maxChordSize->get();
+        else if (inputNotes.size() != 0)
             octaveSize = inputNotes.size();
-        }
 
         for(auto event : events.events) {
             auto time = nextTime(event, blockStartPosition, blockEndPosition);
@@ -256,12 +276,30 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
 
                 if (inputNotes.isEmpty()) continue;
 
+                // Max chord size processing
+                int chordSize;
+                int indexOffset;
+                if (maxChordSize->get() == 0) {
+                    chordSize = inputNotes.size();
+                    indexOffset = 0;
+                } else {
+                    chordSize = *maxChordSize;
+                    indexOffset = (chordSize < inputNotes.size() && extraNotesSelectionMode->getIndex() == FROM_TOP)
+                        ? inputNotes.size() - chordSize
+                        : 0;
+                }
+
                 // Generate note-on MIDI events
                 for (auto i : event.ons) {
                     auto &data = events.data[i];
-                    auto index = data.noteNumber % inputNotes.size();
-                    while (index < 0) {
-                        index += inputNotes.size();
+                    auto index = indexOffset + data.noteNumber % chordSize;
+                    while (index < 0)
+                        index += inputNotes.size(); // TODO: this is dumb but my brain is not functioning right now
+
+                    if (index > inputNotes.size()) {
+                        // There is no sound for us right now, skip it
+                        data.lastNote = ArpBuiltEvents::PlayingNote(-1, -1);
+                        continue;
                     }
 
                     auto note = inputNotes[index].note;
@@ -271,7 +309,7 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
 
                     // Transposition
                     if (*octaves) {
-                        auto octave = data.noteNumber / inputNotes.size();
+                        auto octave = data.noteNumber / chordSize;
                         if (data.noteNumber < 0) {
                             octave--;
                         }
@@ -282,9 +320,10 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
 
                     if (juce::isPositiveAndBelow(note, 128) && data.lastNote.noteNumber != note) {
                         data.lastNote = ArpBuiltEvents::PlayingNote(note, outputMidiChannel);
-                        midi.addEvent(
-                                juce::MidiMessage::noteOn(
-                                        data.lastNote.outChannel, data.lastNote.noteNumber, static_cast<float>(velocity)), offset);
+                        midi.addEvent(juce::MidiMessage::noteOn(
+                                    data.lastNote.outChannel,
+                                    data.lastNote.noteNumber,
+                                    static_cast<float>(velocity)), offset);
                         setNotePlaying(data.lastNote.outChannel, data.lastNote.noteNumber);
                     }
                 }
@@ -356,6 +395,12 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
                 *this->swing = tree.getProperty(TREEID_SWING);
                 this->lastSwing = *this->swing;
             }
+            if (tree.hasProperty(TREEID_MAX_CHORD_SIZE)) {
+                *this->maxChordSize = tree.getProperty(TREEID_MAX_CHORD_SIZE);
+            }
+            if (tree.hasProperty(TREEID_EXTRA_NOTES_SELECTION_MODE)) {
+                *this->extraNotesSelectionMode = tree.getProperty(TREEID_EXTRA_NOTES_SELECTION_MODE);
+            }
             if (tree.hasProperty(TREEID_NUM_INPUT_NOTES)) {
                 this->octaveSize = tree.getProperty(TREEID_NUM_INPUT_NOTES);
             }
@@ -384,6 +429,8 @@ juce::ValueTree LibreArp::toValueTree() {
     tree.setProperty(TREEID_SMART_OCTAVES, this->smartOctaves->get(), nullptr);
     tree.setProperty(TREEID_INPUT_VELOCITY, this->usingInputVelocity->get(), nullptr);
     tree.setProperty(TREEID_SWING, this->swing->get(), nullptr);
+    tree.setProperty(TREEID_MAX_CHORD_SIZE, this->maxChordSize->get(), nullptr);
+    tree.setProperty(TREEID_EXTRA_NOTES_SELECTION_MODE, this->extraNotesSelectionMode->getIndex(), nullptr);
     tree.setProperty(TREEID_NUM_INPUT_NOTES, this->octaveSize, nullptr);
     tree.setProperty(TREEID_OUTPUT_MIDI_CHANNEL, this->outputMidiChannel, nullptr);
     tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
@@ -536,6 +583,22 @@ NonPlayingMode::Value LibreArp::getNonPlayingMode() const {
            : nonPlayingModeOverride;
 }
 
+int LibreArp::getMaxChordSize() const {
+    return *this->maxChordSize;
+}
+
+void LibreArp::setMaxChordSize(int size) {
+    *this->maxChordSize = size;
+}
+
+LibreArp::ExtraNotesSelectionMode LibreArp::getExtraNotesSelectionMode() const {
+    return static_cast<LibreArp::ExtraNotesSelectionMode>(this->extraNotesSelectionMode->getIndex());
+}
+
+void LibreArp::setExtraNotesSelectionMode(ExtraNotesSelectionMode mode) {
+    *this->extraNotesSelectionMode = static_cast<int>(mode);
+}
+
 
 Globals &LibreArp::getGlobals() {
     return this->globals;
@@ -554,7 +617,7 @@ Updater::UpdateInfo& LibreArp::getLastUpdateInfo() {
 
 void LibreArp::processInputMidi(juce::MidiBuffer &inMidi, bool isPlaying) {
     bool inputNotesChanged = false;
-    int sample;
+    int sample = 0;
     juce::MidiBuffer outMidi;
 
     for (const juce::MidiMessageMetadata metadata : inMidi) {
