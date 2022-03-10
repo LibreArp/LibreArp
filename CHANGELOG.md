@@ -7,6 +7,18 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 
 ## Changelog
 
+### LibreArp 2.3
+
+* **NEW** *Smart octaves*: When the input chord spans multiple octaves, transposition is done by that number of octaves
+  * Guarantees that a higher LibreArp note will always be higher in the output MIDI
+  * On by default in new instances; off by default in existing ones
+* **NEW** The loop can now be resized and moved from the beat bar above the note grid
+* **NEW** Added a *Swing* parameter that staggers the pattern in real time
+* **NEW** Added a *Chord size* parameter that makes the plugin use a fixed number of input notes
+  * If the actual number of input notes is greater than the chord size, they are selected according to the new *Note selection mode* parameter.
+* **NEW** Added a *Bypass* parameter for DAWs that do not have a built-in bypass function
+* **FIX** The plugin no longer crashes when the user clicks *Cancel* in the preset chooser dialog
+
 ### LibreArp 2.2
 
 * **NEW** The loop is now a freely movable region
