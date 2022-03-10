@@ -22,6 +22,8 @@
 
 #include "../../LibreArp.h"
 #include "../../AudioUpdatable.h"
+#include "PulseConvertor.h"
+#include "LoopEditor.h"
 
 class PatternEditorView;
 
@@ -31,8 +33,13 @@ class PatternEditorView;
 class PatternEditor :
         public juce::Component,
         public juce::SettableTooltipClient,
-        public AudioUpdatable
+        public AudioUpdatable,
+        PulseConvertor<PatternEditor>,
+        LoopEditor<PatternEditor>
 {
+
+    friend PulseConvertor;
+    friend LoopEditor;
 
     /**
      * The data class of a dragging action.
@@ -184,7 +191,7 @@ public:
      * @param e the persistent editor state
      * @param ec the parent editor view
      */
-    explicit PatternEditor(LibreArp &p, EditorState &e, PatternEditorView *ec);
+    explicit PatternEditor(LibreArp &p, EditorState &e, PatternEditorView &ec);
 
     void paint(juce::Graphics &g) override;
     void mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
@@ -215,7 +222,7 @@ private:
     /**
      * The pointer to the parent editor view.
      */
-    PatternEditorView *view;
+    PatternEditorView &view;
 
 
 
@@ -279,9 +286,9 @@ private:
     int lastNumInputNotes;
 
     /**
-     * The desired mouse cursor that will actually be changed
+     * The desired mouse cursor that will actually be changed at the end of a mouse event.
      */
-    juce::MouseCursor mouseCursor;
+    juce::MouseCursor mouseCursor = juce::MouseCursor::NormalCursor;
 
 
     void updateMouseCursor();
@@ -297,20 +304,6 @@ private:
      * Sets the editor's current drag action according to the mouse position.
      */
     void mouseDetermineDragAction(const juce::MouseEvent &event);
-
-    /**
-     * Mouse loop end resize.
-     *
-     * @param event the mouse event
-     */
-    void loopStartResize(const juce::MouseEvent &event);
-
-    /**
-     * Mouse loop end resize.
-     *
-     * @param event the mouse event
-     */
-    void loopEndResize(const juce::MouseEvent &event);
 
     /**
      * Mouse note resize from left.
@@ -437,52 +430,6 @@ private:
      * @return `true` if any notes are selected and the result variables have been written; otherwise `false`
      */
     bool getNoteSelectionBorder(int64_t& out_start, int64_t& out_end);
-
-    /**
-     * Snaps the specified pulse to the grid.
-     *
-     * @param pulse the pulse
-     * @param floor whether floor should be used instead of round
-     *
-     * @return the rounded pulse
-     */
-    int64_t snapPulse(int64_t pulse, bool floor = false);
-
-    /**
-     * Converts a view-space X coordinate to a pulse position.
-     *
-     * @param x the view-space X coordinate
-     * @param snap whether snap should be used
-     * @param floor whether floor should be used instad of round for snapping
-     *
-     * @return the pulse position
-     */
-    int64_t xToPulse(int x, bool snap = true, bool floor = false);
-
-    /**
-     * Converts a view-space Y coordinate to a note number.
-     */
-    int yToNote(int y);
-
-    /**
-     * Converts a pulse position to a view-space X coordinate.
-     */
-    int pulseToX(int64_t pulse);
-
-    /**
-     * Converts a pulse position to absolute X coordinate (not offset by view offsets).
-     */
-    int pulseToAbsX(int64_t pulse);
-
-    /**
-     * Converts a note number to a view-space Y coordinate.
-     */
-    int noteToY(int note);
-
-    /**
-     * Converts a note number to absolute Y coordinate (not offset by view offsets).
-     */
-    int noteToAbsY(int note);
 
     /**
      * Tells the renderer to repaint the bounding box of all notes.

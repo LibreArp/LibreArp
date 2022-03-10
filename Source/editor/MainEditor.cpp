@@ -91,6 +91,7 @@ void MainEditor::resized() {
 
 void MainEditor::handleAsyncUpdate() {
     patternEditor.audioUpdate();
+    behaviourSettingsEditor.audioUpdate();
 }
 
 void MainEditor::handleUpdateCheck() {

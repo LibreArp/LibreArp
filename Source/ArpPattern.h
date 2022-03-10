@@ -131,8 +131,7 @@ public:
 private:
 
     /**
-     * The timebase of the pattern.
-     * Defines the amount of pulses in one beat.
+     * Number of ticks per beat. A tick is the smallest time unit of a pattern.
      */
     int timebase;
 

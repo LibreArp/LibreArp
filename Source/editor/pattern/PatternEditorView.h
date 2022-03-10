@@ -48,6 +48,7 @@ private:
 
     juce::TextButton saveButton;
     juce::TextButton loadButton;
+    juce::ToggleButton bypassToggle;
 
     juce::Slider snapSlider;
     juce::Label snapSliderLabel;
@@ -55,9 +56,13 @@ private:
     juce::Slider loopResetSlider;
     juce::Label loopResetSliderLabel;
 
+    juce::Slider swingSlider;
+    juce::Label swingSliderLabel;
+
     PatternEditor editor;
     BeatBar beatBar;
 
+    void updateParameterValues();
     void updateLayout();
 };
 

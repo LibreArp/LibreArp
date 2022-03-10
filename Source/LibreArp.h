@@ -47,54 +47,44 @@ public:
     static const juce::Identifier TREEID_LOOP_RESET;
     static const juce::Identifier TREEID_PATTERN_XML;
     static const juce::Identifier TREEID_OCTAVES;
+    static const juce::Identifier TREEID_SMART_OCTAVES;
     static const juce::Identifier TREEID_INPUT_VELOCITY;
+    static const juce::Identifier TREEID_SWING;
+    static const juce::Identifier TREEID_MAX_CHORD_SIZE;
+    static const juce::Identifier TREEID_EXTRA_NOTES_SELECTION_MODE;
     static const juce::Identifier TREEID_NUM_INPUT_NOTES;
     static const juce::Identifier TREEID_OUTPUT_MIDI_CHANNEL;
     static const juce::Identifier TREEID_INPUT_MIDI_CHANNEL;
     static const juce::Identifier TREEID_NON_PLAYING_MODE_OVERRIDE;
+    static const juce::Identifier TREEID_BYPASS;
 
+    enum ExtraNotesSelectionMode : int {
+        FROM_BOTTOM = 0,
+        FROM_TOP = 1,
+    };
 
     LibreArp();
-
     ~LibreArp() override;
 
-
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
-
     void releaseResources() override;
-
     bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
-
     void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
     void processBlock(juce::AudioBuffer<double> &, juce::MidiBuffer &) override;
-
-
     juce::AudioProcessorEditor *createEditor() override;
-
     bool hasEditor() const override;
-
-
     const juce::String getName() const override;
-
     bool acceptsMidi() const override;
-
     bool producesMidi() const override;
-
     bool isMidiEffect() const override;
-
     double getTailLengthSeconds() const override;
-
-
     int getNumPrograms() override;
-
     int getCurrentProgram() override;
-
     void setCurrentProgram(int index) override;
-
     const juce::String getProgramName(int index) override;
-
     void changeProgramName(int index, const juce::String &newName) override;
-
+    void getStateInformation(juce::MemoryBlock &destData) override;
+    void setStateInformation(const void *data, int sizeInBytes) override;
 
     /**
      * Serializes this processor into a ValueTree.
@@ -103,18 +93,10 @@ public:
      */
     juce::ValueTree toValueTree();
 
-    void getStateInformation(juce::MemoryBlock &destData) override;
-
-    void setStateInformation(const void *data, int sizeInBytes) override;
-
-
-
     /**
      * Schedules a stop of all currently playing notes. The stop will occur on the next block process.
      */
     void stopAll();
-
-
 
     /**
      * Sets the pattern to play.
@@ -130,7 +112,6 @@ public:
      */
     void loadPatternFromFile(const juce::File &file);
 
-
     /**
      * Schedules a pattern build for the processing of the next block.
      */
@@ -142,8 +123,6 @@ public:
      * @return the current pattern
      */
     ArpPattern &getPattern();
-
-
 
     /**
      * Gets the last position the processor has played, in pulses.
@@ -166,15 +145,17 @@ public:
      */
     double getLoopReset() const;
 
-
     bool isTransposingOctaves();
 
     void setTransposingOctaves(bool value);
 
+    bool isUsingSmartOctaves();
+
+    void setUsingSmartOctaves(bool value);
+
     bool isUsingInputVelocity();
 
     void setUsingInputVelocity(bool value);
-
 
     /**
      * Gets the last active number of input notes.
@@ -205,6 +186,10 @@ public:
     void fillCurrentNonPlayingPositionInfo(juce::AudioPlayHead::CurrentPositionInfo &cpi);
 
 
+    bool getBypass() const;
+
+    void setBypass(bool value);
+
     /**
      * Gets the MIDI channel output notes are sent into.
      *
@@ -218,7 +203,6 @@ public:
      * @param channel the MIDI channel output notes are sent into. An integer from range 1-16.
      */
     void setOutputMidiChannel(int channel);
-
 
 
     /**
@@ -236,9 +220,27 @@ public:
      */
     void setInputMidiChannel(int channel);
 
+    /**
+     * Gets the current swing amount value.
+     */
+    float getSwing() const;
+
+    /**
+     * Sets the current swing amount value. Should be `0.0` to `1.0`.
+     */
+    void setSwing(float value);
+
     NonPlayingMode::Value getNonPlayingModeOverride() const;
 
     void setNonPlayingModeOverride(NonPlayingMode::Value nonPlayingModeOverride);
+
+    int getMaxChordSize() const;
+
+    void setMaxChordSize(int size);
+
+    ExtraNotesSelectionMode getExtraNotesSelectionMode() const;
+
+    void setExtraNotesSelectionMode(ExtraNotesSelectionMode mode);
 
     /**
      * Gets the current non-playing mode, taking the global and overridden one into account.
@@ -251,6 +253,10 @@ public:
 
     Updater::UpdateInfo &getLastUpdateInfo();
 
+    /**
+     * Whether the playhead was playing in the last block.
+     */
+    bool wasPlaying = false;
 
 
 private:
@@ -276,8 +282,6 @@ private:
      */
     EditorState editorState;
 
-
-
     /**
      * The current pattern.
      */
@@ -293,19 +297,45 @@ private:
      */
     ArpBuiltEvents events;
 
-
+    /**
+     * Whether the plugin is being bypassed.
+     */
+    juce::AudioParameterBool* bypass;
 
     /**
      * Whether the plugin should transpose octaves upon "note overflow".
      */
-    juce::AudioParameterBool *octaves;
+    juce::AudioParameterBool* octaves;
+
+    /**
+     * Whether the plugin should transpose by multiple octaves when the input spans multiple octaves.
+     */
+    juce::AudioParameterBool* smartOctaves;
 
     /**
      * Whether the plugin is using the velocity of input notes.
      */
-    juce::AudioParameterBool *usingInputVelocity;
+    juce::AudioParameterBool* usingInputVelocity;
 
+    /**
+     * The amount of realtime swing applied to the arp pattern.
+     */
+    juce::AudioParameterFloat* swing;
 
+    /**
+     * The maximum amount of notes the plugin will take into account.
+     */
+    juce::AudioParameterInt* maxChordSize;
+
+    /**
+     * Determines how the plugin will choose input notes when there are more than `maxChordSize`.
+     */
+    juce::AudioParameterChoice* extraNotesSelectionMode;
+
+    /**
+     * The value of `swing` in the last processed block.
+     */
+    float lastSwing = 0.0f;
 
     /**
      * The last position the processor has played, in pulses.
@@ -318,13 +348,6 @@ private:
     std::atomic<double> loopReset = 0.0;
 
     /**
-     * Whether the playhead was playing in the last block.
-     */
-    bool wasPlaying = false;
-
-
-
-    /**
      * Whether stopAll was called.
      */
     bool stopScheduled = false;
@@ -333,7 +356,6 @@ private:
      * Whether buildPattern was called.
      */
     bool buildScheduled = false;
-
 
     /**
      * The number of input notes in the last block.
@@ -370,6 +392,10 @@ private:
      */
     int64_t silenceEndedTime;
 
+    /**
+     * Number of octaves spanned by the current input - rounded up.
+     */
+    int smartOctaveNumber = 1;
 
     /**
      * The MIDI channel output notes are sent to.
@@ -407,6 +433,9 @@ private:
      */
     void stopAll(juce::MidiBuffer &midi);
 
+    /**
+     * Calculates the index of the bit representing the specified note.
+     */
     static int noteBitsetPosition(int channel, int noteNumber);
 
     bool isNotePlaying(int channel, int noteNumber);
@@ -416,11 +445,9 @@ private:
     void setNoteNotPlaying(int channel, int noteNumber);
 
     /**
-     * Sends an update to the editor.
+     * Sends an asynchronous update to the editor.
      */
     void updateEditor();
-
-
 
     /**
      * Calculates the next time of the specified event.
@@ -431,6 +458,11 @@ private:
      * @return the next time of the event
      */
     int64_t nextTime(ArpBuiltEvents::Event& event, int64_t blockStartPosition, int64_t blockEndPosition) const;
+
+    /**
+     * Calculates a new position value with swing applied.
+     */
+    double applySwing(double position, float swingAmount) const;
 };
 
 bool operator> (const LibreArp::InputNote &a, const LibreArp::InputNote &b);

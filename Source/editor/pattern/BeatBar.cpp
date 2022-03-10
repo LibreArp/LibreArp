@@ -15,15 +15,16 @@
 // along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
-#include "BeatBar.h"
 #include "PatternEditorView.h"
 #include "../style/Colours.h"
+#include "../style/DragActionTolerances.h"
+#include "../../util/Defer.h"
 
-const juce::String LOOP_TEXT = "loop"; // NOLINT
+#include "BeatBar.h"
 
 const int TEXT_OFFSET = 6;
 
-BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView *ec)
+BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView &ec)
         : processor(p), state(e), view(ec) {
 
     setOpaque(true);
@@ -39,8 +40,8 @@ void BeatBar::paint(juce::Graphics &g) {
     g.setColour(Style::BEATBAR_BORDER_COLOUR);
     g.fillRect(0, getHeight() - 1, getWidth(), 1);
 
-    auto loopStartLine = static_cast<int>((pattern.loopStart / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1 - state.offsetX;
-    auto loopEndLine = static_cast<int>((pattern.loopEnd / static_cast<float>(pattern.getTimebase())) * pixelsPerBeat) + 1 - state.offsetX;
+    auto loopStartLine = pulseToX(pattern.loopStart);
+    auto loopEndLine = pulseToX(pattern.loopEnd);
 
     // Draw outside-the-loop area
     g.setColour(Style::LOOP_OUTSIDE_COLOUR);
@@ -50,7 +51,10 @@ void BeatBar::paint(juce::Graphics &g) {
     // Draw beat lines
     g.setFont(20);
     int n = 1 + state.offsetX / pixelsPerBeat;
-    for (float i = (1 - state.offsetX) % pixelsPerBeat; i < getWidth(); i += pixelsPerBeat, n++) {
+    for (auto i = static_cast<float>((1 - state.offsetX) % pixelsPerBeat);
+            i < static_cast<float>(getWidth());
+            i += static_cast<float>(pixelsPerBeat), n++)
+    {
         g.setColour(Style::BEATBAR_LINE_COLOUR);
         g.fillRect(juce::roundToInt(i), 0, 4, getHeight());
 
@@ -64,19 +68,116 @@ void BeatBar::paint(juce::Graphics &g) {
     g.fillRect(loopEndLine, 0, 4, getHeight());
 }
 
+void BeatBar::mouseMove(const juce::MouseEvent& event) {
+    mouseAnyMove(event);
+    mouseDetermineDragAction(event);
+    updateMouseCursor();
+}
+
+void BeatBar::mouseDrag(const juce::MouseEvent& event) {
+    mouseAnyMove(event);
+    defer d([this] { updateMouseCursor(); });
+
+    if (event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && !event.mods.isMiddleButtonDown()) {
+        switch (dragAction.type) {
+            case DragAction::TYPE_LOOP_START_RESIZE:
+                loopStartResize(event);
+                return;
+            case DragAction::TYPE_LOOP_END_RESIZE:
+                loopEndResize(event);
+                return;
+            case DragAction::TYPE_LOOP_MOVE:
+                loopMove(event);
+                return;
+            default:
+                return;
+        }
+    }
+}
+
+void BeatBar::mouseAnyMove(const juce::MouseEvent& event) {
+    snapEnabled = !(event.mods.isAltDown() || (event.mods.isCtrlDown() && event.mods.isShiftDown()));
+    mouseCursor = juce::MouseCursor::NormalCursor;
+}
+
+void BeatBar::mouseDetermineDragAction(const juce::MouseEvent& event) {\
+    auto &pattern = processor.getPattern();
+    std::scoped_lock lock(pattern.getMutex());
+    setTooltip("");
+
+    auto loopStartLine = pulseToX(pattern.loopStart);
+    auto loopEndLine = pulseToX(pattern.loopEnd);
+
+    {
+        auto loopMinX = loopStartLine - Style::LINE_RESIZE_TOLERANCE;
+        auto loopMaxX = loopStartLine + Style::LINE_RESIZE_TOLERANCE;
+        if (event.x >= loopMinX && event.x <= loopMaxX) {
+            setTooltip("Drag to resize the loop");
+            mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
+            dragAction.basicDragAction(DragAction::TYPE_LOOP_START_RESIZE);
+            return;
+        }
+    }
+
+    {
+        auto loopMinX = loopEndLine - Style::LINE_RESIZE_TOLERANCE;
+        auto loopMaxX = loopEndLine + Style::LINE_RESIZE_TOLERANCE;
+        if (event.x >= loopMinX && event.x <= loopMaxX) {
+            setTooltip("Drag to resize the loop");
+            mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
+            dragAction.basicDragAction(DragAction::TYPE_LOOP_END_RESIZE);
+            return;
+        }
+    }
+
+    if (event.x >= loopStartLine && event.x <= loopEndLine) {
+        setTooltip("Drag to move the loop");
+        mouseCursor = juce::MouseCursor::DraggingHandCursor;
+        dragAction.offsetDragAction(
+                DragAction::TYPE_LOOP_MOVE,
+                xToPulse(event.x) - pattern.loopStart,
+                pattern.loopLength());
+        return;
+    }
+
+    dragAction.basicDragAction();
+}
+
 void BeatBar::mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) {
     if (event.mods.isShiftDown()) {
-        view->zoomPattern(0, wheel.deltaY);
+        view.zoomPattern(0, wheel.deltaY);
     } else {
-        view->zoomPattern(wheel.deltaY, 0);
+        view.zoomPattern(wheel.deltaY, 0);
     }
 }
 
 void BeatBar::mouseDown(const juce::MouseEvent& event) {
     if (!event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && event.mods.isMiddleButtonDown()) {
-        view->resetPatternOffset();
+        view.resetPatternOffset();
         return;
     }
 
     Component::mouseDown(event);
+}
+
+void BeatBar::mouseUp(const juce::MouseEvent& event) {
+    mouseDetermineDragAction(event);
+    repaint();
+}
+
+void BeatBar::updateMouseCursor() {
+    if (mouseCursor != getMouseCursor()) {
+        setMouseCursor(mouseCursor);
+    }
+}
+
+
+void BeatBar::DragAction::basicDragAction(uint8_t type) {
+    this->type = type;
+}
+
+void BeatBar::DragAction::offsetDragAction(uint8_t type, int64_t startOffset, int64_t loopLength) {
+    this->type = type;
+    this->startOffset = startOffset;
+    this->loopLength = loopLength;
 }

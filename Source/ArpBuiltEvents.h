@@ -41,8 +41,7 @@ public:
      * Data class of a single event in time. Contains the time the event fires (in the set timebase) and indices of
      * on-data and off-data.
      */
-    class Event {
-    public:
+    struct Event {
 
         /**
          * The time in the pattern on which the event fires.
@@ -52,12 +51,12 @@ public:
         /**
          * The indices of on-data.
          */
-        std::set<unsigned long> ons;
+        std::set<size_t> ons;
 
         /**
          * The indices of off-data.
          */
-        std::set<unsigned long> offs;
+        std::set<size_t> offs;
     };
 
 
@@ -114,7 +113,7 @@ public:
 
 
     /**
-     * The timebase of the built pattern.
+     * Number of ticks per beat. A tick is the smallest time unit of a pattern.
      */
     int timebase;
 

@@ -21,7 +21,7 @@
 
 #include "../../LibreArp.h"
 
-class BehaviourSettingsEditor : public juce::Component {
+class BehaviourSettingsEditor : public juce::Component, public AudioUpdatable {
 public:
 
     explicit BehaviourSettingsEditor(LibreArp &p);
@@ -29,11 +29,14 @@ public:
     void resized() override;
     void visibilityChanged() override;
 
+    void audioUpdate() override;
+
 private:
 
     LibreArp &processor;
 
     juce::ToggleButton octavesToggle;
+    juce::ToggleButton smartOctavesToggle;
     juce::ToggleButton usingInputVelocityToggle;
 
     juce::Slider midiInChannelSlider;
@@ -44,6 +47,12 @@ private:
 
     juce::ComboBox nonPlayingModeComboBox;
     juce::Label nonPlayingModeLabel;
+
+    juce::Slider maxChordSizeSlider;
+    juce::Label maxChordSizeLabel;
+
+    juce::ComboBox extraNotesSelectionModeComboBox;
+    juce::Label extraNotesSelectionModeLabel;
 
     void updateSettingsValues();
     void updateLayout();

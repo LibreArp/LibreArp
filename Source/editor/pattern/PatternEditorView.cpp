@@ -29,8 +29,8 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
                   "Pattern preset",
                   processor.getGlobals().getPatternPresetsDir(),
                   "*.lapreset"),
-          editor(p, state, this),
-          beatBar(p, state, this)
+          editor(p, state, *this),
+          beatBar(p, state, *this)
 {
 
     loadButton.setButtonText("Load pattern...");
@@ -39,8 +39,11 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
         presetChooser.launchAsync(
                 Flags::openMode | Flags::canSelectFiles,
                 [this](auto& chooser) {
-                    processor.loadPatternFromFile(chooser.getResult());
-                    repaint();
+                    auto results = chooser.getResults();
+                    if (!results.isEmpty() && results[0].existsAsFile()) {
+                        processor.loadPatternFromFile(results[0]);
+                        repaint();
+                    }
                 });
     };
     addAndMakeVisible(loadButton);
@@ -51,10 +54,19 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
         presetChooser.launchAsync(
                 Flags::saveMode | Flags::canSelectFiles | Flags::warnAboutOverwriting,
                 [this](auto& chooser) {
-                    processor.getPattern().toFile(chooser.getResult());
+                    auto results = chooser.getResults();
+                    if (!results.isEmpty()) {
+                        processor.getPattern().toFile(results[0]);
+                    }
                 });
     };
     addAndMakeVisible(saveButton);
+
+    bypassToggle.setButtonText("Bypass");
+    bypassToggle.onStateChange = [this] {
+        processor.setBypass(bypassToggle.getToggleState());
+    };
+    addAndMakeVisible(bypassToggle);
 
     addAndMakeVisible(beatBar);
     addAndMakeVisible(editor);
@@ -87,6 +99,27 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     snapSliderLabel.setText("Snap:", juce::NotificationType::dontSendNotification);
     snapSliderLabel.setJustificationType(juce::Justification::centredRight);
     addAndMakeVisible(snapSliderLabel);
+
+    swingSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
+    swingSlider.setRange(0.0, 1.0);
+    swingSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 42, 24);
+    swingSlider.textFromValueFunction = [] (double value) {
+        std::stringstream sstream;
+        sstream << static_cast<int>(round(value * 100.0)) << " %";
+        return sstream.str();
+    };
+    swingSlider.valueFromTextFunction = [] (const juce::String& text) {
+        return text.getDoubleValue() / 100.0;
+    };
+    swingSlider.setValue(0.555);
+    swingSlider.onValueChange = [this] {
+        processor.setSwing(static_cast<float>(swingSlider.getValue()));
+    };
+    addAndMakeVisible(swingSlider);
+
+    swingSliderLabel.setText("Swing:", juce::NotificationType::dontSendNotification);
+    swingSliderLabel.setJustificationType(juce::Justification::centredRight);
+    addAndMakeVisible(swingSliderLabel);
 }
 
 void PatternEditorView::resized() {
@@ -124,6 +157,17 @@ void PatternEditorView::resetPatternOffset() {
 
 void PatternEditorView::audioUpdate() {
     editor.audioUpdate();
+
+    if (isVisible()) {
+        updateParameterValues();
+    }
+}
+
+void PatternEditorView::updateParameterValues() {
+    loopResetSlider.setValue(processor.getLoopReset(), juce::NotificationType::dontSendNotification);
+    snapSlider.setValue(state.divisor, juce::NotificationType::dontSendNotification);
+    swingSlider.setValue(processor.getSwing(), juce::NotificationType::dontSendNotification);
+    bypassToggle.setToggleState(processor.getBypass(), juce::NotificationType::dontSendNotification);
 }
 
 void PatternEditorView::updateLayout() {
@@ -131,12 +175,19 @@ void PatternEditorView::updateLayout() {
         return;
     }
 
+    updateParameterValues();
+
     auto area = getLocalBounds().reduced(8);
 
     auto toolBarArea = area.removeFromTop(24);
+
     loopResetSliderLabel.setBounds(
             toolBarArea.removeFromLeft(8 + loopResetSliderLabel.getFont().getStringWidth(loopResetSliderLabel.getText())));
     loopResetSlider.setBounds(toolBarArea.removeFromLeft(96));
+    toolBarArea.removeFromLeft(16);
+    swingSliderLabel.setBounds(toolBarArea.removeFromLeft(8 + swingSliderLabel.getFont().getStringWidth(swingSliderLabel.getText())));
+    swingSlider.setBounds(toolBarArea.removeFromLeft(128));
+
     snapSlider.setBounds(toolBarArea.removeFromRight(96));
     snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
 
@@ -145,6 +196,7 @@ void PatternEditorView::updateLayout() {
     auto bottomButtonArea = area.removeFromBottom(24);
     loadButton.setBounds(bottomButtonArea.removeFromLeft(100));
     saveButton.setBounds(bottomButtonArea.removeFromLeft(100));
+    bypassToggle.setBounds(bottomButtonArea.removeFromRight(80));
 
     area.removeFromBottom(8);
 
