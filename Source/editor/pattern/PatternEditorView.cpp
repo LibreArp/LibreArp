@@ -132,24 +132,55 @@ void PatternEditorView::visibilityChanged() {
 }
 
 void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
-    state.pixelsPerBeat = juce::jmax(32, state.pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
-    state.pixelsPerNote = juce::jmax(8, state.pixelsPerNote + static_cast<int>(deltaY * Y_ZOOM_RATE));
+    state.targetPixelsPerBeat = juce::jmax(32.f, state.targetPixelsPerBeat + deltaX * X_ZOOM_RATE);
+    state.targetPixelsPerNote = juce::jmax(8.f, state.targetPixelsPerNote + deltaY * Y_ZOOM_RATE);
 
     editor.repaint();
     beatBar.repaint();
 }
 
 void PatternEditorView::scrollPattern(float deltaX, float deltaY) {
-    state.offsetX = juce::jmax(0, state.offsetX - static_cast<int>(deltaX * X_SCROLL_RATE));
-    state.offsetY = state.offsetY - static_cast<int>(deltaY * Y_SCROLL_RATE);
+    state.targetOffsetX = juce::jmax(0.f, state.targetOffsetX - static_cast<int>(deltaX * X_SCROLL_RATE));
+    state.targetOffsetY = state.targetOffsetY - static_cast<int>(deltaY * Y_SCROLL_RATE);
 
     editor.repaint();
     beatBar.repaint();
 }
 
+void PatternEditorView::updateDisplayDimensions() {
+    const float EPSILON = 0.1;
+    const float AGGR = 0.3;
+    bool updated = false;
+
+    if (std::abs(state.targetOffsetX - state.displayOffsetX) > EPSILON) {
+        state.displayOffsetX = state.displayOffsetX + (state.targetOffsetX - state.displayOffsetX) * AGGR;
+        updated = true;
+    }
+
+    if (std::abs(state.targetOffsetY - state.displayOffsetY) > EPSILON) {
+        state.displayOffsetY = state.displayOffsetY + (state.targetOffsetY - state.displayOffsetY) * AGGR;
+        updated = true;
+    }
+
+    if (std::abs(state.targetPixelsPerBeat - state.displayPixelsPerBeat) > EPSILON) {
+        state.displayPixelsPerBeat = state.displayPixelsPerBeat + (state.targetPixelsPerBeat - state.displayPixelsPerBeat) * AGGR;
+        updated = true;
+    }
+
+    if (std::abs(state.targetPixelsPerNote - state.displayPixelsPerNote) > EPSILON) {
+        state.displayPixelsPerNote = state.displayPixelsPerNote + (state.targetPixelsPerNote - state.displayPixelsPerNote) * AGGR;
+        updated = true;
+    }
+
+    if (updated) {
+        editor.repaint();
+        beatBar.repaint();
+    }
+}
+
 void PatternEditorView::resetPatternOffset() {
-    state.offsetX = 0;
-    state.offsetY = 0;
+    state.targetOffsetX = 0;
+    state.targetOffsetY = 0;
 
     editor.repaint();
     beatBar.repaint();

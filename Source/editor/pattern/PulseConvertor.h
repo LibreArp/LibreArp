@@ -17,7 +17,10 @@
 
 #pragma once
 
+#include <cstdint>
+#include <cmath>
 #include <type_traits>
+#include <juce_core/juce_core.h>
 
 /**
  * This class provides methods for converting mouse position to pulses and notes.
@@ -66,10 +69,10 @@ protected:
     int64_t xToPulse(int x, bool snap = true, bool floor = false) {
         auto &pattern = ((T*) this)->processor.getPattern();
         auto timebase = pattern.getTimebase();
-        double pixelsPerBeat = ((T*) this)->state.pixelsPerBeat;
+        double pixelsPerBeat = ((T*) this)->state.displayPixelsPerBeat;
 
         auto pulse = static_cast<int64_t>(
-                std::round(((x + ((T*) this)->state.offsetX) / pixelsPerBeat) * timebase));
+                std::round(((x + ((T*) this)->state.displayOffsetX) / pixelsPerBeat) * timebase));
 
         return juce::jmax(static_cast<int64_t>(0), (snap) ? snapPulse(pulse, floor) : pulse);
     }
@@ -78,15 +81,15 @@ protected:
      * Converts a view-space Y coordinate to a note number.
      */
     int yToNote(int y) {
-        double pixelsPerNote = ((T*) this)->state.pixelsPerNote;
-        return static_cast<int>(std::ceil(((((T*) this)->getHeight() / 2.0) - (y + ((T*) this)->state.offsetY)) / pixelsPerNote - 0.5));
+        double pixelsPerNote = ((T*) this)->state.displayPixelsPerNote;
+        return static_cast<int>(std::ceil(((((T*) this)->getHeight() / 2.0) - (y + ((T*) this)->state.displayOffsetY)) / pixelsPerNote - 0.5));
     }
 
     /**
      * Converts a pulse position to a view-space X coordinate.
      */
     int pulseToX(int64_t pulse) {
-        return pulseToAbsX(pulse) - ((T*) this)->state.offsetX;
+        return pulseToAbsX(pulse) - ((T*) this)->state.displayOffsetX;
     }
 
     /**
@@ -94,7 +97,7 @@ protected:
      */
     int pulseToAbsX(int64_t pulse) {
         auto &pattern = ((T*) this)->processor.getPattern();
-        auto pixelsPerBeat = ((T*) this)->state.pixelsPerBeat;
+        auto pixelsPerBeat = ((T*) this)->state.displayPixelsPerBeat;
 
         return juce::jmax(0, juce::roundToInt((static_cast<double>(pulse) / static_cast<double>(pattern.getTimebase())) * pixelsPerBeat) + 1);
     }
@@ -103,14 +106,14 @@ protected:
      * Converts a note number to a view-space Y coordinate.
      */
     int noteToY(int note) {
-        return noteToAbsY(note) - ((T*) this)->state.offsetY;
+        return noteToAbsY(note) - ((T*) this)->state.displayOffsetY;
     }
 
     /**
      * Converts a note number to absolute Y coordinate (not offset by view offsets).
      */
     int noteToAbsY(int note) {
-        double pixelsPerNote = ((T*) this)->state.pixelsPerNote;
+        double pixelsPerNote = ((T*) this)->state.displayPixelsPerNote;
         return juce::roundToInt(std::floor((((T*) this)->getHeight() / 2.0) - (note + 0.5) * pixelsPerNote)) + 1;
     }
 

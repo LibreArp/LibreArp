@@ -35,6 +35,7 @@ public:
 
     void zoomPattern(float deltaX, float deltaY);
     void scrollPattern(float deltaX, float deltaY);
+    void updateDisplayDimensions();
     void resetPatternOffset();
 
     void audioUpdate() override;

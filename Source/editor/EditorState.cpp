@@ -36,10 +36,10 @@ juce::ValueTree EditorState::toValueTree() const {
     tree.setProperty(TREEID_DIVISOR, this->divisor, nullptr);
     tree.setProperty(TREEID_LAST_NOTE_LENGTH, juce::int64(this->lastNoteLength), nullptr);
     tree.setProperty(TREEID_LAST_NOTE_VELOCITY, this->lastNoteVelocity, nullptr);
-    tree.setProperty(TREEID_PIXELS_PER_BEAT, this->pixelsPerBeat, nullptr);
-    tree.setProperty(TREEID_PIXELS_PER_NOTE, this->pixelsPerNote, nullptr);
-    tree.setProperty(TREEID_OFFSET_X, this->offsetX, nullptr);
-    tree.setProperty(TREEID_OFFSET_Y, this->offsetY, nullptr);
+    tree.setProperty(TREEID_PIXELS_PER_BEAT, this->targetPixelsPerBeat, nullptr);
+    tree.setProperty(TREEID_PIXELS_PER_NOTE, this->targetPixelsPerNote, nullptr);
+    tree.setProperty(TREEID_OFFSET_X, this->targetOffsetX, nullptr);
+    tree.setProperty(TREEID_OFFSET_Y, this->targetOffsetY, nullptr);
     return tree;
 }
 
@@ -65,16 +65,20 @@ EditorState EditorState::fromValueTree(juce::ValueTree &tree) {
         result.lastNoteVelocity = tree.getProperty(TREEID_LAST_NOTE_VELOCITY);
     }
     if (tree.hasProperty(TREEID_PIXELS_PER_BEAT)) {
-        result.pixelsPerBeat = tree.getProperty(TREEID_PIXELS_PER_BEAT);
+        result.targetPixelsPerBeat = tree.getProperty(TREEID_PIXELS_PER_BEAT);
+        result.displayPixelsPerBeat = result.targetPixelsPerBeat;
     }
     if (tree.hasProperty(TREEID_PIXELS_PER_NOTE)) {
-        result.pixelsPerNote = tree.getProperty(TREEID_PIXELS_PER_NOTE);
+        result.targetPixelsPerNote = tree.getProperty(TREEID_PIXELS_PER_NOTE);
+        result.displayPixelsPerNote = result.targetPixelsPerNote;
     }
     if (tree.hasProperty(TREEID_OFFSET_X)) {
-        result.offsetX = tree.getProperty(TREEID_OFFSET_X);
+        result.targetOffsetX = tree.getProperty(TREEID_OFFSET_X);
+        result.displayOffsetX = result.targetOffsetX;
     }
     if (tree.hasProperty(TREEID_OFFSET_Y)) {
-        result.offsetY = tree.getProperty(TREEID_OFFSET_Y);
+        result.targetOffsetY = tree.getProperty(TREEID_OFFSET_Y);
+        result.displayOffsetY = result.targetOffsetY;
     }
     return result;
 }

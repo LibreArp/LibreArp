@@ -7,6 +7,10 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 
 ## Changelog
 
+### LibreArp 2.4
+
+* **IMPROVE** Added scroll and zoom smoothing
+
 ### LibreArp 2.3
 
 * **NEW** *Smart octaves*: When the input chord spans multiple octaves, transposition is done by that number of octaves

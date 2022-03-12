@@ -32,7 +32,7 @@ BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView &ec)
 
 void BeatBar::paint(juce::Graphics &g) {
     auto &pattern = processor.getPattern();
-    auto pixelsPerBeat = state.pixelsPerBeat;
+    int pixelsPerBeat = state.displayPixelsPerBeat;
 
     // Draw background
     g.setColour(Style::BEATBAR_BACKGROUND_COLOUR);
@@ -50,8 +50,9 @@ void BeatBar::paint(juce::Graphics &g) {
 
     // Draw beat lines
     g.setFont(20);
-    int n = 1 + state.offsetX / pixelsPerBeat;
-    for (auto i = static_cast<float>((1 - state.offsetX) % pixelsPerBeat);
+    int offsetX = static_cast<int>(state.displayOffsetX);
+    int n = 1 + offsetX / pixelsPerBeat;
+    for (auto i = static_cast<float>((1 - offsetX) % pixelsPerBeat);
             i < static_cast<float>(getWidth());
             i += static_cast<float>(pixelsPerBeat), n++)
     {

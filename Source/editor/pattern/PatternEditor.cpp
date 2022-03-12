@@ -48,13 +48,17 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView &ec)
 }
 
 void PatternEditor::paint(juce::Graphics &g) {
+    view.updateDisplayDimensions();
+
     ArpPattern &pattern = processor.getPattern();
-    auto pixelsPerBeat = state.pixelsPerBeat;
-    auto pixelsPerNote = state.pixelsPerNote;
+    int pixelsPerBeat = state.displayPixelsPerBeat;
+    int pixelsPerNote = state.displayPixelsPerNote;
 
     auto unoffsDrawRegion = g.getClipBounds();
     auto drawRegion = unoffsDrawRegion;
-    drawRegion.translate(-state.offsetX, -state.offsetY);
+    int offsetX = static_cast<int>(state.displayOffsetX);
+    int offsetY = static_cast<int>(state.displayOffsetY);
+    drawRegion.translate(-offsetX, -offsetY);
 
     // Draw background
     g.setColour(Style::EDITOR_BACKGROUND_COLOUR);
@@ -65,7 +69,7 @@ void PatternEditor::paint(juce::Graphics &g) {
         auto beat = (pixelsPerBeat * 4) / processor.getTimeSigDenominator();
         auto bar = beat * processor.getTimeSigNumerator();
         g.setColour(Style::BAR_SHADE_COLOUR);
-        int firstBarX = unoffsDrawRegion.getX() - unoffsDrawRegion.getX() % bar - state.offsetX % (bar * 2);
+        int firstBarX = unoffsDrawRegion.getX() - unoffsDrawRegion.getX() % bar - offsetX % (bar * 2);
         for (int i = firstBarX; i < unoffsDrawRegion.getWidth(); i += bar * 2) {
             g.fillRect(i + bar, unoffsDrawRegion.getY(), bar, unoffsDrawRegion.getHeight());
         }
@@ -89,7 +93,7 @@ void PatternEditor::paint(juce::Graphics &g) {
     // Draw gridlines
     // - Horizontal
     g.setColour(Style::EDITOR_GRIDLINES_COLOUR);
-    int horizontalGridlineStart = (getHeight() / 2 - state.offsetY) % pixelsPerNote - pixelsPerNote / 2;
+    int horizontalGridlineStart = (getHeight() / 2 - offsetY) % pixelsPerNote - pixelsPerNote / 2;
     for (int i = horizontalGridlineStart; i < getHeight(); i += pixelsPerNote) {
         g.fillRect(0, i, getWidth(), 2);
     }
@@ -97,7 +101,7 @@ void PatternEditor::paint(juce::Graphics &g) {
     // - Vertical
     float beatDiv = (static_cast<float>(pixelsPerBeat) / static_cast<float>(state.divisor));
     int beatN = 0;
-    for (auto i = static_cast<float>((-state.offsetX) % pixelsPerBeat); i < static_cast<float>(getWidth()); i += beatDiv, beatN++) {
+    for (auto i = static_cast<float>((-offsetX) % pixelsPerBeat); i < static_cast<float>(getWidth()); i += beatDiv, beatN++) {
         if (beatN % state.divisor == 0) {
             g.fillRect(juce::roundToInt(i), 0, 4, getHeight());
         } else {
@@ -110,7 +114,7 @@ void PatternEditor::paint(juce::Graphics &g) {
         g.setColour(Style::OCTAVE_LINE_COLOUR);
         auto pixelsPerOctave = pixelsPerNote * numInputNotes;
 
-        int i = (getHeight() / 2 - state.offsetY) % pixelsPerOctave - pixelsPerNote / 2 + pixelsPerNote;
+        int i = (getHeight() / 2 - offsetY) % pixelsPerOctave - pixelsPerNote / 2 + pixelsPerNote;
         for (/* above */; i < getHeight(); i += pixelsPerOctave) {
             g.fillRect(drawRegion.getX(), i, drawRegion.getWidth(), 1);
         }
@@ -184,7 +188,7 @@ void PatternEditor::paint(juce::Graphics &g) {
 
     // Draw playback position indicator
     if (lastPlayPositionX > 0) {
-        auto positionRect = juce::Rectangle<int>(lastPlayPositionX - state.offsetX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
+        auto positionRect = juce::Rectangle<int>(lastPlayPositionX - offsetX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
         if (positionRect.intersects(unoffsDrawRegion)) {
             g.setColour(Style::PLAYHEAD_POSITION_COLOUR);
             g.fillRect(positionRect);
@@ -312,7 +316,7 @@ void PatternEditor::updateMouseCursor() {
 
 void PatternEditor::mouseAnyMove(const juce::MouseEvent &event) {
     repaint(pulseToX(cursorPulse), 0, 1, getHeight());
-    repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
+    repaint(0, noteToY(cursorNote), getWidth(), state.displayPixelsPerNote);
 
     cursorPulse = xToPulse(event.x);
     cursorNote = yToNote(event.y);
@@ -322,7 +326,7 @@ void PatternEditor::mouseAnyMove(const juce::MouseEvent &event) {
     mouseCursor = juce::MouseCursor::NormalCursor;
 
     repaint(pulseToX(cursorPulse), 0, 1, getHeight());
-    repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
+    repaint(0, noteToY(cursorNote), getWidth(), state.displayPixelsPerNote);
 }
 
 void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
@@ -875,11 +879,12 @@ void PatternEditor::audioUpdate() {
         newPosition = 0;
     }
 
+    int offsetX = static_cast<int>(state.displayOffsetX);
     if (oldPosition <= newPosition) {
-        repaint(oldPosition - state.offsetX, 0, newPosition - oldPosition + 1, getHeight());
+        repaint(oldPosition - offsetX, 0, newPosition - oldPosition + 1, getHeight());
     } else {
-        repaint(oldPosition - state.offsetX, 0, 1, getHeight());
-        repaint(newPosition - state.offsetX, 0, 1, getHeight());
+        repaint(oldPosition - offsetX, 0, 1, getHeight());
+        repaint(newPosition - offsetX, 0, 1, getHeight());
     }
 
     lastPlayPositionX = newPosition;
@@ -941,7 +946,7 @@ void PatternEditor::repaintSelectedNotes() {
 }
 
 juce::Rectangle<int> PatternEditor::getRectangleForNote(ArpNote &note) {
-    auto pixelsPerNote = state.pixelsPerNote;
+    int pixelsPerNote = state.displayPixelsPerNote;
 
     return {
             pulseToX(note.startPoint),

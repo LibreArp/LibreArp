@@ -23,8 +23,7 @@
 #include "../NoteData.h"
 
 
-class EditorState {
-public:
+struct EditorState {
 
     static const juce::Identifier TREEID_EDITOR_STATE;
     static const juce::Identifier TREEID_WIDTH;
@@ -45,10 +44,16 @@ public:
     int divisor = 4;
     int64_t lastNoteLength = -1;
     double lastNoteVelocity = NoteData::DEFAULT_VELOCITY;
-    int pixelsPerBeat = 100;
-    int pixelsPerNote = 12;
-    int offsetX = 0;
-    int offsetY = 0;
+
+    float targetPixelsPerBeat = 100;
+    float targetPixelsPerNote = 12;
+    float displayPixelsPerBeat = 100;
+    float displayPixelsPerNote = 12;
+
+    float targetOffsetX = 0;        ///< Target X-axis pattern editor offset
+    float targetOffsetY = 0;        ///< Target Y-axis pattern editor offset
+    float displayOffsetX = 0;       ///< Actually displayed X-axis pattern editor offset (for animation)
+    float displayOffsetY = 0;       ///< Actually displayed Y-axis pattern editor offset (for animation)
 
     [[nodiscard]] juce::ValueTree toValueTree() const;
     static EditorState fromValueTree(juce::ValueTree &tree);
