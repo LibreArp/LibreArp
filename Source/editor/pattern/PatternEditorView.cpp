@@ -134,6 +134,10 @@ void PatternEditorView::visibilityChanged() {
 void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
     state.targetPixelsPerBeat = juce::jmax(32.f, state.targetPixelsPerBeat + deltaX * X_ZOOM_RATE);
     state.targetPixelsPerNote = juce::jmax(8.f, state.targetPixelsPerNote + deltaY * Y_ZOOM_RATE);
+    if (!processor.getGlobals().isSmoothScrolling()) {
+        state.displayPixelsPerBeat = state.targetPixelsPerBeat;
+        state.displayPixelsPerNote = state.targetPixelsPerNote;
+    }
 
     editor.repaint();
     beatBar.repaint();
@@ -142,13 +146,20 @@ void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
 void PatternEditorView::scrollPattern(float deltaX, float deltaY) {
     state.targetOffsetX = juce::jmax(0.f, state.targetOffsetX - static_cast<int>(deltaX * X_SCROLL_RATE));
     state.targetOffsetY = state.targetOffsetY - static_cast<int>(deltaY * Y_SCROLL_RATE);
+    if (!processor.getGlobals().isSmoothScrolling()) {
+        state.displayOffsetX = state.targetOffsetX;
+        state.displayOffsetY = state.targetOffsetY;
+    }
 
     editor.repaint();
     beatBar.repaint();
 }
 
 void PatternEditorView::updateDisplayDimensions() {
-    const float EPSILON = 0.1;
+    if (!processor.getGlobals().isSmoothScrolling())
+        return;
+
+    const float EPSILON = 0.001;
     const float AGGR = 0.3;
     bool updated = false;
 

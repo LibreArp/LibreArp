@@ -59,6 +59,7 @@ const juce::Identifier Globals::TREEID_MIN_SECS_BEFORE_UPDATE_CHECK = "minSecsBe
 const juce::Identifier Globals::TREEID_LAST_UPDATE_CHECK_TIME = "lastUpdateCheckTime"; // NOLINT
 const juce::Identifier Globals::TREEID_GUI_SCALE_FACTOR = "guiScaleFactor"; // NOLINT
 const juce::Identifier Globals::TREEID_NON_PLAYING_MODE = "nonPlayingMode"; // NOLINT
+const juce::Identifier Globals::TREEID_SMOOTH_SCROLLING = "smoothScrolling"; // NOLINT
 
 Globals::Globals() :
         changed(false),
@@ -105,6 +106,7 @@ void Globals::reset() {
     lastUpdateCheckTime = 0L;
     guiScaleFactor = 1.0;
     nonPlayingMode = NonPlayingMode::Value::PASSTHROUGH;
+    smoothScrolling = true;
 }
 
 bool Globals::save() {
@@ -191,6 +193,9 @@ void Globals::parseValueTree(const juce::ValueTree &tree) {
     }
     if (tree.hasProperty(TREEID_NON_PLAYING_MODE)) {
         this->nonPlayingMode = NonPlayingMode::of(tree.getProperty(TREEID_NON_PLAYING_MODE));
+    }
+    if (tree.hasProperty(TREEID_SMOOTH_SCROLLING)) {
+        this->smoothScrolling = tree.getProperty(TREEID_SMOOTH_SCROLLING);
     }
 }
 
@@ -281,5 +286,16 @@ NonPlayingMode::Value Globals::getNonPlayingMode() const {
 void Globals::setNonPlayingMode(NonPlayingMode::Value nonPlayingMode) {
     std::scoped_lock lock(mutex);
     Globals::nonPlayingMode = nonPlayingMode;
+    this->changed = true;
+}
+
+bool Globals::isSmoothScrolling() const {
+    std::scoped_lock lock(mutex);
+    return smoothScrolling;
+}
+
+void Globals::setSmoothScrolling(bool value) {
+    std::scoped_lock lock(mutex);
+    this->smoothScrolling = value;
     this->changed = true;
 }

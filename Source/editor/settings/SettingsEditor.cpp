@@ -63,6 +63,13 @@ SettingsEditor::SettingsEditor(LibreArp& p) : processor(p) {
     nonPlayingModeLabel.setText("Global non-playing mode", juce::NotificationType::dontSendNotification);
     nonPlayingModeLabel.setTooltip(nonPlayingModeTooltip);
     addAndMakeVisible(nonPlayingModeLabel);
+
+    smoothScrollingToggle.setButtonText("Smooth scrolling");
+    smoothScrollingToggle.setTooltip("When this is enabled, the scroll and zoom of the pattern editor is smoothly animated.");
+    smoothScrollingToggle.onStateChange = [this] {
+        processor.getGlobals().setSmoothScrolling(smoothScrollingToggle.getToggleState());
+    };
+    addAndMakeVisible(smoothScrollingToggle);
 }
 
 void SettingsEditor::resized() {
@@ -73,6 +80,7 @@ void SettingsEditor::updateSettingsValues() {
     updateCheckToggle.setToggleState(processor.getGlobals().isCheckForUpdatesEnabled(), juce::NotificationType::dontSendNotification);
     guiScaleFactorSlider.setValue(processor.getGlobals().getGuiScaleFactor());
     nonPlayingModeComboBox.setSelectedId(static_cast<int>(processor.getGlobals().getNonPlayingMode()));
+    smoothScrollingToggle.setToggleState(processor.getGlobals().isSmoothScrolling(), juce::NotificationType::dontSendNotification);
 }
 
 void SettingsEditor::visibilityChanged() {
@@ -95,6 +103,10 @@ void SettingsEditor::updateLayout() {
     auto scaleFactorArea = area.removeFromTop(24);
     guiScaleFactorSlider.setBounds(scaleFactorArea.removeFromLeft(96));
     guiScaleFactorLabel.setBounds(scaleFactorArea);
+
+    area.removeFromTop(4);
+
+    smoothScrollingToggle.setBounds(area.removeFromTop(24));
 
     area.removeFromTop(4);
 

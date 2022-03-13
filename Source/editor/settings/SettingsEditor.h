@@ -50,6 +50,8 @@ private:
     juce::ComboBox nonPlayingModeComboBox;
     juce::Label nonPlayingModeLabel;
 
+    juce::ToggleButton smoothScrollingToggle;
+
     LibreArp &processor;
 };
 

@@ -89,7 +89,7 @@ protected:
      * Converts a pulse position to a view-space X coordinate.
      */
     int pulseToX(int64_t pulse) {
-        return pulseToAbsX(pulse) - ((T*) this)->state.displayOffsetX;
+        return pulseToAbsX(pulse) - static_cast<int>(((T*) this)->state.displayOffsetX);
     }
 
     /**
@@ -106,7 +106,7 @@ protected:
      * Converts a note number to a view-space Y coordinate.
      */
     int noteToY(int note) {
-        return noteToAbsY(note) - ((T*) this)->state.displayOffsetY;
+        return noteToAbsY(note) - static_cast<int>(((T*) this)->state.displayOffsetY);
     }
 
     /**
