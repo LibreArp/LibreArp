@@ -99,9 +99,9 @@ void PatternEditor::paint(juce::Graphics &g) {
     }
 
     // - Vertical
-    int startingPulse = xToPulse(unoffsDrawRegion.getX());
-    int endingPulse = xToPulse(unoffsDrawRegion.getRight());
     int pulseInc = pattern.getTimebase() / state.divisor;
+    int startingPulse = xToPulse(unoffsDrawRegion.getX()) - pulseInc;
+    int endingPulse = xToPulse(unoffsDrawRegion.getRight()) + pulseInc;
     for (int i = startingPulse; i < endingPulse; i += pulseInc) {
         if (i % pattern.getTimebase() == 0)
             g.fillRect(pulseToX(i) - 2, 0, 4, getHeight());
@@ -112,11 +112,11 @@ void PatternEditor::paint(juce::Graphics &g) {
     // Draw octaves
     if (numInputNotes > 0) {
         g.setColour(Style::OCTAVE_LINE_COLOUR);
-        auto pixelsPerOctave = pixelsPerNote * numInputNotes;
 
-        int i = (getHeight() / 2 - offsetY) % pixelsPerOctave - pixelsPerNote / 2 + pixelsPerNote;
-        for (/* above */; i < getHeight(); i += pixelsPerOctave) {
-            g.fillRect(drawRegion.getX(), i, drawRegion.getWidth(), 1);
+        int startingNote = (yToNote(unoffsDrawRegion.getBottom()) / numInputNotes - 1) * numInputNotes - 1;
+        int endingNote = (yToNote(unoffsDrawRegion.getY()) / numInputNotes + 1) * numInputNotes;
+        for (int i = startingNote; i < endingNote; i += numInputNotes) {
+            g.fillRect(unoffsDrawRegion.getX(), noteToY(i), unoffsDrawRegion.getWidth(), 1);
         }
     }
 
