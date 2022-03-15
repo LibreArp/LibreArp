@@ -32,7 +32,6 @@ BeatBar::BeatBar(LibreArp &p, EditorState &e, PatternEditorView &ec)
 
 void BeatBar::paint(juce::Graphics &g) {
     auto &pattern = processor.getPattern();
-    int pixelsPerBeat = state.displayPixelsPerBeat;
 
     // Draw background
     g.setColour(Style::BEATBAR_BACKGROUND_COLOUR);
@@ -50,17 +49,15 @@ void BeatBar::paint(juce::Graphics &g) {
 
     // Draw beat lines
     g.setFont(20);
-    int offsetX = static_cast<int>(state.displayOffsetX);
-    int n = 1 + offsetX / pixelsPerBeat;
-    for (auto i = static_cast<float>((1 - offsetX) % pixelsPerBeat);
-            i < static_cast<float>(getWidth());
-            i += static_cast<float>(pixelsPerBeat), n++)
+    int startingPulse = (xToPulse(0, false) / pattern.getTimebase()) * pattern.getTimebase();
+    int endingPulse = (xToPulse(getWidth(), false) / pattern.getTimebase() + 1) * pattern.getTimebase();
+    for (int i = startingPulse; i < endingPulse; i += pattern.getTimebase())
     {
         g.setColour(Style::BEATBAR_LINE_COLOUR);
-        g.fillRect(juce::roundToInt(i), 0, 4, getHeight());
+        g.fillRect(pulseToX(i) - 2, 0, 4, getHeight());
 
         g.setColour(Style::BEATBAR_NUMBER_COLOUR);
-        g.drawText(juce::String(n), static_cast<int>(i) + TEXT_OFFSET, 0, 32, getHeight(), juce::Justification::centredLeft);
+        g.drawText(juce::String(i / pattern.getTimebase()), pulseToX(i) + TEXT_OFFSET, 0, 32, getHeight(), juce::Justification::centredLeft);
     }
 
     // Draw loop lines
