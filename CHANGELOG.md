@@ -10,6 +10,8 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 ### LibreArp 2.4
 
 * **IMPROVE** Added scroll and zoom smoothing
+* **IMPROVE** Extended pattern editor tooltips
+  * They now describe the function of modifiers (`Alt`, `Ctrl`, `Shift`)
 
 ### LibreArp 2.3
 

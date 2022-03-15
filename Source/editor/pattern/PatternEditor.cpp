@@ -335,6 +335,31 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
     auto &notes = pattern.getNotes();
     setTooltip("");
 
+    const auto SIZE_TOOLTIP =
+        "Drag to change this note's size\n"
+        "Alt: disable snapping to grid";
+    const auto SIZE_SELECTION_TOOLTIP =
+        "Drag to change the selected notes' size\n"
+        "Alt: disable snapping to grid";
+    const auto MOVE_TOOLTIP =
+        "Drag to move this note\n"
+        "Right click: delete this note\n"
+        "Alt: disable snapping to grid\n"
+        "Shift: duplicate note / snap horizontally\n"
+        "Ctrl: snap vertically";
+    const auto MOVE_SELECTION_TOOLTIP =
+        "Drag to move the selected notes\n"
+        "Right click: delete this note\n"
+        "Alt: disable snapping to grid\n"
+        "Shift: duplicate the selected notes / snap horizontally\n"
+        "Ctrl: snap vertically";
+    const auto STRETCH_SELECTION_TOOLTIP =
+        "Drag to stretch the selection\n"
+        "Alt: disable snapping to grid";
+    const auto RESIZE_LOOP_TOOLTIP =
+        "Drag to resize the loop\n"
+        "Alt: disable snapping to grid";
+
     for (uint64_t i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
         auto noteRect = getRectangleForNote(note);
@@ -343,30 +368,30 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
                 mouseCursor = juce::MouseCursor::LeftEdgeResizeCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, notes, event);
-                    setTooltip("Drag to change this note's size");
+                    setTooltip(SIZE_TOOLTIP);
                 } else {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, selectedNotes, notes, event);
-                    setTooltip("Drag to change the selected notes' size");
+                    setTooltip(SIZE_SELECTION_TOOLTIP);
                 }
                 return;
             } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - Style::NOTE_RESIZE_TOLERANCE)) {
                 mouseCursor = juce::MouseCursor::RightEdgeResizeCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, notes, event);
-                    setTooltip("Drag to change this note's size");
+                    setTooltip(SIZE_TOOLTIP);
                 } else {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, selectedNotes, notes, event);
-                    setTooltip("Drag to change the selected notes' size");
+                    setTooltip(SIZE_SELECTION_TOOLTIP);
                 }
                 return;
             } else {
                 mouseCursor = juce::MouseCursor::DraggingHandCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, notes, event);
-                    setTooltip("Drag to move this note");
+                    setTooltip(MOVE_TOOLTIP);
                 } else {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, selectedNotes, notes, event);
-                    setTooltip("Drag to move the selected notes");
+                    setTooltip(MOVE_SELECTION_TOOLTIP);
                 }
                 return;
             }
@@ -379,7 +404,7 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
             auto startMinX = startX - Style::LINE_RESIZE_TOLERANCE;
             auto startMaxX = startX + Style::LINE_RESIZE_TOLERANCE;
             if (event.x >= startMinX && event.x <= startMaxX) {
-                setTooltip("Drag to stretch the selection");
+                setTooltip(STRETCH_SELECTION_TOOLTIP);
                 mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
                 dragAction.stretchDragAction(DragAction::TYPE_STRETCH_START, selectedNotes, pattern.getNotes(),
                                              timeSelectionStart, timeSelectionEnd);
@@ -390,7 +415,7 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
             auto endMinX = endX - Style::LINE_RESIZE_TOLERANCE;
             auto endMaxX = endX + Style::LINE_RESIZE_TOLERANCE;
             if (event.x >= endMinX && event.x <= endMaxX) {
-                setTooltip("Drag to stretch the selection");
+                setTooltip(STRETCH_SELECTION_TOOLTIP);
                 mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
                 dragAction.stretchDragAction(DragAction::TYPE_STRETCH_END, selectedNotes, pattern.getNotes(),
                                              timeSelectionStart, timeSelectionEnd);
@@ -404,7 +429,7 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
         auto loopMinX = loopStartLine - Style::LINE_RESIZE_TOLERANCE;
         auto loopMaxX = loopStartLine + Style::LINE_RESIZE_TOLERANCE;
         if (event.x >= loopMinX && event.x <= loopMaxX) {
-            setTooltip("Drag to resize the loop");
+            setTooltip(RESIZE_LOOP_TOOLTIP);
             mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
             dragAction.basicDragAction(DragAction::TYPE_LOOP_START_RESIZE);
             return;
@@ -416,7 +441,7 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
         auto loopMinX = loopEndLine - Style::LINE_RESIZE_TOLERANCE;
         auto loopMaxX = loopEndLine + Style::LINE_RESIZE_TOLERANCE;
         if (event.x >= loopMinX && event.x <= loopMaxX) {
-            setTooltip("Drag to resize the loop");
+            setTooltip(RESIZE_LOOP_TOOLTIP);
             mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
             dragAction.basicDragAction(DragAction::TYPE_LOOP_END_RESIZE);
             return;
