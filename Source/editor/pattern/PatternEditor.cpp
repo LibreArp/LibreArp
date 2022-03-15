@@ -51,13 +51,12 @@ void PatternEditor::paint(juce::Graphics &g) {
     view.updateDisplayDimensions();
 
     ArpPattern &pattern = processor.getPattern();
-    int pixelsPerBeat = state.displayPixelsPerBeat;
     int pixelsPerNote = state.displayPixelsPerNote;
+    int offsetX = static_cast<int>(state.displayOffsetX);
+    int offsetY = static_cast<int>(state.displayOffsetY);
 
     auto unoffsDrawRegion = g.getClipBounds();
     auto drawRegion = unoffsDrawRegion;
-    int offsetX = static_cast<int>(state.displayOffsetX);
-    int offsetY = static_cast<int>(state.displayOffsetY);
     drawRegion.translate(-offsetX, -offsetY);
 
     // Draw background
@@ -65,18 +64,15 @@ void PatternEditor::paint(juce::Graphics &g) {
     g.fillRect(unoffsDrawRegion);
 
     // Draw bars
-    // TODO - this is broken, fix!!!
-    /*
     if (processor.getTimeSigDenominator() > 0 && processor.getTimeSigDenominator() <= 32) {
         g.setColour(Style::BAR_SHADE_COLOUR);
-        int barPulses = (pattern.getTimebase() * processor.getTimeSigNumerator()) / processor.getTimeSigDenominator();
+        int barPulses = (pattern.getTimebase() * processor.getTimeSigNumerator() * 4) / processor.getTimeSigDenominator();
         int startingPulse = (xToPulse(0, false) / barPulses) * barPulses;
         int endingPulse = (xToPulse(getWidth(), false) / barPulses + 1) * barPulses;
         for (int i = startingPulse + barPulses; i < endingPulse; i += barPulses * 2) {
-            g.fillRect(pulseToX(i), unoffsDrawRegion.getY(), pulseToX(i + barPulses), unoffsDrawRegion.getHeight());
+            g.fillRect(pulseToX(i), unoffsDrawRegion.getY(), pulseToX(barPulses), unoffsDrawRegion.getHeight());
         }
     }
-    */
 
     // Draw octave 0
     auto numInputNotes = processor.getNumInputNotes();
@@ -96,15 +92,15 @@ void PatternEditor::paint(juce::Graphics &g) {
     // Draw gridlines
     // - Horizontal
     g.setColour(Style::EDITOR_GRIDLINES_COLOUR);
-    int startingNote = yToNote(getHeight());
-    int endingNote = yToNote(0);
+    int startingNote = yToNote(unoffsDrawRegion.getBottom()) - 1;
+    int endingNote = yToNote(unoffsDrawRegion.getY()) + 1;
     for (int i = startingNote; i < endingNote; i++) {
         g.fillRect(0, noteToY(i) - 1, getWidth(), 2);
     }
 
     // - Vertical
-    int startingPulse = xToPulse(0);
-    int endingPulse = xToPulse(getWidth());
+    int startingPulse = xToPulse(unoffsDrawRegion.getX());
+    int endingPulse = xToPulse(unoffsDrawRegion.getRight());
     int pulseInc = pattern.getTimebase() / state.divisor;
     for (int i = startingPulse; i < endingPulse; i += pulseInc) {
         if (i % pattern.getTimebase() == 0)

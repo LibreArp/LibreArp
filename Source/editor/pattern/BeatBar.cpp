@@ -57,7 +57,7 @@ void BeatBar::paint(juce::Graphics &g) {
         g.fillRect(pulseToX(i) - 2, 0, 4, getHeight());
 
         g.setColour(Style::BEATBAR_NUMBER_COLOUR);
-        g.drawText(juce::String(i / pattern.getTimebase()), pulseToX(i) + TEXT_OFFSET, 0, 32, getHeight(), juce::Justification::centredLeft);
+        g.drawText(juce::String(1 + i / pattern.getTimebase()), pulseToX(i) + TEXT_OFFSET, 0, 32, getHeight(), juce::Justification::centredLeft);
     }
 
     // Draw loop lines
