@@ -67,10 +67,11 @@ void PatternEditor::paint(juce::Graphics &g) {
     if (processor.getTimeSigDenominator() > 0 && processor.getTimeSigDenominator() <= 32) {
         g.setColour(Style::BAR_SHADE_COLOUR);
         int barPulses = (pattern.getTimebase() * processor.getTimeSigNumerator() * 4) / processor.getTimeSigDenominator();
-        int startingPulse = (xToPulse(0, false) / barPulses) * barPulses;
-        int endingPulse = (xToPulse(getWidth(), false) / barPulses + 1) * barPulses;
-        for (int i = startingPulse + barPulses; i < endingPulse; i += barPulses * 2) {
-            g.fillRect(pulseToX(i), unoffsDrawRegion.getY(), pulseToX(barPulses), unoffsDrawRegion.getHeight());
+        int twoBarPulses = 2 * barPulses;
+        int startingPulse = (xToPulse(0, false) / twoBarPulses - 1) * twoBarPulses;
+        int endingPulse = (xToPulse(getWidth(), false) / twoBarPulses + 1) * twoBarPulses;
+        for (int i = startingPulse + barPulses; i < endingPulse; i += twoBarPulses) {
+            g.fillRect(pulseToX(i), unoffsDrawRegion.getY(), pulseToAbsX(barPulses), unoffsDrawRegion.getHeight());
         }
     }
 
@@ -99,14 +100,19 @@ void PatternEditor::paint(juce::Graphics &g) {
     }
 
     // - Vertical
-    int pulseInc = pattern.getTimebase() / state.divisor;
-    int startingPulse = xToPulse(unoffsDrawRegion.getX()) - pulseInc;
-    int endingPulse = xToPulse(unoffsDrawRegion.getRight()) + pulseInc;
-    for (int i = startingPulse; i < endingPulse; i += pulseInc) {
-        if (i % pattern.getTimebase() == 0)
-            g.fillRect(pulseToX(i) - 2, 0, 4, getHeight());
-        else
-            g.fillRect(pulseToX(i) - 1, 0, 2, getHeight());
+    float stepInc = (float) pattern.getTimebase() / (float) state.divisor;
+    int si = (int) stepInc;
+    int startingPulse = (xToPulse(unoffsDrawRegion.getX(), false) / si - 1) * si;
+    int endingPulse = (xToPulse(unoffsDrawRegion.getRight(), false) / si + 1) * si;
+    for (float i = startingPulse; i < endingPulse; i += stepInc) {
+        g.fillRect(pulseToX((int) i) - 1, 0, 2, getHeight());
+    }
+
+    int beatInc = pattern.getTimebase();
+    startingPulse = (xToPulse(unoffsDrawRegion.getX(), false) / beatInc - 1) * beatInc;
+    endingPulse = (xToPulse(unoffsDrawRegion.getRight(), false) / beatInc + 1) * beatInc;
+    for (int i = startingPulse; i < endingPulse; i += beatInc) {
+        g.fillRect(pulseToX(i) - 2, 0, 4, getHeight());
     }
 
     // Draw octaves
