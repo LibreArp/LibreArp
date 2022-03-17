@@ -51,8 +51,8 @@ private:
     juce::TextButton loadButton;
     juce::ToggleButton bypassToggle;
 
-    juce::Slider snapSlider;
-    juce::Label snapSliderLabel;
+    juce::ComboBox snapMenu;
+    juce::Label snapMenuLabel;
 
     juce::Slider loopResetSlider;
     juce::Label loopResetSliderLabel;

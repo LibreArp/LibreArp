@@ -14,6 +14,7 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
   * They now describe the function of modifiers (`Alt`, `Ctrl`, `Shift`)
 * **FIX** The grid in the pattern editor is now drawn more precisely relative to the notes
 * **FIX** When zooming, scroll now remains in position relative to content
+* **FIX** *Snap* is now a menu that only allows safe values
 
 ### LibreArp 2.3
 

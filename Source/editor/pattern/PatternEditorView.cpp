@@ -86,19 +86,28 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     loopResetSliderLabel.setJustificationType(juce::Justification::centredLeft);
     addAndMakeVisible(loopResetSliderLabel);
 
-    snapSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
-    snapSlider.setRange(1, 16, 1);
-    snapSlider.setValue(state.divisor, juce::NotificationType::dontSendNotification);
-    snapSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
-    snapSlider.onValueChange = [this] {
-        state.divisor = static_cast<int>(snapSlider.getValue());
+    {
+        snapMenu.addItem("1/32 beat", 32);
+        snapMenu.addItem("1/16 beat", 16);
+        snapMenu.addItem("1/12 beat", 12);
+        snapMenu.addItem("1/8 beat", 8);
+        snapMenu.addItem("1/6 beat", 6);
+        snapMenu.addItem("1/4 beat", 4);
+        snapMenu.addItem("1/3 beat", 3);
+        snapMenu.addItem("1/2 beat", 2);
+        snapMenu.addItem("Beat", 1);
+    }
+    snapMenu.setEditableText(false);
+    snapMenu.setScrollWheelEnabled(true);
+    snapMenu.onChange = [this] {
+        state.divisor = snapMenu.getSelectedId();
         editor.repaint();
     };
-    addAndMakeVisible(snapSlider);
+    addAndMakeVisible(snapMenu);
 
-    snapSliderLabel.setText("Snap:", juce::NotificationType::dontSendNotification);
-    snapSliderLabel.setJustificationType(juce::Justification::centredRight);
-    addAndMakeVisible(snapSliderLabel);
+    snapMenuLabel.setText("Snap:", juce::NotificationType::dontSendNotification);
+    snapMenuLabel.setJustificationType(juce::Justification::centredRight);
+    addAndMakeVisible(snapMenuLabel);
 
     swingSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
     swingSlider.setRange(0.0, 1.0);
@@ -218,7 +227,7 @@ void PatternEditorView::audioUpdate() {
 
 void PatternEditorView::updateParameterValues() {
     loopResetSlider.setValue(processor.getLoopReset(), juce::NotificationType::dontSendNotification);
-    snapSlider.setValue(state.divisor, juce::NotificationType::dontSendNotification);
+    snapMenu.setSelectedId(state.divisor, juce::NotificationType::dontSendNotification);
     swingSlider.setValue(processor.getSwing(), juce::NotificationType::dontSendNotification);
     bypassToggle.setToggleState(processor.getBypass(), juce::NotificationType::dontSendNotification);
 }
@@ -241,8 +250,8 @@ void PatternEditorView::updateLayout() {
     swingSliderLabel.setBounds(toolBarArea.removeFromLeft(8 + swingSliderLabel.getFont().getStringWidth(swingSliderLabel.getText())));
     swingSlider.setBounds(toolBarArea.removeFromLeft(128));
 
-    snapSlider.setBounds(toolBarArea.removeFromRight(96));
-    snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
+    snapMenu.setBounds(toolBarArea.removeFromRight(96));
+    snapMenuLabel.setBounds(toolBarArea.removeFromRight(64));
 
     area.removeFromTop(8);
 
