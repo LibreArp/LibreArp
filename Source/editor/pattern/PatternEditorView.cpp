@@ -132,9 +132,20 @@ void PatternEditorView::visibilityChanged() {
 }
 
 void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
+    float oldBeat = state.targetPixelsPerBeat;
+    float oldNote = state.targetPixelsPerNote;
     state.targetPixelsPerBeat = juce::jmax(32.f, state.targetPixelsPerBeat + deltaX * X_ZOOM_RATE);
     state.targetPixelsPerNote = juce::jmax(8.f, state.targetPixelsPerNote + deltaY * Y_ZOOM_RATE);
+
+    float xPerc = state.targetPixelsPerBeat / oldBeat;
+    float yPerc = state.targetPixelsPerNote / oldNote;
+
+    state.targetOffsetX *= xPerc;
+    state.targetOffsetY *= yPerc;
+
     if (!processor.getGlobals().isSmoothScrolling()) {
+        state.displayOffsetX = state.targetOffsetX;
+        state.displayOffsetY = state.targetOffsetY;
         state.displayPixelsPerBeat = state.targetPixelsPerBeat;
         state.displayPixelsPerNote = state.targetPixelsPerNote;
     }
