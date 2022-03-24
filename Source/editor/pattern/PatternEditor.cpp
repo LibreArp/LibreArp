@@ -189,8 +189,8 @@ void PatternEditor::paint(juce::Graphics &g) {
     if (loopEndLine < getWidth()) g.fillRect(loopEndLine, 0, getWidth() - loopEndLine, getHeight());
 
     g.setColour(Style::LOOP_LINE_COLOUR);
-    g.fillRect(loopStartLine, 0, 4, getHeight());
-    g.fillRect(loopEndLine, 0, 4, getHeight());
+    g.fillRect(loopStartLine - 2, 0, 4, getHeight());
+    g.fillRect(loopEndLine - 2, 0, 4, getHeight());
 
     // Draw playback position indicator
     if (lastPlayPositionX > 0) {
@@ -207,8 +207,8 @@ void PatternEditor::paint(juce::Graphics &g) {
         auto endX = pulseToX(timeSelectionEnd);
 
         g.setColour(Style::SELECTED_TIME_BORDER_COLOUR);
-        g.fillRect(startX, 0, 2, getHeight());
-        g.fillRect(endX, 0, 2, getHeight());
+        g.fillRect(startX - 1, 0, 2, getHeight());
+        g.fillRect(endX - 1, 0, 2, getHeight());
 
         g.setColour(Style::SELECTED_TIME_BACKGROUND_COLOUR);
         g.fillRect(startX, 0, endX - startX, getHeight());

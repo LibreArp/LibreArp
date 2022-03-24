@@ -61,8 +61,8 @@ void BeatBar::paint(juce::Graphics &g) {
 
     // Draw loop lines
     g.setColour(Style::LOOP_LINE_COLOUR);
-    g.fillRect(loopStartLine, 0, 4, getHeight());
-    g.fillRect(loopEndLine, 0, 4, getHeight());
+    g.fillRect(loopStartLine - 2, 0, 4, getHeight());
+    g.fillRect(loopEndLine - 2, 0, 4, getHeight());
 }
 
 void BeatBar::mouseMove(const juce::MouseEvent& event) {

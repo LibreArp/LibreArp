@@ -18,6 +18,8 @@
 #pragma once
 
 #include <type_traits>
+#include <mutex>
+#include <juce_gui_basics/juce_gui_basics.h>
 
 /**
  * This class provides methods for editing of the loop region.
