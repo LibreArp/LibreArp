@@ -69,6 +69,7 @@ target_sources(LibreArp
 
         Source/editor/pattern/BeatBar.cpp Source/editor/pattern/BeatBar.h
         Source/editor/pattern/LoopEditor.h
+        Source/editor/pattern/NoteBar.cpp Source/editor/pattern/NoteBar.h
         Source/editor/pattern/PatternEditor.cpp Source/editor/pattern/PatternEditor.h
         Source/editor/pattern/PatternEditorView.cpp Source/editor/pattern/PatternEditorView.h
         Source/editor/pattern/PulseConvertor.h

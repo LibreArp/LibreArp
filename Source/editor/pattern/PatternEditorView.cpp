@@ -30,7 +30,8 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
                   processor.getGlobals().getPatternPresetsDir(),
                   "*.lapreset"),
           editor(p, state, *this),
-          beatBar(p, state, *this)
+          beatBar(p, state, *this),
+          noteBar(p, state, *this)
 {
 
     loadButton.setButtonText("Load pattern...");
@@ -68,8 +69,15 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     };
     addAndMakeVisible(bypassToggle);
 
-    addAndMakeVisible(beatBar);
     addAndMakeVisible(editor);
+    addAndMakeVisible(beatBar);
+    addAndMakeVisible(noteBar);
+
+    recentreButton.setButtonText("");
+    recentreButton.onClick = [this] {
+        resetPatternOffset();
+    };
+    addAndMakeVisible(recentreButton);
 
     loopResetSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
     loopResetSlider.setRange(0, 65535, 1);
@@ -161,6 +169,7 @@ void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
 
     editor.repaint();
     beatBar.repaint();
+    noteBar.repaint();
 }
 
 void PatternEditorView::scrollPattern(float deltaX, float deltaY) {
@@ -173,6 +182,7 @@ void PatternEditorView::scrollPattern(float deltaX, float deltaY) {
 
     editor.repaint();
     beatBar.repaint();
+    noteBar.repaint();
 }
 
 void PatternEditorView::updateDisplayDimensions() {
@@ -206,15 +216,21 @@ void PatternEditorView::updateDisplayDimensions() {
     if (updated) {
         editor.repaint();
         beatBar.repaint();
+        noteBar.repaint();
     }
 }
 
 void PatternEditorView::resetPatternOffset() {
     state.targetOffsetX = 0;
     state.targetOffsetY = 0;
+    if (!processor.getGlobals().isSmoothScrolling()) {
+        state.displayOffsetX = state.targetOffsetX;
+        state.displayOffsetY = state.targetOffsetY;
+    }
 
     editor.repaint();
     beatBar.repaint();
+    noteBar.repaint();
 }
 
 void PatternEditorView::audioUpdate() {
@@ -262,6 +278,10 @@ void PatternEditorView::updateLayout() {
 
     area.removeFromBottom(8);
 
-    beatBar.setBounds(area.removeFromTop(20));
+    static const auto NOTE_BAR_WIDTH = 45;
+    auto beatBarArea = area.removeFromTop(20);
+    recentreButton.setBounds(beatBarArea.removeFromLeft(NOTE_BAR_WIDTH));
+    beatBar.setBounds(beatBarArea);
+    noteBar.setBounds(area.removeFromLeft(NOTE_BAR_WIDTH));
     editor.setBounds(area);
 }

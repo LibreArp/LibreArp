@@ -22,6 +22,7 @@
 #include "../../LibreArp.h"
 #include "PatternEditor.h"
 #include "BeatBar.h"
+#include "NoteBar.h"
 #include "../../AudioUpdatable.h"
 
 
@@ -62,6 +63,8 @@ private:
 
     PatternEditor editor;
     BeatBar beatBar;
+    NoteBar noteBar;
+    juce::TextButton recentreButton;
 
     void updateParameterValues();
     void updateLayout();

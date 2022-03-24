@@ -51,8 +51,7 @@ void BeatBar::paint(juce::Graphics &g) {
     g.setFont(20);
     int startingPulse = (xToPulse(0, false) / pattern.getTimebase()) * pattern.getTimebase();
     int endingPulse = (xToPulse(getWidth(), false) / pattern.getTimebase() + 1) * pattern.getTimebase();
-    for (int i = startingPulse; i < endingPulse; i += pattern.getTimebase())
-    {
+    for (int i = startingPulse; i < endingPulse; i += pattern.getTimebase()) {
         g.setColour(Style::BEATBAR_LINE_COLOUR);
         g.fillRect(pulseToX(i) - 2, 0, 4, getHeight());
 
