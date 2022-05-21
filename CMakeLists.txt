@@ -40,6 +40,7 @@ juce_add_binary_data(LibreArpBinaries
 
 juce_add_plugin(LibreArp
         COMPANY_NAME "The LibreArp contributors"
+        LV2URI "http://librearp.gitlab.io/plugin/librearp"
         IS_SYNTH TRUE
         NEEDS_MIDI_INPUT TRUE
         NEEDS_MIDI_OUTPUT TRUE
@@ -52,7 +53,7 @@ juce_add_plugin(LibreArp
         COPY_PLUGIN_AFTER_BUILD FALSE
         PLUGIN_MANUFACTURER_CODE Larx
         PLUGIN_CODE Larx
-        FORMATS AU VST3 Standalone
+        FORMATS AU VST3 LV2 Standalone
         NEEDS_CURL TRUE
         PRODUCT_NAME "LibreArp")
 

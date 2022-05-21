@@ -2,7 +2,7 @@ variables:
   GIT_DEPTH: 5
   GIT_SUBMODULE_STRATEGY: recursive
   DOCKER_IMAGE_NAME_LINUX: librearp/linux-build-docker
-  CMAKE_TARGETS: LibreArp_VST3
+  CMAKE_TARGETS: LibreArp_VST3 LibreArp_LV2
 
 stages:
   - build
@@ -29,11 +29,17 @@ build-linux:
     - linux
   image: $CI_REGISTRY/$DOCKER_IMAGE_NAME_LINUX:latest
   after_script:
+    # VST3
     - cd build/LibreArp_artefacts/VST3
     - tar -czvf LibreArp.vst3.tar.gz LibreArp.vst3
     - cd -
+
+    # LV2
+    - cd build/LibreArp_artefacts/LV2
+    - tar -czvf LibreArp.lv2.tar.gz LibreArp.lv2
+    - cd -
   artifacts:
-    name: LibreArp-vst3-linux
+    name: LibreArp-linux
 
 build-win:
   extends: .build-job
@@ -43,7 +49,11 @@ build-win:
     - choco install --yes --no-progress cmake --installargs 'ADD_CMAKE_TO_PATH=System'
     - $env:Path += ";C:\Program Files\CMake\bin\"
   after_script:
-    - cd build\LibreArp_artefacts\Release\VST3
+    - Push-Location build\LibreArp_artefacts\Release\VST3
     - Compress-Archive -Path LibreArp.vst3 -DestinationPath LibreArp.vst3.zip
+    - Pop-Location
+    - Push-Location build\LibreArp_artefacts\Release\LV2
+    - Compress-Archive -Path LibreArp.lv2 -DestinationPath LibreArp.lv2.zip
+    - Pop-Location
   artifacts:
-    name: LibreArp-vst3-windows
+    name: LibreArp-windows
