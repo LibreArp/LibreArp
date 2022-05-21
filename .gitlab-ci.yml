@@ -2,10 +2,14 @@ variables:
   GIT_DEPTH: 5
   GIT_SUBMODULE_STRATEGY: recursive
   DOCKER_IMAGE_NAME_LINUX: librearp/linux-build-docker
-  CMAKE_TARGETS: LibreArp_VST3 LibreArp_LV2
 
 stages:
   - build
+
+
+#
+# Common pipeline templates
+#
 
 .build-job:
   stage: build
@@ -23,26 +27,47 @@ stages:
       - build/LibreArp_artefacts/**/*.a
       - build/LibreArp_artefacts/**/*.lib
 
-build-linux:
+.build-job-vst3:
   extends: .build-job
+  variables:
+    CMAKE_TARGETS: LibreArp_VST3
+
+.build-job-lv2:
+  extends: .build-job
+  variables:
+    CMAKE_TARGETS: LibreArp_LV2
+
+
+#
+# Build pipelines
+#
+
+build-linux-vst3:
+  extends: .build-job-vst3
   tags:
     - linux
   image: $CI_REGISTRY/$DOCKER_IMAGE_NAME_LINUX:latest
   after_script:
-    # VST3
     - cd build/LibreArp_artefacts/VST3
     - tar -czvf LibreArp.vst3.tar.gz LibreArp.vst3
     - cd -
+  artifacts:
+    name: LibreArp-vst3-linux
 
-    # LV2
+build-linux-lv2:
+  extends: .build-job-lv2
+  tags:
+    - linux
+  image: $CI_REGISTRY/$DOCKER_IMAGE_NAME_LINUX:latest
+  after_script:
     - cd build/LibreArp_artefacts/LV2
     - tar -czvf LibreArp.lv2.tar.gz LibreArp.lv2
     - cd -
   artifacts:
-    name: LibreArp-linux
+    name: LibreArp-lv2-linux
 
-build-win:
-  extends: .build-job
+build-win-vst3:
+  extends: .build-job-vst3
   tags:
     - windows
   before_script:
@@ -52,8 +77,5 @@ build-win:
     - Push-Location build\LibreArp_artefacts\Release\VST3
     - Compress-Archive -Path LibreArp.vst3 -DestinationPath LibreArp.vst3.zip
     - Pop-Location
-    - Push-Location build\LibreArp_artefacts\Release\LV2
-    - Compress-Archive -Path LibreArp.lv2 -DestinationPath LibreArp.lv2.zip
-    - Pop-Location
   artifacts:
-    name: LibreArp-windows
+    name: LibreArp-vst3-windows
