@@ -19,6 +19,7 @@
 
 #include "PatternEditorView.h"
 #include "../style/Colours.h"
+#include "../../util/MathConsts.h"
 
 #include "NoteBar.h"
 
@@ -60,7 +61,7 @@ void NoteBar::paint(juce::Graphics &g) {
     endingNote = (yToNote(0) / inputs + 1) * inputs;
     g.setFont(22);
     for (int i = startingNote; i < endingNote; i += inputs) {
-        int octave = std::abs(i / inputs) + std::signbit(i);
+        int octave = std::abs(i / inputs) + signum(i);
         juce::String sign = (octave == 0) ? "" : (i < 0) ? "-" : "+";
         int y = noteToY(i);
 
