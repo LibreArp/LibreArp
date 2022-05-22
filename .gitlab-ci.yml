@@ -79,3 +79,17 @@ build-win-vst3:
     - Pop-Location
   artifacts:
     name: LibreArp-vst3-windows
+
+build-win-lv2:
+  extends: .build-job-lv2
+  tags:
+    - windows
+  before_script:
+    - choco install --yes --no-progress cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+    - $env:Path += ";C:\Program Files\CMake\bin\"
+  after_script:
+    - Push-Location build\LibreArp_artefacts\Release\LV2
+    - Compress-Archive -Path LibreArp.lv2 -DestinationPath LibreArp.lv2.zip
+    - Pop-Location
+  artifacts:
+    name: LibreArp-lv2-windows
