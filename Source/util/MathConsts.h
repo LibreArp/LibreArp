@@ -18,8 +18,3 @@
 #pragma once
 
 #define X_PI 3.14159265358979323846
-
-template <typename T>
-int signum(T val) {
-    return (T(0) < val) - (val < T(0));
-}

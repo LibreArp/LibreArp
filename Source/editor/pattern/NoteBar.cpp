@@ -61,7 +61,9 @@ void NoteBar::paint(juce::Graphics &g) {
     endingNote = (yToNote(0) / inputs + 1) * inputs;
     g.setFont(22);
     for (int i = startingNote; i < endingNote; i += inputs) {
-        int octave = std::abs(i / inputs) + signum(i);
+        int octave = std::abs(i / inputs);
+        if (i < 0)
+            octave++;
         juce::String sign = (octave == 0) ? "" : (i < 0) ? "-" : "+";
         int y = noteToY(i);
 
@@ -73,5 +75,13 @@ void NoteBar::paint(juce::Graphics &g) {
 
         g.setColour(Style::BEATBAR_LINE_COLOUR);
         g.drawRect(0, y - 1, getWidth(), 2);
+    }
+}
+
+void NoteBar::audioUpdate() {
+    auto procNum = this->processor.getNumInputNotes();
+    if (procNum != this->lastNumInputNotes) {
+        this->lastNumInputNotes = procNum;
+        this->repaint();
     }
 }

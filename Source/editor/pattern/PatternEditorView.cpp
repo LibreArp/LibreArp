@@ -234,6 +234,7 @@ void PatternEditorView::resetPatternOffset() {
 }
 
 void PatternEditorView::audioUpdate() {
+    noteBar.audioUpdate();
     editor.audioUpdate();
 
     if (isVisible()) {
