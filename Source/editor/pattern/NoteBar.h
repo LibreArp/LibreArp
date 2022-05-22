@@ -27,6 +27,7 @@ class PatternEditorView;
 class NoteBar :
         public juce::Component,
         public juce::SettableTooltipClient,
+        public AudioUpdatable,
         PulseConvertor<NoteBar>
 {
 
@@ -34,10 +35,10 @@ class NoteBar :
 
 public:
 
-
     explicit NoteBar(LibreArp &p, EditorState &e, PatternEditorView &ec);
 
     void paint(juce::Graphics &g) override;
+    void audioUpdate() override;
 
 private:
 
@@ -46,4 +47,6 @@ private:
     PatternEditorView &view;
 
     bool snapEnabled = true;
+    int lastNumInputNotes = -1;
+
 };
