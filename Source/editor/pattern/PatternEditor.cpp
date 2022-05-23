@@ -77,18 +77,14 @@ void PatternEditor::paint(juce::Graphics &g) {
 
     // Draw octave 0
     auto numInputNotes = processor.getNumInputNotes();
-    int noteZeroY = noteToY(0);
-    if (numInputNotes > 0) {
+    int noteZeroY = noteToY(-1);
+    int topNoteY = noteToY(numInputNotes - 1);
+    int octaveHeight = noteZeroY - topNoteY;
+    if (numInputNotes > 0)
         g.setColour(Style::ZERO_OCTAVE_COLOUR);
-        auto height = numInputNotes * pixelsPerNote;
-        auto rect = juce::Rectangle<int>(
-                unoffsDrawRegion.getX(), noteZeroY - height + pixelsPerNote, unoffsDrawRegion.getWidth(), height);
-        g.fillRect(rect);
-    } else {
+    else
         g.setColour(Style::ZERO_LINE_COLOUR);
-        auto rect = juce::Rectangle<int>(unoffsDrawRegion.getX(), noteZeroY, unoffsDrawRegion.getWidth(), pixelsPerNote);
-        g.fillRect(rect);
-    }
+    g.fillRect(juce::Rectangle<int>(unoffsDrawRegion.getX(), topNoteY, unoffsDrawRegion.getWidth(), octaveHeight));
 
     // Draw gridlines
     // - Horizontal
