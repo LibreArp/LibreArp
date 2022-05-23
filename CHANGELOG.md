@@ -9,12 +9,14 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 
 ### LibreArp 2.4
 
+* **NEW** *Note panel*: A panel to the left of the pattern editor visualizing octaves and note numbers
 * **IMPROVE** Added scroll and zoom smoothing
 * **IMPROVE** Extended pattern editor tooltips
   * They now describe the function of modifiers (`Alt`, `Ctrl`, `Shift`)
-* **FIX** The grid in the pattern editor is now drawn more precisely relative to the notes
+* **FIX** The grid and other elements in the pattern editor is now drawn more precisely relative to the notes
 * **FIX** When zooming, scroll now remains in position relative to content
 * **FIX** *Snap* is now a menu that only allows safe values
+* **FIX** *Chord size* now correctly reads "Auto" when set to zero
 
 ### LibreArp 2.3
 
