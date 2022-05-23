@@ -128,7 +128,8 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     swingSlider.valueFromTextFunction = [] (const juce::String& text) {
         return text.getDoubleValue() / 100.0;
     };
-    swingSlider.setValue(0.555);
+    // Force-updates the slider to say '0 %' if initialized to zero
+    swingSlider.setValue(0.555, juce::NotificationType::dontSendNotification);
     swingSlider.onValueChange = [this] {
         processor.setSwing(static_cast<float>(swingSlider.getValue()));
     };
