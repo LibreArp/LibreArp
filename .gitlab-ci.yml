@@ -47,3 +47,16 @@ build-win:
     - Compress-Archive -Path LibreArp.vst3 -DestinationPath LibreArp.vst3.zip
   artifacts:
     name: LibreArp-vst3-windows
+
+build-macos:
+  extends: .build-job
+  tags:
+    - shared-macos-amd64
+  before_script:
+    - brew install cmake
+    - brew install gcc
+    - brew install curl
+  after_script:
+    - cd build/LibreArp_artefacts/VST3
+    - tar -czvf LibreArp.vst3.tar.gz LibreArp.vst3
+    - cd -
