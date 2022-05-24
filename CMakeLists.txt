@@ -15,8 +15,8 @@
 # along with this program.  If not, see https://librearp.gitlab.io/license/.
 #
 
-set(LIBREARP_VERSION "2.3")
-set(LIBREARP_VERSION_CODE "020300")
+set(LIBREARP_VERSION "2.4")
+set(LIBREARP_VERSION_CODE "020400")
 
 cmake_minimum_required(VERSION 3.16)
 project(LibreArp VERSION ${LIBREARP_VERSION})
@@ -70,6 +70,7 @@ target_sources(LibreArp
 
         Source/editor/pattern/BeatBar.cpp Source/editor/pattern/BeatBar.h
         Source/editor/pattern/LoopEditor.h
+        Source/editor/pattern/NoteBar.cpp Source/editor/pattern/NoteBar.h
         Source/editor/pattern/PatternEditor.cpp Source/editor/pattern/PatternEditor.h
         Source/editor/pattern/PatternEditorView.cpp Source/editor/pattern/PatternEditorView.h
         Source/editor/pattern/PulseConvertor.h

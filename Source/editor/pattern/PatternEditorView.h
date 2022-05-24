@@ -22,6 +22,7 @@
 #include "../../LibreArp.h"
 #include "PatternEditor.h"
 #include "BeatBar.h"
+#include "NoteBar.h"
 #include "../../AudioUpdatable.h"
 
 
@@ -35,6 +36,7 @@ public:
 
     void zoomPattern(float deltaX, float deltaY);
     void scrollPattern(float deltaX, float deltaY);
+    void updateDisplayDimensions();
     void resetPatternOffset();
 
     void audioUpdate() override;
@@ -50,8 +52,8 @@ private:
     juce::TextButton loadButton;
     juce::ToggleButton bypassToggle;
 
-    juce::Slider snapSlider;
-    juce::Label snapSliderLabel;
+    juce::ComboBox snapMenu;
+    juce::Label snapMenuLabel;
 
     juce::Slider loopResetSlider;
     juce::Label loopResetSliderLabel;
@@ -61,6 +63,8 @@ private:
 
     PatternEditor editor;
     BeatBar beatBar;
+    NoteBar noteBar;
+    juce::TextButton recentreButton;
 
     void updateParameterValues();
     void updateLayout();

@@ -56,6 +56,7 @@ public:
     static const juce::Identifier TREEID_LAST_UPDATE_CHECK_TIME;
     static const juce::Identifier TREEID_GUI_SCALE_FACTOR;
     static const juce::Identifier TREEID_NON_PLAYING_MODE;
+    static const juce::Identifier TREEID_SMOOTH_SCROLLING;
 
 
     explicit Globals();
@@ -143,6 +144,10 @@ public:
 
     void setGuiScaleFactor(float guiScaleFactor);
 
+    bool isSmoothScrolling() const;
+
+    void setSmoothScrolling(bool value);
+
     NonPlayingMode::Value getNonPlayingMode() const;
 
     void setNonPlayingMode(NonPlayingMode::Value nonPlayingMode);
@@ -203,6 +208,12 @@ private:
      * Behaviour of the plugin when the host is not playing.
      */
     NonPlayingMode::Value nonPlayingMode;
+
+    /**
+     * If `true`, the pattern editor scroll and zoom is smoothly animated; otherwise scroll and zoom is 'jumpy',
+     * like in the older versions.
+     */
+    bool smoothScrolling;
 
     /**
      * Mutex for the globals.

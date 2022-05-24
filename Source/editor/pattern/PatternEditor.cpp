@@ -48,13 +48,16 @@ PatternEditor::PatternEditor(LibreArp &p, EditorState &e, PatternEditorView &ec)
 }
 
 void PatternEditor::paint(juce::Graphics &g) {
+    view.updateDisplayDimensions();
+
     ArpPattern &pattern = processor.getPattern();
-    auto pixelsPerBeat = state.pixelsPerBeat;
-    auto pixelsPerNote = state.pixelsPerNote;
+    int pixelsPerNote = state.displayPixelsPerNote;
+    int offsetX = static_cast<int>(state.displayOffsetX);
+    int offsetY = static_cast<int>(state.displayOffsetY);
 
     auto unoffsDrawRegion = g.getClipBounds();
     auto drawRegion = unoffsDrawRegion;
-    drawRegion.translate(-state.offsetX, -state.offsetY);
+    drawRegion.translate(-offsetX, -offsetY);
 
     // Draw background
     g.setColour(Style::EDITOR_BACKGROUND_COLOUR);
@@ -62,57 +65,60 @@ void PatternEditor::paint(juce::Graphics &g) {
 
     // Draw bars
     if (processor.getTimeSigDenominator() > 0 && processor.getTimeSigDenominator() <= 32) {
-        auto beat = (pixelsPerBeat * 4) / processor.getTimeSigDenominator();
-        auto bar = beat * processor.getTimeSigNumerator();
         g.setColour(Style::BAR_SHADE_COLOUR);
-        int firstBarX = unoffsDrawRegion.getX() - unoffsDrawRegion.getX() % bar - state.offsetX % (bar * 2);
-        for (int i = firstBarX; i < unoffsDrawRegion.getWidth(); i += bar * 2) {
-            g.fillRect(i + bar, unoffsDrawRegion.getY(), bar, unoffsDrawRegion.getHeight());
+        int barPulses = (pattern.getTimebase() * processor.getTimeSigNumerator() * 4) / processor.getTimeSigDenominator();
+        int twoBarPulses = 2 * barPulses;
+        int startingPulse = (xToPulse(0, false) / twoBarPulses - 1) * twoBarPulses;
+        int endingPulse = (xToPulse(getWidth(), false) / twoBarPulses + 1) * twoBarPulses;
+        for (int i = startingPulse + barPulses; i < endingPulse; i += twoBarPulses) {
+            g.fillRect(pulseToX(i), unoffsDrawRegion.getY(), pulseToAbsX(barPulses), unoffsDrawRegion.getHeight());
         }
     }
 
     // Draw octave 0
     auto numInputNotes = processor.getNumInputNotes();
-    int noteZeroY = noteToY(0);
-    if (numInputNotes > 0) {
+    int noteZeroY = noteToY(-1);
+    int topNoteY = noteToY(numInputNotes - 1);
+    int octaveHeight = noteZeroY - topNoteY;
+    if (numInputNotes > 0)
         g.setColour(Style::ZERO_OCTAVE_COLOUR);
-        auto height = numInputNotes * pixelsPerNote;
-        auto rect = juce::Rectangle<int>(
-                unoffsDrawRegion.getX(), noteZeroY - height + pixelsPerNote, unoffsDrawRegion.getWidth(), height);
-        g.fillRect(rect);
-    } else {
+    else
         g.setColour(Style::ZERO_LINE_COLOUR);
-        auto rect = juce::Rectangle<int>(unoffsDrawRegion.getX(), noteZeroY, unoffsDrawRegion.getWidth(), pixelsPerNote);
-        g.fillRect(rect);
-    }
+    g.fillRect(juce::Rectangle<int>(unoffsDrawRegion.getX(), topNoteY, unoffsDrawRegion.getWidth(), octaveHeight));
 
     // Draw gridlines
     // - Horizontal
     g.setColour(Style::EDITOR_GRIDLINES_COLOUR);
-    int horizontalGridlineStart = (getHeight() / 2 - state.offsetY) % pixelsPerNote - pixelsPerNote / 2;
-    for (int i = horizontalGridlineStart; i < getHeight(); i += pixelsPerNote) {
-        g.fillRect(0, i, getWidth(), 2);
+    int startingNote = yToNote(unoffsDrawRegion.getBottom()) - 1;
+    int endingNote = yToNote(unoffsDrawRegion.getY()) + 1;
+    for (int i = startingNote; i < endingNote; i++) {
+        g.fillRect(0, noteToY(i) - 1, getWidth(), 2);
     }
 
     // - Vertical
-    float beatDiv = (static_cast<float>(pixelsPerBeat) / static_cast<float>(state.divisor));
-    int beatN = 0;
-    for (auto i = static_cast<float>((-state.offsetX) % pixelsPerBeat); i < static_cast<float>(getWidth()); i += beatDiv, beatN++) {
-        if (beatN % state.divisor == 0) {
-            g.fillRect(juce::roundToInt(i), 0, 4, getHeight());
-        } else {
-            g.fillRect(juce::roundToInt(i), 0, 2, getHeight());
-        }
+    float stepInc = (float) pattern.getTimebase() / (float) state.divisor;
+    int si = (int) stepInc;
+    int startingPulse = (xToPulse(unoffsDrawRegion.getX(), false) / si - 1) * si;
+    int endingPulse = (xToPulse(unoffsDrawRegion.getRight(), false) / si + 1) * si;
+    for (float i = startingPulse; i < endingPulse; i += stepInc) {
+        g.fillRect(pulseToX((int) i) - 1, 0, 2, getHeight());
+    }
+
+    int beatInc = pattern.getTimebase();
+    startingPulse = (xToPulse(unoffsDrawRegion.getX(), false) / beatInc - 1) * beatInc;
+    endingPulse = (xToPulse(unoffsDrawRegion.getRight(), false) / beatInc + 1) * beatInc;
+    for (int i = startingPulse; i < endingPulse; i += beatInc) {
+        g.fillRect(pulseToX(i) - 2, 0, 4, getHeight());
     }
 
     // Draw octaves
     if (numInputNotes > 0) {
         g.setColour(Style::OCTAVE_LINE_COLOUR);
-        auto pixelsPerOctave = pixelsPerNote * numInputNotes;
 
-        int i = (getHeight() / 2 - state.offsetY) % pixelsPerOctave - pixelsPerNote / 2 + pixelsPerNote;
-        for (/* above */; i < getHeight(); i += pixelsPerOctave) {
-            g.fillRect(drawRegion.getX(), i, drawRegion.getWidth(), 1);
+        int startingNote = (yToNote(unoffsDrawRegion.getBottom()) / numInputNotes - 1) * numInputNotes - 1;
+        int endingNote = (yToNote(unoffsDrawRegion.getY()) / numInputNotes + 1) * numInputNotes;
+        for (int i = startingNote; i < endingNote; i += numInputNotes) {
+            g.fillRect(unoffsDrawRegion.getX(), noteToY(i), unoffsDrawRegion.getWidth(), 1);
         }
     }
 
@@ -179,12 +185,12 @@ void PatternEditor::paint(juce::Graphics &g) {
     if (loopEndLine < getWidth()) g.fillRect(loopEndLine, 0, getWidth() - loopEndLine, getHeight());
 
     g.setColour(Style::LOOP_LINE_COLOUR);
-    g.fillRect(loopStartLine, 0, 4, getHeight());
-    g.fillRect(loopEndLine, 0, 4, getHeight());
+    g.fillRect(loopStartLine - 2, 0, 4, getHeight());
+    g.fillRect(loopEndLine - 2, 0, 4, getHeight());
 
     // Draw playback position indicator
     if (lastPlayPositionX > 0) {
-        auto positionRect = juce::Rectangle<int>(lastPlayPositionX - state.offsetX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
+        auto positionRect = juce::Rectangle<int>(lastPlayPositionX - offsetX, unoffsDrawRegion.getY(), 1, unoffsDrawRegion.getHeight());
         if (positionRect.intersects(unoffsDrawRegion)) {
             g.setColour(Style::PLAYHEAD_POSITION_COLOUR);
             g.fillRect(positionRect);
@@ -197,8 +203,8 @@ void PatternEditor::paint(juce::Graphics &g) {
         auto endX = pulseToX(timeSelectionEnd);
 
         g.setColour(Style::SELECTED_TIME_BORDER_COLOUR);
-        g.fillRect(startX, 0, 2, getHeight());
-        g.fillRect(endX, 0, 2, getHeight());
+        g.fillRect(startX - 1, 0, 2, getHeight());
+        g.fillRect(endX - 1, 0, 2, getHeight());
 
         g.setColour(Style::SELECTED_TIME_BACKGROUND_COLOUR);
         g.fillRect(startX, 0, endX - startX, getHeight());
@@ -312,7 +318,7 @@ void PatternEditor::updateMouseCursor() {
 
 void PatternEditor::mouseAnyMove(const juce::MouseEvent &event) {
     repaint(pulseToX(cursorPulse), 0, 1, getHeight());
-    repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
+    repaint(0, noteToY(cursorNote), getWidth(), state.displayPixelsPerNote);
 
     cursorPulse = xToPulse(event.x);
     cursorNote = yToNote(event.y);
@@ -322,7 +328,7 @@ void PatternEditor::mouseAnyMove(const juce::MouseEvent &event) {
     mouseCursor = juce::MouseCursor::NormalCursor;
 
     repaint(pulseToX(cursorPulse), 0, 1, getHeight());
-    repaint(0, noteToY(cursorNote), getWidth(), state.pixelsPerNote);
+    repaint(0, noteToY(cursorNote), getWidth(), state.displayPixelsPerNote);
 }
 
 void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
@@ -330,6 +336,31 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
     std::scoped_lock lock(pattern.getMutex());
     auto &notes = pattern.getNotes();
     setTooltip("");
+
+    const auto SIZE_TOOLTIP =
+        "Drag to change this note's size\n"
+        "Alt: disable snapping to grid";
+    const auto SIZE_SELECTION_TOOLTIP =
+        "Drag to change the selected notes' size\n"
+        "Alt: disable snapping to grid";
+    const auto MOVE_TOOLTIP =
+        "Drag to move this note\n"
+        "Right click: delete this note\n"
+        "Alt: disable snapping to grid\n"
+        "Shift: duplicate note / snap horizontally\n"
+        "Ctrl: snap vertically";
+    const auto MOVE_SELECTION_TOOLTIP =
+        "Drag to move the selected notes\n"
+        "Right click: delete this note\n"
+        "Alt: disable snapping to grid\n"
+        "Shift: duplicate the selected notes / snap horizontally\n"
+        "Ctrl: snap vertically";
+    const auto STRETCH_SELECTION_TOOLTIP =
+        "Drag to stretch the selection\n"
+        "Alt: disable snapping to grid";
+    const auto RESIZE_LOOP_TOOLTIP =
+        "Drag to resize the loop\n"
+        "Alt: disable snapping to grid";
 
     for (uint64_t i = 0; i < notes.size(); i++) {
         auto &note = notes[i];
@@ -339,30 +370,30 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
                 mouseCursor = juce::MouseCursor::LeftEdgeResizeCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, notes, event);
-                    setTooltip("Drag to change this note's size");
+                    setTooltip(SIZE_TOOLTIP);
                 } else {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_START_RESIZE, i, selectedNotes, notes, event);
-                    setTooltip("Drag to change the selected notes' size");
+                    setTooltip(SIZE_SELECTION_TOOLTIP);
                 }
                 return;
             } else if (event.x >= (noteRect.getX() + noteRect.getWidth() - Style::NOTE_RESIZE_TOLERANCE)) {
                 mouseCursor = juce::MouseCursor::RightEdgeResizeCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, notes, event);
-                    setTooltip("Drag to change this note's size");
+                    setTooltip(SIZE_TOOLTIP);
                 } else {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_END_RESIZE, i, selectedNotes, notes, event);
-                    setTooltip("Drag to change the selected notes' size");
+                    setTooltip(SIZE_SELECTION_TOOLTIP);
                 }
                 return;
             } else {
                 mouseCursor = juce::MouseCursor::DraggingHandCursor;
                 if (selectedNotes.find(i) == selectedNotes.end()) {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, notes, event);
-                    setTooltip("Drag to move this note");
+                    setTooltip(MOVE_TOOLTIP);
                 } else {
                     dragAction.noteDragAction(this, DragAction::TYPE_NOTE_MOVE, i, selectedNotes, notes, event);
-                    setTooltip("Drag to move the selected notes");
+                    setTooltip(MOVE_SELECTION_TOOLTIP);
                 }
                 return;
             }
@@ -375,7 +406,7 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
             auto startMinX = startX - Style::LINE_RESIZE_TOLERANCE;
             auto startMaxX = startX + Style::LINE_RESIZE_TOLERANCE;
             if (event.x >= startMinX && event.x <= startMaxX) {
-                setTooltip("Drag to stretch the selection");
+                setTooltip(STRETCH_SELECTION_TOOLTIP);
                 mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
                 dragAction.stretchDragAction(DragAction::TYPE_STRETCH_START, selectedNotes, pattern.getNotes(),
                                              timeSelectionStart, timeSelectionEnd);
@@ -386,7 +417,7 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
             auto endMinX = endX - Style::LINE_RESIZE_TOLERANCE;
             auto endMaxX = endX + Style::LINE_RESIZE_TOLERANCE;
             if (event.x >= endMinX && event.x <= endMaxX) {
-                setTooltip("Drag to stretch the selection");
+                setTooltip(STRETCH_SELECTION_TOOLTIP);
                 mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
                 dragAction.stretchDragAction(DragAction::TYPE_STRETCH_END, selectedNotes, pattern.getNotes(),
                                              timeSelectionStart, timeSelectionEnd);
@@ -400,7 +431,7 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
         auto loopMinX = loopStartLine - Style::LINE_RESIZE_TOLERANCE;
         auto loopMaxX = loopStartLine + Style::LINE_RESIZE_TOLERANCE;
         if (event.x >= loopMinX && event.x <= loopMaxX) {
-            setTooltip("Drag to resize the loop");
+            setTooltip(RESIZE_LOOP_TOOLTIP);
             mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
             dragAction.basicDragAction(DragAction::TYPE_LOOP_START_RESIZE);
             return;
@@ -412,7 +443,7 @@ void PatternEditor::mouseDetermineDragAction(const juce::MouseEvent& event) {
         auto loopMinX = loopEndLine - Style::LINE_RESIZE_TOLERANCE;
         auto loopMaxX = loopEndLine + Style::LINE_RESIZE_TOLERANCE;
         if (event.x >= loopMinX && event.x <= loopMaxX) {
-            setTooltip("Drag to resize the loop");
+            setTooltip(RESIZE_LOOP_TOOLTIP);
             mouseCursor = juce::MouseCursor::LeftRightResizeCursor;
             dragAction.basicDragAction(DragAction::TYPE_LOOP_END_RESIZE);
             return;
@@ -875,11 +906,12 @@ void PatternEditor::audioUpdate() {
         newPosition = 0;
     }
 
+    int offsetX = static_cast<int>(state.displayOffsetX);
     if (oldPosition <= newPosition) {
-        repaint(oldPosition - state.offsetX, 0, newPosition - oldPosition + 1, getHeight());
+        repaint(oldPosition - offsetX, 0, newPosition - oldPosition + 1, getHeight());
     } else {
-        repaint(oldPosition - state.offsetX, 0, 1, getHeight());
-        repaint(newPosition - state.offsetX, 0, 1, getHeight());
+        repaint(oldPosition - offsetX, 0, 1, getHeight());
+        repaint(newPosition - offsetX, 0, 1, getHeight());
     }
 
     lastPlayPositionX = newPosition;
@@ -941,7 +973,7 @@ void PatternEditor::repaintSelectedNotes() {
 }
 
 juce::Rectangle<int> PatternEditor::getRectangleForNote(ArpNote &note) {
-    auto pixelsPerNote = state.pixelsPerNote;
+    int pixelsPerNote = state.displayPixelsPerNote;
 
     return {
             pulseToX(note.startPoint),

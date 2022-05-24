@@ -20,39 +20,33 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include "../../LibreArp.h"
+#include "PulseConvertor.h"
 
-/**
- * A component for editing global settings of the plugin.
- */
-class SettingsEditor : public juce::Component {
+class PatternEditorView;
+
+class NoteBar :
+        public juce::Component,
+        public juce::SettableTooltipClient,
+        public AudioUpdatable,
+        PulseConvertor<NoteBar>
+{
+
+    friend PulseConvertor;
+
 public:
 
-    /**
-     * Constructs the settings editor.
-     *
-     * @param p the processor
-     */
-    explicit SettingsEditor(LibreArp &p);
+    explicit NoteBar(LibreArp &p, EditorState &e, PatternEditorView &ec);
 
-    void resized() override;
-    void visibilityChanged() override;
+    void paint(juce::Graphics &g) override;
+    void audioUpdate() override;
 
 private:
 
-    void updateSettingsValues();
-    void updateLayout();
-
-    juce::ToggleButton updateCheckToggle;
-
-    juce::Slider guiScaleFactorSlider;
-    juce::Label guiScaleFactorLabel;
-
-    juce::ComboBox nonPlayingModeComboBox;
-    juce::Label nonPlayingModeLabel;
-
-    juce::ToggleButton smoothScrollingToggle;
-
     LibreArp &processor;
+    EditorState &state;
+    PatternEditorView &view;
+
+    bool snapEnabled = true;
+    int lastNumInputNotes = -1;
+
 };
-
-

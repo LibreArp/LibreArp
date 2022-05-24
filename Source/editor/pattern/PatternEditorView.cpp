@@ -30,7 +30,8 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
                   processor.getGlobals().getPatternPresetsDir(),
                   "*.lapreset"),
           editor(p, state, *this),
-          beatBar(p, state, *this)
+          beatBar(p, state, *this),
+          noteBar(p, state, *this)
 {
 
     loadButton.setButtonText("Load pattern...");
@@ -68,8 +69,15 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     };
     addAndMakeVisible(bypassToggle);
 
-    addAndMakeVisible(beatBar);
     addAndMakeVisible(editor);
+    addAndMakeVisible(beatBar);
+    addAndMakeVisible(noteBar);
+
+    recentreButton.setButtonText("");
+    recentreButton.onClick = [this] {
+        resetPatternOffset();
+    };
+    addAndMakeVisible(recentreButton);
 
     loopResetSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
     loopResetSlider.setRange(0, 65535, 1);
@@ -86,19 +94,28 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     loopResetSliderLabel.setJustificationType(juce::Justification::centredLeft);
     addAndMakeVisible(loopResetSliderLabel);
 
-    snapSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
-    snapSlider.setRange(1, 16, 1);
-    snapSlider.setValue(state.divisor, juce::NotificationType::dontSendNotification);
-    snapSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
-    snapSlider.onValueChange = [this] {
-        state.divisor = static_cast<int>(snapSlider.getValue());
+    {
+        snapMenu.addItem("1/32 beat", 32);
+        snapMenu.addItem("1/16 beat", 16);
+        snapMenu.addItem("1/12 beat", 12);
+        snapMenu.addItem("1/8 beat", 8);
+        snapMenu.addItem("1/6 beat", 6);
+        snapMenu.addItem("1/4 beat", 4);
+        snapMenu.addItem("1/3 beat", 3);
+        snapMenu.addItem("1/2 beat", 2);
+        snapMenu.addItem("Beat", 1);
+    }
+    snapMenu.setEditableText(false);
+    snapMenu.setScrollWheelEnabled(true);
+    snapMenu.onChange = [this] {
+        state.divisor = snapMenu.getSelectedId();
         editor.repaint();
     };
-    addAndMakeVisible(snapSlider);
+    addAndMakeVisible(snapMenu);
 
-    snapSliderLabel.setText("Snap:", juce::NotificationType::dontSendNotification);
-    snapSliderLabel.setJustificationType(juce::Justification::centredRight);
-    addAndMakeVisible(snapSliderLabel);
+    snapMenuLabel.setText("Snap:", juce::NotificationType::dontSendNotification);
+    snapMenuLabel.setJustificationType(juce::Justification::centredRight);
+    addAndMakeVisible(snapMenuLabel);
 
     swingSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
     swingSlider.setRange(0.0, 1.0);
@@ -111,7 +128,8 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     swingSlider.valueFromTextFunction = [] (const juce::String& text) {
         return text.getDoubleValue() / 100.0;
     };
-    swingSlider.setValue(0.555);
+    // Force-updates the slider to say '0 %' if initialized to zero
+    swingSlider.setValue(0.555, juce::NotificationType::dontSendNotification);
     swingSlider.onValueChange = [this] {
         processor.setSwing(static_cast<float>(swingSlider.getValue()));
     };
@@ -132,30 +150,92 @@ void PatternEditorView::visibilityChanged() {
 }
 
 void PatternEditorView::zoomPattern(float deltaX, float deltaY) {
-    state.pixelsPerBeat = juce::jmax(32, state.pixelsPerBeat + static_cast<int>(deltaX * X_ZOOM_RATE));
-    state.pixelsPerNote = juce::jmax(8, state.pixelsPerNote + static_cast<int>(deltaY * Y_ZOOM_RATE));
+    float oldBeat = state.targetPixelsPerBeat;
+    float oldNote = state.targetPixelsPerNote;
+    state.targetPixelsPerBeat = juce::jmax(32.f, state.targetPixelsPerBeat + deltaX * X_ZOOM_RATE);
+    state.targetPixelsPerNote = juce::jmax(8.f, state.targetPixelsPerNote + deltaY * Y_ZOOM_RATE);
+
+    float xPerc = state.targetPixelsPerBeat / oldBeat;
+    float yPerc = state.targetPixelsPerNote / oldNote;
+
+    state.targetOffsetX *= xPerc;
+    state.targetOffsetY *= yPerc;
+
+    if (!processor.getGlobals().isSmoothScrolling()) {
+        state.displayOffsetX = state.targetOffsetX;
+        state.displayOffsetY = state.targetOffsetY;
+        state.displayPixelsPerBeat = state.targetPixelsPerBeat;
+        state.displayPixelsPerNote = state.targetPixelsPerNote;
+    }
 
     editor.repaint();
     beatBar.repaint();
+    noteBar.repaint();
 }
 
 void PatternEditorView::scrollPattern(float deltaX, float deltaY) {
-    state.offsetX = juce::jmax(0, state.offsetX - static_cast<int>(deltaX * X_SCROLL_RATE));
-    state.offsetY = state.offsetY - static_cast<int>(deltaY * Y_SCROLL_RATE);
+    state.targetOffsetX = juce::jmax(0.f, state.targetOffsetX - static_cast<int>(deltaX * X_SCROLL_RATE));
+    state.targetOffsetY = state.targetOffsetY - static_cast<int>(deltaY * Y_SCROLL_RATE);
+    if (!processor.getGlobals().isSmoothScrolling()) {
+        state.displayOffsetX = state.targetOffsetX;
+        state.displayOffsetY = state.targetOffsetY;
+    }
 
     editor.repaint();
     beatBar.repaint();
+    noteBar.repaint();
+}
+
+void PatternEditorView::updateDisplayDimensions() {
+    if (!processor.getGlobals().isSmoothScrolling())
+        return;
+
+    const float EPSILON = 0.001;
+    const float AGGR = 0.3;
+    bool updated = false;
+
+    if (std::abs(state.targetOffsetX - state.displayOffsetX) > EPSILON) {
+        state.displayOffsetX = state.displayOffsetX + (state.targetOffsetX - state.displayOffsetX) * AGGR;
+        updated = true;
+    }
+
+    if (std::abs(state.targetOffsetY - state.displayOffsetY) > EPSILON) {
+        state.displayOffsetY = state.displayOffsetY + (state.targetOffsetY - state.displayOffsetY) * AGGR;
+        updated = true;
+    }
+
+    if (std::abs(state.targetPixelsPerBeat - state.displayPixelsPerBeat) > EPSILON) {
+        state.displayPixelsPerBeat = state.displayPixelsPerBeat + (state.targetPixelsPerBeat - state.displayPixelsPerBeat) * AGGR;
+        updated = true;
+    }
+
+    if (std::abs(state.targetPixelsPerNote - state.displayPixelsPerNote) > EPSILON) {
+        state.displayPixelsPerNote = state.displayPixelsPerNote + (state.targetPixelsPerNote - state.displayPixelsPerNote) * AGGR;
+        updated = true;
+    }
+
+    if (updated) {
+        editor.repaint();
+        beatBar.repaint();
+        noteBar.repaint();
+    }
 }
 
 void PatternEditorView::resetPatternOffset() {
-    state.offsetX = 0;
-    state.offsetY = 0;
+    state.targetOffsetX = 0;
+    state.targetOffsetY = 0;
+    if (!processor.getGlobals().isSmoothScrolling()) {
+        state.displayOffsetX = state.targetOffsetX;
+        state.displayOffsetY = state.targetOffsetY;
+    }
 
     editor.repaint();
     beatBar.repaint();
+    noteBar.repaint();
 }
 
 void PatternEditorView::audioUpdate() {
+    noteBar.audioUpdate();
     editor.audioUpdate();
 
     if (isVisible()) {
@@ -165,7 +245,7 @@ void PatternEditorView::audioUpdate() {
 
 void PatternEditorView::updateParameterValues() {
     loopResetSlider.setValue(processor.getLoopReset(), juce::NotificationType::dontSendNotification);
-    snapSlider.setValue(state.divisor, juce::NotificationType::dontSendNotification);
+    snapMenu.setSelectedId(state.divisor, juce::NotificationType::dontSendNotification);
     swingSlider.setValue(processor.getSwing(), juce::NotificationType::dontSendNotification);
     bypassToggle.setToggleState(processor.getBypass(), juce::NotificationType::dontSendNotification);
 }
@@ -188,8 +268,8 @@ void PatternEditorView::updateLayout() {
     swingSliderLabel.setBounds(toolBarArea.removeFromLeft(8 + swingSliderLabel.getFont().getStringWidth(swingSliderLabel.getText())));
     swingSlider.setBounds(toolBarArea.removeFromLeft(128));
 
-    snapSlider.setBounds(toolBarArea.removeFromRight(96));
-    snapSliderLabel.setBounds(toolBarArea.removeFromRight(64));
+    snapMenu.setBounds(toolBarArea.removeFromRight(96));
+    snapMenuLabel.setBounds(toolBarArea.removeFromRight(64));
 
     area.removeFromTop(8);
 
@@ -200,6 +280,10 @@ void PatternEditorView::updateLayout() {
 
     area.removeFromBottom(8);
 
-    beatBar.setBounds(area.removeFromTop(20));
+    static const auto NOTE_BAR_WIDTH = 45;
+    auto beatBarArea = area.removeFromTop(20);
+    recentreButton.setBounds(beatBarArea.removeFromLeft(NOTE_BAR_WIDTH));
+    beatBar.setBounds(beatBarArea);
+    noteBar.setBounds(area.removeFromLeft(NOTE_BAR_WIDTH));
     editor.setBounds(area);
 }

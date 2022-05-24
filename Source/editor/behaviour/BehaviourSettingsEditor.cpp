@@ -88,6 +88,8 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     maxChordSizeSlider.textFromValueFunction = [](auto value) {
         return (value == 0) ? juce::String("Auto") : juce::String(value);
     };
+    // Force-updates the slider to say 'Auto' if initialized to zero
+    maxChordSizeSlider.setValue(0.555, juce::NotificationType::dontSendNotification);
     maxChordSizeSlider.onValueChange = [this] {
         processor.setMaxChordSize(static_cast<int>(maxChordSizeSlider.getValue()));
     };
@@ -148,7 +150,7 @@ void BehaviourSettingsEditor::updateSettingsValues() {
     smartOctavesToggle.setEnabled(processor.isTransposingOctaves());
     usingInputVelocityToggle.setToggleState(processor.isUsingInputVelocity(), juce::NotificationType::dontSendNotification);
     nonPlayingModeComboBox.setSelectedId(static_cast<int>(processor.getNonPlayingModeOverride()));
-    maxChordSizeSlider.setValue(processor.getMaxChordSize());
+    maxChordSizeSlider.setValue(processor.getMaxChordSize(), juce::NotificationType::dontSendNotification);
     extraNotesSelectionModeComboBox.setSelectedId(static_cast<int>(processor.getExtraNotesSelectionMode() + 1));
 }
 
