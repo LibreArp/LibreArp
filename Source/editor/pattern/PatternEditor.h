@@ -361,6 +361,11 @@ private:
     void select(const juce::MouseEvent& event);
 
     /**
+     * Duplicates the selected notes.
+     */
+    void duplicateSelection(bool back);
+
+    /**
      * Mouse selection stretching, from the selection start.
      */
     void selectionStartStretch(const juce::MouseEvent& event);

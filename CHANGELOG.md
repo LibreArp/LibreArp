@@ -7,6 +7,11 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 
 ## Changelog
 
+### LibreArp 2.5
+
+* **NEW** *Selection duplication*: Using `Ctrl+B` and `Ctrl+Shift+B`, it is now possible to duplicate selected notes
+  * Without `Shift`, new notes are placed *after* the selection; with `Shift`, they are placed *before* the selection
+
 ### LibreArp 2.4
 
 * **NEW** *Note panel*: A panel to the left of the pattern editor visualizing octaves and note numbers

@@ -589,6 +589,16 @@ bool PatternEditor::keyPressed(const juce::KeyPress &key) {
         return true;
     }
 
+    if (key == juce::KeyPress::createFromDescription("CTRL+B")) {
+        duplicateSelection(false);
+        return true;
+    }
+
+    if (key == juce::KeyPress::createFromDescription("CTRL+SHIFT+B")) {
+        duplicateSelection(true);
+        return true;
+    }
+
     if (key == juce::KeyPress::createFromDescription("CTRL+A")) {
         selectAll();
         return true;
@@ -851,12 +861,48 @@ void PatternEditor::select(const juce::MouseEvent& event) {
 
     int64_t notesStart, notesEnd;
     if (getNoteSelectionBorder(notesStart, notesEnd)) {
-        bool snap = !event.mods.isAltDown();
-
+	bool snap = !event.mods.isAltDown();
         timeSelectionStart = juce::jmin(notesStart, xToPulse(selection.getX(), snap));
         timeSelectionEnd = juce::jmax(notesEnd, xToPulse(selection.getRight(), snap));
     }
     repaintSelectedNotes();
+}
+
+void PatternEditor::duplicateSelection(bool back) {
+    if (selectedNotes.size() <= 0)
+        return;
+
+    repaint();
+
+    auto& pattern = processor.getPattern();
+    std::scoped_lock lock(pattern.getMutex());
+    auto& notes = pattern.getNotes();
+
+    auto offset = ((back) ? -1 : 1) * (timeSelectionEnd - timeSelectionStart);
+    size_t startIndex = notes.size();
+    size_t addedNotes = 0;
+    for (auto origIndex : selectedNotes) {
+        auto newNote = notes[origIndex];
+        if (-offset > newNote.startPoint)
+            continue;
+
+        newNote.startPoint += offset;
+        newNote.endPoint += offset;
+        notes.push_back(newNote);
+        addedNotes++;
+    }
+
+    processor.buildPattern();
+
+    if (addedNotes <= 0)
+        return;
+
+    size_t endIndex = startIndex + addedNotes;
+    selectedNotes.clear();
+    for (size_t i = startIndex; i < endIndex; i++)
+        selectedNotes.insert(i);
+
+    getNoteSelectionBorder(timeSelectionStart, timeSelectionEnd);
 }
 
 
