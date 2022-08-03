@@ -53,6 +53,7 @@ LArpLookAndFeel::LArpLookAndFeel() {
     setColour(juce::TextButton::textColourOnId, Style::MAIN_FOREGROUND_COLOUR);
     setColour(juce::TextButton::textColourOffId, Style::MAIN_FOREGROUND_COLOUR);
     setColour(juce::TextButton::buttonColourId, Style::MAIN_BACKGROUND_COLOUR);
+    setColour(juce::TextButton::buttonOnColourId, Style::HIGHLIGHT_BACKGROUND_COLOUR);
     setColour(juce::ComboBox::outlineColourId, Style::MAIN_FOREGROUND_COLOUR);
 
     setColour(juce::HyperlinkButton::textColourId, Style::HIGHLIGHT_FOREGROUND_COLOUR);

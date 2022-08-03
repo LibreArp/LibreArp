@@ -33,6 +33,7 @@ const juce::Identifier LibreArp::TREEID_OUTPUT_MIDI_CHANNEL = "outputMidiChannel
 const juce::Identifier LibreArp::TREEID_INPUT_MIDI_CHANNEL = "inputMidiChannel"; // NOLINT
 const juce::Identifier LibreArp::TREEID_NON_PLAYING_MODE_OVERRIDE = "nonPlayingModeOverride"; // NOLINT
 const juce::Identifier LibreArp::TREEID_BYPASS = "bypass"; // NOLINT
+const juce::Identifier LibreArp::TREEID_PATTERN_OFFSET = "patternOffset"; // NOLINT
 
 static const int NOTES_IN_OCTAVE = 12;
 
@@ -115,6 +116,11 @@ LibreArp::LibreArp()
             { "From bottom", "From top" },
             ExtraNotesSelectionMode::FROM_BOTTOM,
             "Determines how notes should be selected when there are more than Chord size"));
+    addParameter(recordingPatternOffset = new juce::AudioParameterBool(
+            "recordingPatternOffset",
+            "Record offset",
+            false,
+            "Whether the offset should be changed the next time playback starts."));
 
     globals.markChanged();
 }
@@ -243,6 +249,20 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
 
         // Current position in pattern-space
         auto baseBlockStartPosition = cpi.ppqPosition * timebase;
+        if (*this->recordingPatternOffset) {
+            this->patternOffset = baseBlockStartPosition;
+            *this->recordingPatternOffset = false;
+            this->updateHostDisplay();
+            this->stopAll();
+        }
+
+        baseBlockStartPosition -= this->patternOffset;
+        auto offsadd = (this->loopReset > 0)
+            ? static_cast<int64_t>(this->loopReset * timebase)
+            : this->events.loopLength;
+        if (baseBlockStartPosition < 0)
+            baseBlockStartPosition = std::fmod(baseBlockStartPosition, offsadd) + offsadd;
+
         auto baseBlockEndPosition = baseBlockStartPosition + numSamples / pulseSamples;
         auto blockStartPosition = static_cast<int64_t>(std::floor(applySwing(baseBlockStartPosition, lastSwing)));
         auto blockEndPosition = static_cast<int64_t>(std::ceil(applySwing(baseBlockEndPosition, *swing)));
@@ -422,6 +442,9 @@ void LibreArp::setStateInformation(const void *data, int sizeInBytes) {
             if (tree.hasProperty(TREEID_BYPASS)) {
                 *this->bypass = tree.getProperty(TREEID_BYPASS);
             }
+            if (tree.hasProperty(TREEID_PATTERN_OFFSET)) {
+                this->patternOffset = static_cast<juce::int64>(tree.getProperty(TREEID_PATTERN_OFFSET));
+            }
 
             setPattern(loadedPattern);
         }
@@ -445,6 +468,7 @@ juce::ValueTree LibreArp::toValueTree() {
     tree.setProperty(TREEID_INPUT_MIDI_CHANNEL, this->inputMidiChannel, nullptr);
     tree.setProperty(TREEID_NON_PLAYING_MODE_OVERRIDE, NonPlayingMode::toJuceString(this->nonPlayingModeOverride), nullptr);
     tree.setProperty(TREEID_BYPASS, this->bypass->get(), nullptr);
+    tree.setProperty(TREEID_PATTERN_OFFSET, static_cast<juce::int64>(this->patternOffset), nullptr);
     return tree;
 }
 
@@ -567,6 +591,16 @@ bool LibreArp::getBypass() const {
 void LibreArp::setBypass(bool value) {
     *this->bypass = value;
 }
+
+bool LibreArp::getRecordingPatternOffset() const {
+    return *this->recordingPatternOffset;
+}
+
+void LibreArp::setRecordingPatternOffset(bool value) {
+    *this->recordingPatternOffset = value;
+    this->updateEditor();
+}
+
 
 int LibreArp::getInputMidiChannel() const {
     return this->inputMidiChannel;

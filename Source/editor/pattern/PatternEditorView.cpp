@@ -63,6 +63,17 @@ PatternEditorView::PatternEditorView(LibreArp &p, EditorState &e)
     };
     addAndMakeVisible(saveButton);
 
+    recordingOffsetToggle.setButtonText("Record offset");
+    recordingOffsetToggle.setTooltip("The next time playback starts, the offset "
+            "of the pattern is set to the current playback position.");
+    recordingOffsetToggle.setClickingTogglesState(true);
+    recordingOffsetToggle.onStateChange = [this] {
+        processor.setRecordingPatternOffset(recordingOffsetToggle.getToggleState());
+    };
+    recordingOffsetToggle.setColour(juce::TextButton::ColourIds::textColourOnId,
+            juce::Colour(255, 0, 0));
+    addAndMakeVisible(recordingOffsetToggle);
+
     bypassToggle.setButtonText("Bypass");
     bypassToggle.onStateChange = [this] {
         processor.setBypass(bypassToggle.getToggleState());
@@ -248,6 +259,7 @@ void PatternEditorView::updateParameterValues() {
     snapMenu.setSelectedId(state.divisor, juce::NotificationType::dontSendNotification);
     swingSlider.setValue(processor.getSwing(), juce::NotificationType::dontSendNotification);
     bypassToggle.setToggleState(processor.getBypass(), juce::NotificationType::dontSendNotification);
+    recordingOffsetToggle.setToggleState(processor.getRecordingPatternOffset(), juce::NotificationType::dontSendNotification);
 }
 
 void PatternEditorView::updateLayout() {
@@ -276,6 +288,8 @@ void PatternEditorView::updateLayout() {
     auto bottomButtonArea = area.removeFromBottom(24);
     loadButton.setBounds(bottomButtonArea.removeFromLeft(100));
     saveButton.setBounds(bottomButtonArea.removeFromLeft(100));
+    bottomButtonArea.removeFromLeft(24);
+    recordingOffsetToggle.setBounds(bottomButtonArea.removeFromLeft(120));
     bypassToggle.setBounds(bottomButtonArea.removeFromRight(80));
 
     area.removeFromBottom(8);

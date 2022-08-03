@@ -57,6 +57,7 @@ public:
     static const juce::Identifier TREEID_INPUT_MIDI_CHANNEL;
     static const juce::Identifier TREEID_NON_PLAYING_MODE_OVERRIDE;
     static const juce::Identifier TREEID_BYPASS;
+    static const juce::Identifier TREEID_PATTERN_OFFSET;
 
     enum ExtraNotesSelectionMode : int {
         FROM_BOTTOM = 0,
@@ -189,6 +190,10 @@ public:
     bool getBypass() const;
 
     void setBypass(bool value);
+
+    bool getRecordingPatternOffset() const;
+
+    void setRecordingPatternOffset(bool value);
 
     /**
      * Gets the MIDI channel output notes are sent into.
@@ -391,6 +396,14 @@ private:
      * The timestamp of the last debug playback reset.
      */
     int64_t silenceEndedTime;
+
+    /** Playback offset - subtracted from the current playback time. Used to
+     * offset the pattern globally in a song. */
+    int64_t patternOffset = 0;
+
+    /** Whether the plugin is going to be recording the playback offset the
+     * next time playback starts. */
+    juce::AudioParameterBool* recordingPatternOffset;
 
     /**
      * Number of octaves spanned by the current input - rounded up.

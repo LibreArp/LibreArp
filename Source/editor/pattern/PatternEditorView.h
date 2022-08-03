@@ -50,6 +50,7 @@ private:
 
     juce::TextButton saveButton;
     juce::TextButton loadButton;
+    juce::TextButton recordingOffsetToggle;
     juce::ToggleButton bypassToggle;
 
     juce::ComboBox snapMenu;

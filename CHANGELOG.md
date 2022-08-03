@@ -11,6 +11,10 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 
 * **NEW** *Selection duplication*: Using `Ctrl+B` and `Ctrl+Shift+B`, it is now possible to duplicate selected notes
   * Without `Shift`, new notes are placed *after* the selection; with `Shift`, they are placed *before* the selection
+* **NEW** *Pattern offset*: Using the new *Record offset* button, you can set the starting position of the pattern
+  relative to the song.
+  * Arm the button by a click, set the starting position in the host DAW and start playback. The pattern will be offset
+    to start at that starting position.
 
 ### LibreArp 2.4
 
