@@ -318,9 +318,10 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
                 // Generate note-on MIDI events
                 for (auto i : event.ons) {
                     auto &data = events.data[i];
-                    auto index = indexOffset + data.noteNumber % chordSize;
-                    while (index < 0)
-                        index += inputNotes.size(); // TODO: this is dumb but my brain is not functioning right now
+                    auto index = data.noteNumber % chordSize;
+                    if (index < 0)
+                        index += inputNotes.size();
+                    index += indexOffset;
 
                     if (index > inputNotes.size()) {
                         // There is no sound for us right now, skip it
