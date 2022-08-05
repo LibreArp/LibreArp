@@ -54,6 +54,10 @@ private:
     juce::ComboBox extraNotesSelectionModeComboBox;
     juce::Label extraNotesSelectionModeLabel;
 
+    juce::Label patternOffsetLabel;
+    juce::TextButton recordingOffsetToggle;
+    juce::TextButton resetOffsetButton;
+
     void updateSettingsValues();
     void updateLayout();
 

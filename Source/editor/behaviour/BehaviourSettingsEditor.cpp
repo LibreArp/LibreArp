@@ -112,6 +112,24 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     extraNotesSelectionModeLabel.setText("Note selection mode", juce::NotificationType::dontSendNotification);
     extraNotesSelectionModeLabel.setTooltip(extraNotesSelectionModeTooltip);
 
+    patternOffsetLabel.setText("Pattern offset", juce::NotificationType::dontSendNotification);
+
+    recordingOffsetToggle.setButtonText("Record offset");
+    recordingOffsetToggle.setTooltip("When selected, the next time playback "
+            "starts, the offset of the pattern is set to the current playback "
+            "position.");
+    recordingOffsetToggle.setClickingTogglesState(true);
+    recordingOffsetToggle.onStateChange = [this] {
+        processor.setRecordingPatternOffset(recordingOffsetToggle.getToggleState());
+    };
+    recordingOffsetToggle.setColour(juce::TextButton::ColourIds::textColourOnId,
+            juce::Colour(255, 0, 0));
+
+    resetOffsetButton.setButtonText("Reset offset");
+    resetOffsetButton.onClick = [this] {
+        processor.resetPatternOffset();
+    };
+
     addAndMakeVisible(midiInChannelLabel);
     addAndMakeVisible(midiInChannelSlider);
     addAndMakeVisible(midiOutChannelLabel);
@@ -125,6 +143,9 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     addAndMakeVisible(maxChordSizeLabel);
     addAndMakeVisible(extraNotesSelectionModeComboBox);
     addAndMakeVisible(extraNotesSelectionModeLabel);
+    addAndMakeVisible(patternOffsetLabel);
+    addAndMakeVisible(recordingOffsetToggle);
+    addAndMakeVisible(resetOffsetButton);
 }
 
 void BehaviourSettingsEditor::resized() {
@@ -152,6 +173,7 @@ void BehaviourSettingsEditor::updateSettingsValues() {
     nonPlayingModeComboBox.setSelectedId(static_cast<int>(processor.getNonPlayingModeOverride()));
     maxChordSizeSlider.setValue(processor.getMaxChordSize(), juce::NotificationType::dontSendNotification);
     extraNotesSelectionModeComboBox.setSelectedId(static_cast<int>(processor.getExtraNotesSelectionMode() + 1));
+    recordingOffsetToggle.setToggleState(processor.getRecordingPatternOffset(), juce::NotificationType::dontSendNotification);
 }
 
 void BehaviourSettingsEditor::updateLayout() {
@@ -198,4 +220,11 @@ void BehaviourSettingsEditor::updateLayout() {
     auto extraNotesSelectionModeArea = area.removeFromTop(24);
     extraNotesSelectionModeComboBox.setBounds(extraNotesSelectionModeArea.removeFromLeft(128));
     extraNotesSelectionModeLabel.setBounds(extraNotesSelectionModeArea);
+
+    area.removeFromTop(8);
+
+    auto patternOffsetArea = area.removeFromTop(24);
+    recordingOffsetToggle.setBounds(patternOffsetArea.removeFromLeft(100));
+    resetOffsetButton.setBounds(patternOffsetArea.removeFromLeft(100));
+    patternOffsetLabel.setBounds(patternOffsetArea);
 }

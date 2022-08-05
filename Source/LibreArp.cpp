@@ -584,7 +584,6 @@ void LibreArp::setOutputMidiChannel(int channel) {
 }
 
 
-
 bool LibreArp::getBypass() const {
     return *this->bypass;
 }
@@ -593,6 +592,7 @@ void LibreArp::setBypass(bool value) {
     *this->bypass = value;
 }
 
+
 bool LibreArp::getRecordingPatternOffset() const {
     return *this->recordingPatternOffset;
 }
@@ -600,6 +600,11 @@ bool LibreArp::getRecordingPatternOffset() const {
 void LibreArp::setRecordingPatternOffset(bool value) {
     *this->recordingPatternOffset = value;
     this->updateEditor();
+}
+
+void LibreArp::resetPatternOffset() {
+    this->patternOffset = 0;
+    this->stopAll();
 }
 
 

@@ -195,6 +195,8 @@ public:
 
     void setRecordingPatternOffset(bool value);
 
+    void resetPatternOffset();
+
     /**
      * Gets the MIDI channel output notes are sent into.
      *
