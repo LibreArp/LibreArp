@@ -15,6 +15,8 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
   relative to the song.
   * Arm the button by a click, set the starting position in the host DAW and start playback. The pattern will be offset
     to start at that starting position.
+* **IMPROVE** For consistency, the note bar (left to the pattern grid) now reacts to mouse scrolling and middle clicking
+  similarly to the beat bar (above the pattern grid).
 
 ### LibreArp 2.4
 

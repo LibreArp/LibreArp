@@ -85,3 +85,20 @@ void NoteBar::audioUpdate() {
         this->repaint();
     }
 }
+
+void NoteBar::mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) {
+    if (event.mods.isShiftDown()) {
+        view.zoomPattern(wheel.deltaY, 0);
+    } else {
+        view.zoomPattern(0, wheel.deltaY);
+    }
+}
+
+void NoteBar::mouseDown(const juce::MouseEvent& event) {
+    if (!event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && event.mods.isMiddleButtonDown()) {
+        view.resetPatternOffset();
+        return;
+    }
+
+    Component::mouseDown(event);
+}

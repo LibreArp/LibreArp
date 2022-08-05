@@ -39,6 +39,8 @@ public:
 
     void paint(juce::Graphics &g) override;
     void audioUpdate() override;
+    void mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
+    void mouseDown(const juce::MouseEvent& event) override;
 
 private:
 
