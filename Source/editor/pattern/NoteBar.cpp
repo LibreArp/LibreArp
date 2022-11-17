@@ -59,7 +59,7 @@ void NoteBar::paint(juce::Graphics &g) {
     // Draw octaves
     startingNote = (yToNote(getHeight()) / inputs) * inputs - inputs - 1;
     endingNote = (yToNote(0) / inputs + 1) * inputs;
-    g.setFont(22);
+    g.setFont(std::min(state.displayPixelsPerNote * inputs, 22.0f));
     for (int i = startingNote; i < endingNote; i += inputs) {
         int octave = std::abs(i / inputs);
         if (i < 0)
