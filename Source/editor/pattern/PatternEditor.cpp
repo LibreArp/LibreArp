@@ -70,8 +70,9 @@ void PatternEditor::paint(juce::Graphics &g) {
         int twoBarPulses = 2 * barPulses;
         int startingPulse = (xToPulse(0, false) / twoBarPulses - 1) * twoBarPulses;
         int endingPulse = (xToPulse(getWidth(), false) / twoBarPulses + 1) * twoBarPulses;
-        for (int i = startingPulse + barPulses; i < endingPulse; i += twoBarPulses) {
-            g.fillRect(pulseToX(i), unoffsDrawRegion.getY(), pulseToAbsX(barPulses), unoffsDrawRegion.getHeight());
+        for (int i = startingPulse + twoBarPulses; i < endingPulse; i += twoBarPulses) {
+            g.fillRect(pulseToX(i), unoffsDrawRegion.getY(),
+                    pulseToAbsX(barPulses), unoffsDrawRegion.getHeight());
         }
     }
 
