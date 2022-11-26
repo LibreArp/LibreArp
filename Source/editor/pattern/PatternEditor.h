@@ -285,6 +285,9 @@ private:
      */
     int lastNumInputNotes;
 
+    int lastTimeSigNumerator;
+    int lastTimeSigDenominator;
+
     /**
      * The desired mouse cursor that will actually be changed at the end of a mouse event.
      */

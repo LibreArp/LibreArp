@@ -58,6 +58,9 @@ public:
     static const juce::Identifier TREEID_NON_PLAYING_MODE_OVERRIDE;
     static const juce::Identifier TREEID_BYPASS;
     static const juce::Identifier TREEID_PATTERN_OFFSET;
+    static const juce::Identifier TREEID_USER_TIME_SIG;
+    static const juce::Identifier TREEID_USER_TIME_SIG_NUMERATOR;
+    static const juce::Identifier TREEID_USER_TIME_SIG_DENOMINATOR;
 
     enum ExtraNotesSelectionMode : int {
         FROM_BOTTOM = 0,
@@ -164,6 +167,18 @@ public:
      * @return the last active number of input notes
      */
     int getNumInputNotes() const;
+
+    /** Set whether we should be using user-defined time signature. */
+    void setUserTimeSig(bool v);
+
+    /** Check whether we are using user-defined time signature. */
+    bool isUserTimeSig() const;
+
+    void setUserTimeSigNumerator(int v);
+    int getUserTimeSigNumerator() const;
+
+    void setUserTimeSigDenominator(int v);
+    int getUserTimeSigDenominator() const;
 
     /**
      * Gets the time signature numerator.
@@ -384,15 +399,21 @@ private:
      */
     int octaveSize = 0;
 
-    /**
-     * Time signature numerator.
-     */
-    int timeSigNumerator = 4;
+    /** Whether time signature is manually set by the user or automatically
+     * determined from the host. */
+    bool userTimeSig = false;
 
-    /**
-     * Time signature denominator.
-     */
-    int timeSigDenominator = 4;
+    /** Time signature numerator from user. */
+    int userTimeSigNumerator = 4;
+
+    /** Time signature denominator from user. */
+    int userTimeSigDenominator = 4;
+
+    /** Time signature numerator from host. */
+    int hostTimeSigNumerator = 4;
+
+    /** Time signature denominator from host. */
+    int hostTimeSigDenominator = 4;
 
     /**
      * The timestamp of the last debug playback reset.

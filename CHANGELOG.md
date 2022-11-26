@@ -15,6 +15,8 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
   relative to the song.
   * Arm the button by a click, set the starting position in the host DAW and start playback. The pattern will be offset
     to start at that starting position.
+* **NEW** *Manual time signature*: You may now set the time signature visualized by the Pattern Editor manually,
+  for better usability in hosts that do not properly report the time signature to their plugins.
 * **IMPROVE** For consistency, the note bar (left to the pattern grid) now reacts to mouse scrolling and middle clicking
   similarly to the beat bar (above the pattern grid).
 

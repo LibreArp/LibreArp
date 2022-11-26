@@ -939,6 +939,15 @@ void PatternEditor::audioUpdate() {
         return;
     }
 
+    if (lastTimeSigNumerator != processor.getTimeSigNumerator()
+        || lastTimeSigDenominator != processor.getTimeSigDenominator())
+    {
+        repaint();
+    }
+
+    lastTimeSigNumerator = processor.getTimeSigNumerator();
+    lastTimeSigDenominator = processor.getTimeSigDenominator();
+
     int oldPosition = lastPlayPositionX;
     int newPosition;
 

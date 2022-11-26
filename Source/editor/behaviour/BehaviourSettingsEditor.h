@@ -35,6 +35,11 @@ private:
 
     LibreArp &processor;
 
+    juce::ToggleButton userTimeSigToggle;
+    juce::Slider userTimeSigNumeratorSlider;
+    juce::Label userTimeSigSlashLabel;
+    juce::Slider userTimeSigDenominatorSlider;
+
     juce::ToggleButton octavesToggle;
     juce::ToggleButton smartOctavesToggle;
     juce::ToggleButton usingInputVelocityToggle;

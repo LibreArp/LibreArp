@@ -18,6 +18,37 @@
 #include "BehaviourSettingsEditor.h"
 
 BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
+    userTimeSigToggle.setButtonText("Manual time signature");
+    userTimeSigToggle.setTooltip("Enables manual time signature setting instead of automatic fetch from the host");
+    userTimeSigToggle.onStateChange = [this] {
+        bool enabled = userTimeSigToggle.getToggleState();
+        processor.setUserTimeSig(enabled);
+
+        userTimeSigNumeratorSlider.setVisible(enabled);
+        userTimeSigSlashLabel.setVisible(enabled);
+        userTimeSigDenominatorSlider.setVisible(enabled);
+
+        this->updateLayout();
+        this->repaint();
+    };
+
+    userTimeSigNumeratorSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
+    userTimeSigNumeratorSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxRight, false, 24, 24);
+    userTimeSigNumeratorSlider.setRange(1, 64, 1);
+    userTimeSigNumeratorSlider.onValueChange = [this] {
+        processor.setUserTimeSigNumerator(static_cast<int>(userTimeSigNumeratorSlider.getValue()));
+    };
+
+    userTimeSigSlashLabel.setText("/", juce::NotificationType::dontSendNotification);
+    userTimeSigSlashLabel.setJustificationType(juce::Justification::centred);
+
+    userTimeSigDenominatorSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
+    userTimeSigDenominatorSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 24, 24);
+    userTimeSigDenominatorSlider.setRange(1, 64, 1);
+    userTimeSigDenominatorSlider.onValueChange = [this] {
+        processor.setUserTimeSigDenominator(static_cast<int>(userTimeSigDenominatorSlider.getValue()));
+    };
+
     midiInChannelSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
     midiInChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
     midiInChannelSlider.setRange(0, 16, 1);
@@ -130,6 +161,10 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
         processor.resetPatternOffset();
     };
 
+    addAndMakeVisible(userTimeSigToggle);
+    addAndMakeVisible(userTimeSigNumeratorSlider);
+    addAndMakeVisible(userTimeSigSlashLabel);
+    addAndMakeVisible(userTimeSigDenominatorSlider);
     addAndMakeVisible(midiInChannelLabel);
     addAndMakeVisible(midiInChannelSlider);
     addAndMakeVisible(midiOutChannelLabel);
@@ -164,6 +199,9 @@ void BehaviourSettingsEditor::audioUpdate() {
 }
 
 void BehaviourSettingsEditor::updateSettingsValues() {
+    userTimeSigToggle.setToggleState(processor.isUserTimeSig(), juce::NotificationType::dontSendNotification);
+    userTimeSigNumeratorSlider.setValue(processor.getUserTimeSigNumerator());
+    userTimeSigDenominatorSlider.setValue(processor.getUserTimeSigDenominator());
     midiInChannelSlider.setValue(processor.getInputMidiChannel(), juce::NotificationType::dontSendNotification);
     midiOutChannelSlider.setValue(processor.getOutputMidiChannel(), juce::NotificationType::dontSendNotification);
     octavesToggle.setToggleState(processor.isTransposingOctaves(), juce::NotificationType::dontSendNotification);
@@ -184,6 +222,19 @@ void BehaviourSettingsEditor::updateLayout() {
     updateSettingsValues();
 
     auto area = getLocalBounds().reduced(8);
+
+    userTimeSigToggle.setBounds(area.removeFromTop(24));
+
+    if (userTimeSigToggle.getToggleState()) {
+        area.removeFromTop(4);
+
+        auto timeSigArea = area.removeFromTop(24);
+        userTimeSigNumeratorSlider.setBounds(timeSigArea.removeFromLeft(64));
+        userTimeSigSlashLabel.setBounds(timeSigArea.removeFromLeft(18));
+        userTimeSigDenominatorSlider.setBounds(timeSigArea.removeFromLeft(64));
+    }
+
+    area.removeFromTop(8);
 
     auto midiInChannelArea = area.removeFromTop(24);
     midiInChannelSlider.updateText();
