@@ -61,7 +61,8 @@ void NoteBar::paint(juce::Graphics &g) {
     endingNote = (yToNote(0) / inputs + 1) * inputs;
     g.setFont(std::min(state.displayPixelsPerNote * inputs, 22.0f));
     for (int i = startingNote; i < endingNote; i += inputs) {
-        int octave = std::abs(i / inputs);
+        auto octNn = (i >= 0) ? i : i + 1;
+        int octave = std::abs(octNn / inputs);
         if (i < 0)
             octave++;
         juce::String sign = (octave == 0) ? "" : (i < 0) ? "-" : "+";
