@@ -339,7 +339,8 @@ void LibreArp::processMidi(int numSamples, juce::MidiBuffer& midi) {
 
                     // Transposition
                     if (*octaves) {
-                        auto octave = data.noteNumber / chordSize;
+                        auto octNn = (data.noteNumber >= 0) ? data.noteNumber : data.noteNumber + 1;
+                        auto octave = octNn / chordSize;
                         if (data.noteNumber < 0) {
                             octave--;
                         }

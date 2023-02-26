@@ -19,6 +19,7 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
   for better usability in hosts that do not properly report the time signature to their plugins.
 * **IMPROVE** For consistency, the note bar (left to the pattern grid) now reacts to mouse scrolling and middle clicking
   similarly to the beat bar (above the pattern grid).
+* **FIX** The first note now gets transposed correctly into negative octaves, instead of being one extra octave lower
 
 ### LibreArp 2.4
 
