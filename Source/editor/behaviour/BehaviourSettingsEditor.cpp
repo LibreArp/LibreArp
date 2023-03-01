@@ -15,18 +15,21 @@
 // along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
+#include "../LArpLookAndFeel.h"
 #include "BehaviourSettingsEditor.h"
 
 BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
-    userTimeSigToggle.setButtonText("Manual time signature");
+    userTimeSigTitle.setText("Manual time signature", juce::NotificationType::dontSendNotification);
+
+    userTimeSigToggle.setButtonText("Enable");
     userTimeSigToggle.setTooltip("Enables manual time signature setting instead of automatic fetch from the host");
     userTimeSigToggle.onStateChange = [this] {
         bool enabled = userTimeSigToggle.getToggleState();
         processor.setUserTimeSig(enabled);
 
-        userTimeSigNumeratorSlider.setVisible(enabled);
-        userTimeSigSlashLabel.setVisible(enabled);
-        userTimeSigDenominatorSlider.setVisible(enabled);
+        userTimeSigNumeratorSlider.setEnabled(enabled);
+        userTimeSigSlashLabel.setEnabled(enabled);
+        userTimeSigDenominatorSlider.setEnabled(enabled);
 
         this->updateLayout();
         this->repaint();
@@ -49,6 +52,8 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
         processor.setUserTimeSigDenominator(static_cast<int>(userTimeSigDenominatorSlider.getValue()));
     };
 
+    midiTitle.setText("MIDI", juce::NotificationType::dontSendNotification);
+
     midiInChannelSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
     midiInChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
     midiInChannelSlider.setRange(0, 16, 1);
@@ -67,6 +72,8 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
         processor.setOutputMidiChannel(static_cast<int>(midiOutChannelSlider.getValue()));
     };
     midiOutChannelLabel.setText("MIDI Output Channel", juce::NotificationType::dontSendNotification);
+
+    noteBehaviourTitle.setText("Note behaviour", juce::NotificationType::dontSendNotification);
 
     octavesToggle.setButtonText("Octave transposition");
     octavesToggle.setTooltip("Enables transposition by octaves when hitting notes that are out of bounds");
@@ -110,6 +117,8 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     nonPlayingModeLabel.setText("Non-playing mode", juce::NotificationType::dontSendNotification);
     nonPlayingModeLabel.setTooltip(nonPlayingModeTooltip);
 
+    chordTitle.setText("Chord", juce::NotificationType::dontSendNotification);
+
     const juce::String maxChordSizeTooltip = "Sets the number of input notes taken into account by the arpeggiator. "
         "When set to 'Auto', the number of notes is derived from the actual number of input notes.";
     maxChordSizeSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
@@ -143,7 +152,7 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     extraNotesSelectionModeLabel.setText("Note selection mode", juce::NotificationType::dontSendNotification);
     extraNotesSelectionModeLabel.setTooltip(extraNotesSelectionModeTooltip);
 
-    patternOffsetLabel.setText("Pattern offset", juce::NotificationType::dontSendNotification);
+    patternOffsetTitle.setText("Pattern offset", juce::NotificationType::dontSendNotification);
 
     recordingOffsetToggle.setButtonText("Record offset");
     recordingOffsetToggle.setTooltip("When selected, the next time playback "
@@ -161,24 +170,28 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
         processor.resetPatternOffset();
     };
 
+    addAndMakeVisible(userTimeSigTitle);
     addAndMakeVisible(userTimeSigToggle);
     addAndMakeVisible(userTimeSigNumeratorSlider);
     addAndMakeVisible(userTimeSigSlashLabel);
     addAndMakeVisible(userTimeSigDenominatorSlider);
+    addAndMakeVisible(midiTitle);
     addAndMakeVisible(midiInChannelLabel);
     addAndMakeVisible(midiInChannelSlider);
     addAndMakeVisible(midiOutChannelLabel);
     addAndMakeVisible(midiOutChannelSlider);
+    addAndMakeVisible(noteBehaviourTitle);
     addAndMakeVisible(octavesToggle);
     addAndMakeVisible(smartOctavesToggle);
     addAndMakeVisible(usingInputVelocityToggle);
     addAndMakeVisible(nonPlayingModeComboBox);
     addAndMakeVisible(nonPlayingModeLabel);
+    addAndMakeVisible(chordTitle);
     addAndMakeVisible(maxChordSizeSlider);
     addAndMakeVisible(maxChordSizeLabel);
     addAndMakeVisible(extraNotesSelectionModeComboBox);
     addAndMakeVisible(extraNotesSelectionModeLabel);
-    addAndMakeVisible(patternOffsetLabel);
+    addAndMakeVisible(patternOffsetTitle);
     addAndMakeVisible(recordingOffsetToggle);
     addAndMakeVisible(resetOffsetButton);
 }
@@ -212,6 +225,11 @@ void BehaviourSettingsEditor::updateSettingsValues() {
     maxChordSizeSlider.setValue(processor.getMaxChordSize(), juce::NotificationType::dontSendNotification);
     extraNotesSelectionModeComboBox.setSelectedId(static_cast<int>(processor.getExtraNotesSelectionMode() + 1));
     recordingOffsetToggle.setToggleState(processor.getRecordingPatternOffset(), juce::NotificationType::dontSendNotification);
+
+    bool userTimeSig = userTimeSigToggle.getToggleState();
+    userTimeSigNumeratorSlider.setEnabled(userTimeSig);
+    userTimeSigSlashLabel.setEnabled(userTimeSig);
+    userTimeSigDenominatorSlider.setEnabled(userTimeSig);
 }
 
 void BehaviourSettingsEditor::updateLayout() {
@@ -221,61 +239,80 @@ void BehaviourSettingsEditor::updateLayout() {
 
     updateSettingsValues();
 
-    auto area = getLocalBounds().reduced(8);
+    auto area = getLocalBounds().reduced(LArpLookAndFeel::MARGIN);
 
-    userTimeSigToggle.setBounds(area.removeFromTop(24));
 
-    if (userTimeSigToggle.getToggleState()) {
-        area.removeFromTop(4);
+    //
+    midiTitle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
 
-        auto timeSigArea = area.removeFromTop(24);
-        userTimeSigNumeratorSlider.setBounds(timeSigArea.removeFromLeft(64));
-        userTimeSigSlashLabel.setBounds(timeSigArea.removeFromLeft(18));
-        userTimeSigDenominatorSlider.setBounds(timeSigArea.removeFromLeft(64));
-    }
-
-    area.removeFromTop(8);
-
-    auto midiInChannelArea = area.removeFromTop(24);
+    auto midiInChannelArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     midiInChannelSlider.updateText();
     midiInChannelSlider.setBounds(midiInChannelArea.removeFromLeft(96));
     midiInChannelLabel.setBounds(midiInChannelArea);
 
-    area.removeFromTop(4);
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
 
-    auto midiOutChannelArea = area.removeFromTop(24);
+    auto midiOutChannelArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     midiOutChannelSlider.updateText();
     midiOutChannelSlider.setBounds(midiOutChannelArea.removeFromLeft(96));
     midiOutChannelLabel.setBounds(midiOutChannelArea);
 
-    area.removeFromTop(8);
 
-    octavesToggle.setBounds(area.removeFromTop(24));
-    smartOctavesToggle.setBounds(area.removeFromTop(24));
-    usingInputVelocityToggle.setBounds(area.removeFromTop(24));
+    //
+    area.removeFromTop(LArpLookAndFeel::SECTION_SEP);
+    noteBehaviourTitle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
 
-    area.removeFromTop(4);
+    octavesToggle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    smartOctavesToggle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    usingInputVelocityToggle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
 
-    auto nonPlayingModeArea = area.removeFromTop(24);
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    auto nonPlayingModeArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     nonPlayingModeComboBox.setBounds(nonPlayingModeArea.removeFromLeft(128));
     nonPlayingModeLabel.setBounds(nonPlayingModeArea);
 
-    area.removeFromTop(8);
 
-    auto maxChordSizeArea = area.removeFromTop(24);
+    //
+    area.removeFromTop(LArpLookAndFeel::SECTION_SEP);
+    chordTitle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    auto maxChordSizeArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     maxChordSizeSlider.setBounds(maxChordSizeArea.removeFromLeft(96));
     maxChordSizeLabel.setBounds(maxChordSizeArea);
 
-    area.removeFromTop(4);
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
 
-    auto extraNotesSelectionModeArea = area.removeFromTop(24);
+    auto extraNotesSelectionModeArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     extraNotesSelectionModeComboBox.setBounds(extraNotesSelectionModeArea.removeFromLeft(128));
     extraNotesSelectionModeLabel.setBounds(extraNotesSelectionModeArea);
 
-    area.removeFromTop(8);
 
-    auto patternOffsetArea = area.removeFromTop(24);
+    //
+    area.removeFromTop(LArpLookAndFeel::SECTION_SEP);
+    patternOffsetTitle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    auto patternOffsetArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     recordingOffsetToggle.setBounds(patternOffsetArea.removeFromLeft(100));
     resetOffsetButton.setBounds(patternOffsetArea.removeFromLeft(100));
-    patternOffsetLabel.setBounds(patternOffsetArea);
+
+
+    //
+    area.removeFromTop(LArpLookAndFeel::SECTION_SEP);
+    userTimeSigTitle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    userTimeSigToggle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    auto timeSigArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
+    userTimeSigNumeratorSlider.setBounds(timeSigArea.removeFromLeft(64));
+    userTimeSigSlashLabel.setBounds(timeSigArea.removeFromLeft(18));
+    userTimeSigDenominatorSlider.setBounds(timeSigArea.removeFromLeft(64));
+
 }

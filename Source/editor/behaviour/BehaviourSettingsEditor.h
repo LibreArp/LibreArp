@@ -20,6 +20,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include "../../LibreArp.h"
+#include "../generic/Title.h"
 
 class BehaviourSettingsEditor : public juce::Component, public AudioUpdatable {
 public:
@@ -35,31 +36,33 @@ private:
 
     LibreArp &processor;
 
+    Title userTimeSigTitle;
     juce::ToggleButton userTimeSigToggle;
     juce::Slider userTimeSigNumeratorSlider;
     juce::Label userTimeSigSlashLabel;
     juce::Slider userTimeSigDenominatorSlider;
 
+    Title noteBehaviourTitle;
     juce::ToggleButton octavesToggle;
     juce::ToggleButton smartOctavesToggle;
     juce::ToggleButton usingInputVelocityToggle;
 
+    Title midiTitle;
     juce::Slider midiInChannelSlider;
     juce::Label midiInChannelLabel;
-
     juce::Slider midiOutChannelSlider;
     juce::Label midiOutChannelLabel;
 
     juce::ComboBox nonPlayingModeComboBox;
     juce::Label nonPlayingModeLabel;
 
+    Title chordTitle;
     juce::Slider maxChordSizeSlider;
     juce::Label maxChordSizeLabel;
-
     juce::ComboBox extraNotesSelectionModeComboBox;
     juce::Label extraNotesSelectionModeLabel;
 
-    juce::Label patternOffsetLabel;
+    Title patternOffsetTitle;
     juce::TextButton recordingOffsetToggle;
     juce::TextButton resetOffsetButton;
 

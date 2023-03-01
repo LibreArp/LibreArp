@@ -21,8 +21,12 @@
 
 
 class LArpLookAndFeel : public juce::LookAndFeel_V4 {
-
 public:
+
+    static constexpr int MARGIN = 8;
+    static constexpr int SECTION_SEP = 16;
+    static constexpr int COMPONENT_HEIGHT = 24;
+    static constexpr int COMPONENT_SEP = 4;
 
     void drawTabButton(juce::TabBarButton &button, juce::Graphics &graphics, bool isMouseOver, bool isMouseDown) override;
 

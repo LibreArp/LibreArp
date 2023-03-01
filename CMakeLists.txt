@@ -67,6 +67,8 @@ target_sources(LibreArp
 
         Source/editor/behaviour/BehaviourSettingsEditor.cpp Source/editor/behaviour/BehaviourSettingsEditor.h
 
+        Source/editor/generic/Title.cpp Source/editor/generic/Title.h
+
         Source/editor/pattern/BeatBar.cpp Source/editor/pattern/BeatBar.h
         Source/editor/pattern/LoopEditor.h
         Source/editor/pattern/NoteBar.cpp Source/editor/pattern/NoteBar.h
