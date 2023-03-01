@@ -27,7 +27,7 @@ SettingsEditor::SettingsEditor(LibreArp& p) : processor(p) {
 
     const juce::String guiScaleFactorTooltip = "The scaling factor of LibreArp's editor.";
     guiScaleFactorSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
-    guiScaleFactorSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 32, 24);
+    guiScaleFactorSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 42, 24);
     guiScaleFactorSlider.setRange(1.0f, 3.0f, 0.25f);
     guiScaleFactorSlider.setTooltip(guiScaleFactorTooltip);
     guiScaleFactorSlider.onValueChange = [this] {

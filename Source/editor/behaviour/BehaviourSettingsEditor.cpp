@@ -55,7 +55,7 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     midiTitle.setText("MIDI", juce::NotificationType::dontSendNotification);
 
     midiInChannelSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
-    midiInChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    midiInChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 42, 24);
     midiInChannelSlider.setRange(0, 16, 1);
     midiInChannelSlider.textFromValueFunction = [](auto value) {
         return (value == 0) ? juce::String("Any") : juce::String(value);
@@ -66,7 +66,7 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     midiInChannelLabel.setText("MIDI Input Channel", juce::NotificationType::dontSendNotification);
 
     midiOutChannelSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
-    midiOutChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    midiOutChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 42, 24);
     midiOutChannelSlider.setRange(1, 16, 1);
     midiOutChannelSlider.onValueChange = [this] {
         processor.setOutputMidiChannel(static_cast<int>(midiOutChannelSlider.getValue()));
@@ -122,7 +122,7 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     const juce::String maxChordSizeTooltip = "Sets the number of input notes taken into account by the arpeggiator. "
         "When set to 'Auto', the number of notes is derived from the actual number of input notes.";
     maxChordSizeSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
-    maxChordSizeSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    maxChordSizeSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 42, 24);
     maxChordSizeSlider.setTooltip(maxChordSizeTooltip);
     maxChordSizeSlider.setRange(0, 128, 1);
     maxChordSizeSlider.textFromValueFunction = [](auto value) {
