@@ -20,6 +20,7 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 * **IMPROVE** For consistency, the note bar (left to the pattern grid) now reacts to mouse scrolling and middle clicking
   similarly to the beat bar (above the pattern grid).
 * **IMPROVE** Section titles have been introduced to the *Behaviour* tab for to improve clarity
+* **IMPROVE** The default and minimum editor size is now 800x600 to accommodate for new controls on the *Behaviour* tab
 * **FIX** The first note now gets transposed correctly into negative octaves, instead of being one extra octave lower
 
 ### LibreArp 2.4

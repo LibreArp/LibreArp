@@ -35,10 +35,11 @@ MainEditor::MainEditor(LibreArp &p, EditorState &e)
 
     juce::LookAndFeel::setDefaultLookAndFeel(&LArpLookAndFeel::getInstance());
 
+    boundsConstrainer.setMinimumSize(EditorState::DEFAULT_WIDTH, EditorState::DEFAULT_HEIGHT);
+
     setSize(state.width, state.height);
     setResizable(true, true);
-
-    boundsConstrainer.setMinimumSize(200, 200);
+    setConstrainer(&boundsConstrainer);
 
     placeholderLabel.setText("Unimplemented component", juce::NotificationType::dontSendNotification);
     placeholderLabel.setJustificationType(juce::Justification::centred);
