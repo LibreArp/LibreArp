@@ -19,36 +19,10 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
-#include "../../LibreArp.h"
-#include "PulseConvertor.h"
-
-class PatternEditorView;
-
-class NoteBar :
-        public juce::Component,
-        public juce::SettableTooltipClient,
-        public AudioUpdatable,
-        PulseConvertor<NoteBar>
-{
-
-    friend PulseConvertor;
-
+class Title : public juce::Label {
 public:
-
-    explicit NoteBar(LibreArp &p, EditorState &e, PatternEditorView &ec);
+    Title(const juce::String &componentName = juce::String(), const juce::String &labelText = juce::String());
 
     void paint(juce::Graphics &g) override;
-    void audioUpdate() override;
-    void mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
-    void mouseDown(const juce::MouseEvent& event) override;
-
-private:
-
-    LibreArp &processor;
-    EditorState &state;
-    PatternEditorView &view;
-
-    bool snapEnabled = true;
-    int lastNumInputNotes = -1;
 
 };

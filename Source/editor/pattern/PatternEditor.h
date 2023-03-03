@@ -285,6 +285,9 @@ private:
      */
     int lastNumInputNotes;
 
+    int lastTimeSigNumerator;
+    int lastTimeSigDenominator;
+
     /**
      * The desired mouse cursor that will actually be changed at the end of a mouse event.
      */
@@ -359,6 +362,11 @@ private:
      * Mouse notes selection.
      */
     void select(const juce::MouseEvent& event);
+
+    /**
+     * Duplicates the selected notes.
+     */
+    void duplicateSelection(bool back);
 
     /**
      * Mouse selection stretching, from the selection start.

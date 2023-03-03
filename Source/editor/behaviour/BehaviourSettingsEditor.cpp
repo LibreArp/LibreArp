@@ -15,11 +15,47 @@
 // along with this program.  If not, see https://librearp.gitlab.io/license/.
 //
 
+#include "../LArpLookAndFeel.h"
 #include "BehaviourSettingsEditor.h"
 
 BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
+    userTimeSigTitle.setText("Manual time signature", juce::NotificationType::dontSendNotification);
+
+    userTimeSigToggle.setButtonText("Enable");
+    userTimeSigToggle.setTooltip("Enables manual time signature setting instead of automatic fetch from the host");
+    userTimeSigToggle.onStateChange = [this] {
+        bool enabled = userTimeSigToggle.getToggleState();
+        processor.setUserTimeSig(enabled);
+
+        userTimeSigNumeratorSlider.setEnabled(enabled);
+        userTimeSigSlashLabel.setEnabled(enabled);
+        userTimeSigDenominatorSlider.setEnabled(enabled);
+
+        this->updateLayout();
+        this->repaint();
+    };
+
+    userTimeSigNumeratorSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
+    userTimeSigNumeratorSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxRight, false, 24, 24);
+    userTimeSigNumeratorSlider.setRange(1, 64, 1);
+    userTimeSigNumeratorSlider.onValueChange = [this] {
+        processor.setUserTimeSigNumerator(static_cast<int>(userTimeSigNumeratorSlider.getValue()));
+    };
+
+    userTimeSigSlashLabel.setText("/", juce::NotificationType::dontSendNotification);
+    userTimeSigSlashLabel.setJustificationType(juce::Justification::centred);
+
+    userTimeSigDenominatorSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
+    userTimeSigDenominatorSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 24, 24);
+    userTimeSigDenominatorSlider.setRange(1, 64, 1);
+    userTimeSigDenominatorSlider.onValueChange = [this] {
+        processor.setUserTimeSigDenominator(static_cast<int>(userTimeSigDenominatorSlider.getValue()));
+    };
+
+    midiTitle.setText("MIDI", juce::NotificationType::dontSendNotification);
+
     midiInChannelSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
-    midiInChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    midiInChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 42, 24);
     midiInChannelSlider.setRange(0, 16, 1);
     midiInChannelSlider.textFromValueFunction = [](auto value) {
         return (value == 0) ? juce::String("Any") : juce::String(value);
@@ -30,12 +66,14 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     midiInChannelLabel.setText("MIDI Input Channel", juce::NotificationType::dontSendNotification);
 
     midiOutChannelSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
-    midiOutChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    midiOutChannelSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 42, 24);
     midiOutChannelSlider.setRange(1, 16, 1);
     midiOutChannelSlider.onValueChange = [this] {
         processor.setOutputMidiChannel(static_cast<int>(midiOutChannelSlider.getValue()));
     };
     midiOutChannelLabel.setText("MIDI Output Channel", juce::NotificationType::dontSendNotification);
+
+    noteBehaviourTitle.setText("Note behaviour", juce::NotificationType::dontSendNotification);
 
     octavesToggle.setButtonText("Octave transposition");
     octavesToggle.setTooltip("Enables transposition by octaves when hitting notes that are out of bounds");
@@ -79,10 +117,12 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     nonPlayingModeLabel.setText("Non-playing mode", juce::NotificationType::dontSendNotification);
     nonPlayingModeLabel.setTooltip(nonPlayingModeTooltip);
 
+    chordTitle.setText("Chord", juce::NotificationType::dontSendNotification);
+
     const juce::String maxChordSizeTooltip = "Sets the number of input notes taken into account by the arpeggiator. "
         "When set to 'Auto', the number of notes is derived from the actual number of input notes.";
     maxChordSizeSlider.setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
-    maxChordSizeSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 32, 24);
+    maxChordSizeSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxLeft, false, 42, 24);
     maxChordSizeSlider.setTooltip(maxChordSizeTooltip);
     maxChordSizeSlider.setRange(0, 128, 1);
     maxChordSizeSlider.textFromValueFunction = [](auto value) {
@@ -112,19 +152,48 @@ BehaviourSettingsEditor::BehaviourSettingsEditor(LibreArp &p) : processor(p) {
     extraNotesSelectionModeLabel.setText("Note selection mode", juce::NotificationType::dontSendNotification);
     extraNotesSelectionModeLabel.setTooltip(extraNotesSelectionModeTooltip);
 
+    patternOffsetTitle.setText("Pattern offset", juce::NotificationType::dontSendNotification);
+
+    recordingOffsetToggle.setButtonText("Record offset");
+    recordingOffsetToggle.setTooltip("When selected, the next time playback "
+            "starts, the offset of the pattern is set to the current playback "
+            "position.");
+    recordingOffsetToggle.setClickingTogglesState(true);
+    recordingOffsetToggle.onStateChange = [this] {
+        processor.setRecordingPatternOffset(recordingOffsetToggle.getToggleState());
+    };
+    recordingOffsetToggle.setColour(juce::TextButton::ColourIds::textColourOnId,
+            juce::Colour(255, 0, 0));
+
+    resetOffsetButton.setButtonText("Reset offset");
+    resetOffsetButton.onClick = [this] {
+        processor.resetPatternOffset();
+    };
+
+    addAndMakeVisible(userTimeSigTitle);
+    addAndMakeVisible(userTimeSigToggle);
+    addAndMakeVisible(userTimeSigNumeratorSlider);
+    addAndMakeVisible(userTimeSigSlashLabel);
+    addAndMakeVisible(userTimeSigDenominatorSlider);
+    addAndMakeVisible(midiTitle);
     addAndMakeVisible(midiInChannelLabel);
     addAndMakeVisible(midiInChannelSlider);
     addAndMakeVisible(midiOutChannelLabel);
     addAndMakeVisible(midiOutChannelSlider);
+    addAndMakeVisible(noteBehaviourTitle);
     addAndMakeVisible(octavesToggle);
     addAndMakeVisible(smartOctavesToggle);
     addAndMakeVisible(usingInputVelocityToggle);
     addAndMakeVisible(nonPlayingModeComboBox);
     addAndMakeVisible(nonPlayingModeLabel);
+    addAndMakeVisible(chordTitle);
     addAndMakeVisible(maxChordSizeSlider);
     addAndMakeVisible(maxChordSizeLabel);
     addAndMakeVisible(extraNotesSelectionModeComboBox);
     addAndMakeVisible(extraNotesSelectionModeLabel);
+    addAndMakeVisible(patternOffsetTitle);
+    addAndMakeVisible(recordingOffsetToggle);
+    addAndMakeVisible(resetOffsetButton);
 }
 
 void BehaviourSettingsEditor::resized() {
@@ -143,6 +212,9 @@ void BehaviourSettingsEditor::audioUpdate() {
 }
 
 void BehaviourSettingsEditor::updateSettingsValues() {
+    userTimeSigToggle.setToggleState(processor.isUserTimeSig(), juce::NotificationType::dontSendNotification);
+    userTimeSigNumeratorSlider.setValue(processor.getUserTimeSigNumerator());
+    userTimeSigDenominatorSlider.setValue(processor.getUserTimeSigDenominator());
     midiInChannelSlider.setValue(processor.getInputMidiChannel(), juce::NotificationType::dontSendNotification);
     midiOutChannelSlider.setValue(processor.getOutputMidiChannel(), juce::NotificationType::dontSendNotification);
     octavesToggle.setToggleState(processor.isTransposingOctaves(), juce::NotificationType::dontSendNotification);
@@ -152,6 +224,12 @@ void BehaviourSettingsEditor::updateSettingsValues() {
     nonPlayingModeComboBox.setSelectedId(static_cast<int>(processor.getNonPlayingModeOverride()));
     maxChordSizeSlider.setValue(processor.getMaxChordSize(), juce::NotificationType::dontSendNotification);
     extraNotesSelectionModeComboBox.setSelectedId(static_cast<int>(processor.getExtraNotesSelectionMode() + 1));
+    recordingOffsetToggle.setToggleState(processor.getRecordingPatternOffset(), juce::NotificationType::dontSendNotification);
+
+    bool userTimeSig = userTimeSigToggle.getToggleState();
+    userTimeSigNumeratorSlider.setEnabled(userTimeSig);
+    userTimeSigSlashLabel.setEnabled(userTimeSig);
+    userTimeSigDenominatorSlider.setEnabled(userTimeSig);
 }
 
 void BehaviourSettingsEditor::updateLayout() {
@@ -161,41 +239,80 @@ void BehaviourSettingsEditor::updateLayout() {
 
     updateSettingsValues();
 
-    auto area = getLocalBounds().reduced(8);
+    auto area = getLocalBounds().reduced(LArpLookAndFeel::MARGIN);
 
-    auto midiInChannelArea = area.removeFromTop(24);
+
+    //
+    midiTitle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    auto midiInChannelArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     midiInChannelSlider.updateText();
     midiInChannelSlider.setBounds(midiInChannelArea.removeFromLeft(96));
     midiInChannelLabel.setBounds(midiInChannelArea);
 
-    area.removeFromTop(4);
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
 
-    auto midiOutChannelArea = area.removeFromTop(24);
+    auto midiOutChannelArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     midiOutChannelSlider.updateText();
     midiOutChannelSlider.setBounds(midiOutChannelArea.removeFromLeft(96));
     midiOutChannelLabel.setBounds(midiOutChannelArea);
 
-    area.removeFromTop(8);
 
-    octavesToggle.setBounds(area.removeFromTop(24));
-    smartOctavesToggle.setBounds(area.removeFromTop(24));
-    usingInputVelocityToggle.setBounds(area.removeFromTop(24));
+    //
+    area.removeFromTop(LArpLookAndFeel::SECTION_SEP);
+    noteBehaviourTitle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
 
-    area.removeFromTop(4);
+    octavesToggle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    smartOctavesToggle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    usingInputVelocityToggle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
 
-    auto nonPlayingModeArea = area.removeFromTop(24);
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    auto nonPlayingModeArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     nonPlayingModeComboBox.setBounds(nonPlayingModeArea.removeFromLeft(128));
     nonPlayingModeLabel.setBounds(nonPlayingModeArea);
 
-    area.removeFromTop(8);
 
-    auto maxChordSizeArea = area.removeFromTop(24);
+    //
+    area.removeFromTop(LArpLookAndFeel::SECTION_SEP);
+    chordTitle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    auto maxChordSizeArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     maxChordSizeSlider.setBounds(maxChordSizeArea.removeFromLeft(96));
     maxChordSizeLabel.setBounds(maxChordSizeArea);
 
-    area.removeFromTop(4);
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
 
-    auto extraNotesSelectionModeArea = area.removeFromTop(24);
+    auto extraNotesSelectionModeArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
     extraNotesSelectionModeComboBox.setBounds(extraNotesSelectionModeArea.removeFromLeft(128));
     extraNotesSelectionModeLabel.setBounds(extraNotesSelectionModeArea);
+
+
+    //
+    area.removeFromTop(LArpLookAndFeel::SECTION_SEP);
+    patternOffsetTitle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    auto patternOffsetArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
+    recordingOffsetToggle.setBounds(patternOffsetArea.removeFromLeft(100));
+    resetOffsetButton.setBounds(patternOffsetArea.removeFromLeft(100));
+
+
+    //
+    area.removeFromTop(LArpLookAndFeel::SECTION_SEP);
+    userTimeSigTitle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    userTimeSigToggle.setBounds(area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT));
+
+    area.removeFromTop(LArpLookAndFeel::COMPONENT_SEP);
+
+    auto timeSigArea = area.removeFromTop(LArpLookAndFeel::COMPONENT_HEIGHT);
+    userTimeSigNumeratorSlider.setBounds(timeSigArea.removeFromLeft(64));
+    userTimeSigSlashLabel.setBounds(timeSigArea.removeFromLeft(18));
+    userTimeSigDenominatorSlider.setBounds(timeSigArea.removeFromLeft(64));
+
 }

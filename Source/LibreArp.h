@@ -57,6 +57,10 @@ public:
     static const juce::Identifier TREEID_INPUT_MIDI_CHANNEL;
     static const juce::Identifier TREEID_NON_PLAYING_MODE_OVERRIDE;
     static const juce::Identifier TREEID_BYPASS;
+    static const juce::Identifier TREEID_PATTERN_OFFSET;
+    static const juce::Identifier TREEID_USER_TIME_SIG;
+    static const juce::Identifier TREEID_USER_TIME_SIG_NUMERATOR;
+    static const juce::Identifier TREEID_USER_TIME_SIG_DENOMINATOR;
 
     enum ExtraNotesSelectionMode : int {
         FROM_BOTTOM = 0,
@@ -164,6 +168,18 @@ public:
      */
     int getNumInputNotes() const;
 
+    /** Set whether we should be using user-defined time signature. */
+    void setUserTimeSig(bool v);
+
+    /** Check whether we are using user-defined time signature. */
+    bool isUserTimeSig() const;
+
+    void setUserTimeSigNumerator(int v);
+    int getUserTimeSigNumerator() const;
+
+    void setUserTimeSigDenominator(int v);
+    int getUserTimeSigDenominator() const;
+
     /**
      * Gets the time signature numerator.
      *
@@ -189,6 +205,12 @@ public:
     bool getBypass() const;
 
     void setBypass(bool value);
+
+    bool getRecordingPatternOffset() const;
+
+    void setRecordingPatternOffset(bool value);
+
+    void resetPatternOffset();
 
     /**
      * Gets the MIDI channel output notes are sent into.
@@ -377,20 +399,34 @@ private:
      */
     int octaveSize = 0;
 
-    /**
-     * Time signature numerator.
-     */
-    int timeSigNumerator = 4;
+    /** Whether time signature is manually set by the user or automatically
+     * determined from the host. */
+    bool userTimeSig = false;
 
-    /**
-     * Time signature denominator.
-     */
-    int timeSigDenominator = 4;
+    /** Time signature numerator from user. */
+    int userTimeSigNumerator = 4;
+
+    /** Time signature denominator from user. */
+    int userTimeSigDenominator = 4;
+
+    /** Time signature numerator from host. */
+    int hostTimeSigNumerator = 4;
+
+    /** Time signature denominator from host. */
+    int hostTimeSigDenominator = 4;
 
     /**
      * The timestamp of the last debug playback reset.
      */
     int64_t silenceEndedTime;
+
+    /** Playback offset - subtracted from the current playback time. Used to
+     * offset the pattern globally in a song. */
+    int64_t patternOffset = 0;
+
+    /** Whether the plugin is going to be recording the playback offset the
+     * next time playback starts. */
+    juce::AudioParameterBool* recordingPatternOffset;
 
     /**
      * Number of octaves spanned by the current input - rounded up.

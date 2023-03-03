@@ -276,6 +276,7 @@ void PatternEditorView::updateLayout() {
     auto bottomButtonArea = area.removeFromBottom(24);
     loadButton.setBounds(bottomButtonArea.removeFromLeft(100));
     saveButton.setBounds(bottomButtonArea.removeFromLeft(100));
+    bottomButtonArea.removeFromLeft(24);
     bypassToggle.setBounds(bottomButtonArea.removeFromRight(80));
 
     area.removeFromBottom(8);

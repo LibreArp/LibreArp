@@ -7,6 +7,22 @@ in the [wiki](https://gitlab.com/LibreArp/LibreArp/wikis/versioning-pattern).
 
 ## Changelog
 
+### LibreArp 2.5
+
+* **NEW** *Selection duplication*: Using `Ctrl+B` and `Ctrl+Shift+B`, it is now possible to duplicate selected notes
+  * Without `Shift`, new notes are placed *after* the selection; with `Shift`, they are placed *before* the selection
+* **NEW** *Pattern offset*: Using the new *Record offset* button, you can set the starting position of the pattern
+  relative to the song.
+  * Arm the button by a click, set the starting position in the host DAW and start playback. The pattern will be offset
+    to start at that starting position.
+* **NEW** *Manual time signature*: You may now set the time signature visualized by the Pattern Editor manually,
+  for better usability in hosts that do not properly report the time signature to their plugins.
+* **IMPROVE** For consistency, the note bar (left to the pattern grid) now reacts to mouse scrolling and middle clicking
+  similarly to the beat bar (above the pattern grid).
+* **IMPROVE** Section titles have been introduced to the *Behaviour* tab for to improve clarity
+* **IMPROVE** The default and minimum editor size is now 800x600 to accommodate for new controls on the *Behaviour* tab
+* **FIX** The first note now gets transposed correctly into negative octaves, instead of being one extra octave lower
+
 ### LibreArp 2.4
 
 * **NEW** *Note panel*: A panel to the left of the pattern editor visualizing octaves and note numbers

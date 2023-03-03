@@ -59,9 +59,10 @@ void NoteBar::paint(juce::Graphics &g) {
     // Draw octaves
     startingNote = (yToNote(getHeight()) / inputs) * inputs - inputs - 1;
     endingNote = (yToNote(0) / inputs + 1) * inputs;
-    g.setFont(22);
+    g.setFont(std::min(state.displayPixelsPerNote * inputs, 22.0f));
     for (int i = startingNote; i < endingNote; i += inputs) {
-        int octave = std::abs(i / inputs);
+        auto octNn = (i >= 0) ? i : i + 1;
+        int octave = std::abs(octNn / inputs);
         if (i < 0)
             octave++;
         juce::String sign = (octave == 0) ? "" : (i < 0) ? "-" : "+";
@@ -84,4 +85,21 @@ void NoteBar::audioUpdate() {
         this->lastNumInputNotes = procNum;
         this->repaint();
     }
+}
+
+void NoteBar::mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) {
+    if (event.mods.isShiftDown()) {
+        view.zoomPattern(wheel.deltaY, 0);
+    } else {
+        view.zoomPattern(0, wheel.deltaY);
+    }
+}
+
+void NoteBar::mouseDown(const juce::MouseEvent& event) {
+    if (!event.mods.isLeftButtonDown() && !event.mods.isRightButtonDown() && event.mods.isMiddleButtonDown()) {
+        view.resetPatternOffset();
+        return;
+    }
+
+    Component::mouseDown(event);
 }

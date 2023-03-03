@@ -25,6 +25,9 @@
 
 struct EditorState {
 
+    static constexpr int DEFAULT_WIDTH = 800;
+    static constexpr int DEFAULT_HEIGHT = 600;
+
     static const juce::Identifier TREEID_EDITOR_STATE;
     static const juce::Identifier TREEID_WIDTH;
     static const juce::Identifier TREEID_HEIGHT;
@@ -37,8 +40,8 @@ struct EditorState {
     static const juce::Identifier TREEID_OFFSET_Y;
 
     // Main
-    int width = 640;
-    int height = 480;
+    int width = DEFAULT_WIDTH;
+    int height = DEFAULT_HEIGHT;
 
     // Pattern editor
     int divisor = 4;
