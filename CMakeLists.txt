@@ -15,8 +15,8 @@
 # along with this program.  If not, see https://librearp.gitlab.io/license/.
 #
 
-set(LIBREARP_VERSION "2.4")
-set(LIBREARP_VERSION_CODE "020400")
+set(LIBREARP_VERSION "2.5")
+set(LIBREARP_VERSION_CODE "020500")
 
 cmake_minimum_required(VERSION 3.16)
 project(LibreArp VERSION ${LIBREARP_VERSION})
