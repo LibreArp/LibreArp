@@ -18,17 +18,18 @@
 set(LIBREARP_VERSION "2.5")
 set(LIBREARP_VERSION_CODE "020500")
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.22)
 project(LibreArp VERSION ${LIBREARP_VERSION})
 
 add_definitions(
         -DLIBREARP_VERSION=\"${LIBREARP_VERSION}\"
         -DLIBREARP_VERSION_CODE=\"${LIBREARP_VERSION_CODE}\")
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
+    add_compile_options("-fPIC")
 endif()
 
 add_subdirectory(Vendor/juce)
@@ -107,7 +108,6 @@ target_compile_definitions(LibreArp
         JUCE_USE_OGGVORBIS=0
         JUCE_USE_WINDOWS_MEDIA_FORMAT=0
         JUCE_VST3_CAN_REPLACE_VST2=0
-        JUCE_DISPLAY_SPLASH_SCREEN=0 # we are GPL so we are allowed
         )
 
 target_link_libraries(LibreArp
