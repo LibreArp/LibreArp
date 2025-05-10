@@ -124,8 +124,6 @@ LibreArp::LibreArp()
             "Record offset",
             false,
             "Whether the offset should be changed the next time playback starts."));
-
-    globals.markChanged();
 }
 
 LibreArp::~LibreArp() = default;

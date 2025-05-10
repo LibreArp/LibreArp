@@ -74,11 +74,6 @@ void MainEditor::paint(juce::Graphics &g) {
 void MainEditor::visibilityChanged() {
     Component::visibilityChanged();
 
-    if (!isVisible()) {
-        processor.getGlobals().save();
-        return;
-    }
-
     processor.getGlobals().load();
     handleUpdateCheck();
     updateUpdateButton();

@@ -69,26 +69,14 @@ public:
     void reset();
 
     /**
-     * Saves global settings if changed.
-     *
-     * @return <code>true</code> if needed, otherwise <code>false</code>
+     * Saves global settings.
      */
-    bool save();
-
-    /**
-     * Saves global settings (regardless of whether the settings have been changed).
-     */
-    void forceSave();
+    void save();
 
     /**
      * Loads/reloads global settings. Unsaved settings will be lost.
      */
     void load();
-
-    /**
-     * Marks the globals as changed. The next save() call will actually do the save.
-     */
-    void markChanged();
 
     /**
      * Converts this Globals object into a value tree.
@@ -168,11 +156,6 @@ private:
      * Default presets directory.
      */
     juce::File patternPresetsDir;
-
-    /**
-     * This flag is <code>true</code> if the global settings have changed since the last save/load.
-     */
-    bool changed;
 
     /**
      * Whether the GUI of the plugin has already asked the user for consent about automatic update checks.

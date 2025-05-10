@@ -62,7 +62,6 @@ const juce::Identifier Globals::TREEID_NON_PLAYING_MODE = "nonPlayingMode"; // N
 const juce::Identifier Globals::TREEID_SMOOTH_SCROLLING = "smoothScrolling"; // NOLINT
 
 Globals::Globals() :
-        changed(false),
         askedForUpdateCheckConsent(false),
         checkForUpdatesEnabled(BuildConfig::DEFAULT_CHECK_FOR_UPDATES_ENABLED),
         foundUpdateOnLastCheck(false),
@@ -109,19 +108,8 @@ void Globals::reset() {
     smoothScrolling = true;
 }
 
-bool Globals::save() {
+void Globals::save() {
     std::scoped_lock lock(mutex);
-    if (changed) {
-        this->forceSave();
-        return true;
-    } else {
-        return false;
-    }
-}
-
-void Globals::forceSave() {
-    std::scoped_lock lock(mutex);
-
     char const *lineEnding;
 #if JUCE_WINDOWS
     lineEnding = "\r\n";
@@ -143,11 +131,6 @@ void Globals::load() {
     } else {
         reset();
     }
-}
-
-void Globals::markChanged() {
-    std::scoped_lock lock(mutex);
-    this->changed = true;
 }
 
 juce::ValueTree Globals::toValueTree() {
@@ -220,7 +203,7 @@ bool Globals::isCheckForUpdatesEnabled() const {
 void Globals::setCheckForUpdatesEnabled(bool checkForUpdates) {
     std::scoped_lock lock(mutex);
     this->checkForUpdatesEnabled = checkForUpdates;
-    this->changed = true;
+    this->save();
 }
 
 bool Globals::isAskedForUpdateCheckConsent() const {
@@ -231,7 +214,7 @@ bool Globals::isAskedForUpdateCheckConsent() const {
 void Globals::setAskedForUpdateCheckConsent(bool asked) {
     std::scoped_lock lock(mutex);
     this->askedForUpdateCheckConsent = asked;
-    this->changed = true;
+    this->save();
 }
 
 int64_t Globals::getMinSecsBeforeUpdateCheck() const {
@@ -239,10 +222,10 @@ int64_t Globals::getMinSecsBeforeUpdateCheck() const {
     return minSecsBeforeUpdateCheck;
 }
 
-void Globals::setMinSecsBeforeUpdateCheck(int64_t minSecsBeforeUpdateCheck) {
+void Globals::setMinSecsBeforeUpdateCheck(int64_t val) {
     std::scoped_lock lock(mutex);
-    Globals::minSecsBeforeUpdateCheck = minSecsBeforeUpdateCheck;
-    this->changed = true;
+    minSecsBeforeUpdateCheck = val;
+    this->save();
 }
 
 int64_t Globals::getLastUpdateCheckTime() const {
@@ -250,10 +233,10 @@ int64_t Globals::getLastUpdateCheckTime() const {
     return lastUpdateCheckTime;
 }
 
-void Globals::setLastUpdateCheckTime(int64_t lastUpdateCheckTime) {
+void Globals::setLastUpdateCheckTime(int64_t val) {
     std::scoped_lock lock(mutex);
-    Globals::lastUpdateCheckTime = lastUpdateCheckTime;
-    this->changed = true;
+    lastUpdateCheckTime = val;
+    this->save();
 }
 
 bool Globals::isFoundUpdateOnLastCheck() const {
@@ -261,10 +244,10 @@ bool Globals::isFoundUpdateOnLastCheck() const {
     return foundUpdateOnLastCheck;
 }
 
-void Globals::setFoundUpdateOnLastCheck(bool foundUpdateOnLastCheck) {
+void Globals::setFoundUpdateOnLastCheck(bool val) {
     std::scoped_lock lock(mutex);
-    Globals::foundUpdateOnLastCheck = foundUpdateOnLastCheck;
-    this->changed = true;
+    foundUpdateOnLastCheck = val;
+    this->save();
 }
 
 float Globals::getGuiScaleFactor() const {
@@ -272,10 +255,10 @@ float Globals::getGuiScaleFactor() const {
     return guiScaleFactor;
 }
 
-void Globals::setGuiScaleFactor(float guiScaleFactor) {
+void Globals::setGuiScaleFactor(float val) {
     std::scoped_lock lock(mutex);
-    Globals::guiScaleFactor = guiScaleFactor;
-    this->changed = true;
+    guiScaleFactor = val;
+    this->save();
 }
 
 NonPlayingMode::Value Globals::getNonPlayingMode() const {
@@ -283,10 +266,10 @@ NonPlayingMode::Value Globals::getNonPlayingMode() const {
     return nonPlayingMode;
 }
 
-void Globals::setNonPlayingMode(NonPlayingMode::Value nonPlayingMode) {
+void Globals::setNonPlayingMode(NonPlayingMode::Value val) {
     std::scoped_lock lock(mutex);
-    Globals::nonPlayingMode = nonPlayingMode;
-    this->changed = true;
+    nonPlayingMode = val;
+    this->save();
 }
 
 bool Globals::isSmoothScrolling() const {
@@ -294,8 +277,8 @@ bool Globals::isSmoothScrolling() const {
     return smoothScrolling;
 }
 
-void Globals::setSmoothScrolling(bool value) {
+void Globals::setSmoothScrolling(bool val) {
     std::scoped_lock lock(mutex);
-    this->smoothScrolling = value;
-    this->changed = true;
+    smoothScrolling = val;
+    this->save();
 }
